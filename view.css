@@ -1,0 +1,5 @@
+@charset "UTF-8";
+
+.pagelayout-report #report-main-content .region-content table {
+    background:none;
+}

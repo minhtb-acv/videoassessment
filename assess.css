@@ -1,0 +1,78 @@
+@charset "UTF-8";
+
+.gradingform_rubric { padding-bottom:0; overflow:inherit; }
+.gradingform_rubric table { margin-bottom:0; }
+#fitem_id_advancedgradingafter { margin-top:1.5em; }
+
+#fitem_id_advancedgradingbefore,
+#fitem_id_advancedgradingafter {
+    overflow-x:auto;
+}
+.path-mod-videoassessment #fitem_id_advancedgradingbefore .felement,
+.path-mod-videoassessment #fitem_id_advancedgradingafter .felement,
+.path-mod-videoassessment .gradingform_rubric .criteria {
+    width:100%;
+}
+.path-mod-videoassessment .gradingform_rubric .criteria .definition {
+    word-break:break-all !important;
+}
+
+#page-content { overflow:inherit; }
+#page-content #region-main { overflow:visible; }
+#page-content:before, #page-content:after {content:""; display:table;}
+#page-content:after {clear:both;}
+#page-content {zoom:1;}
+#region-main-box:before, #region-main-box:after {content:""; display:table;}
+#region-main-box:after {clear:both;}
+#region-main-box {zoom:1;}
+#region-post-box:before, #region-post-box:after {content:""; display:table;}
+#region-post-box:after {clear:both;}
+#region-post-box {zoom:1;}
+
+#page-content{
+  float:none !important;
+  display:block;
+  width:auto !important;
+}
+#page-content #region-main-box{
+  position:static !important;
+  display:block;
+  float:none !important;
+  width:100% !important;
+}
+#page-content #region-post-box{
+  float:none !important;
+  position:static !important;
+}
+#page-content #region-main-wrap{
+  float:none !important;
+  width:auto !important;
+  display:block !important;
+  right:0 !important;
+}
+.path-mod-videoassessment .gradingform{
+  margin-left: 430px !important;
+  min-height: 660px;
+}
+.path-mod-videoassessment .assess-form-videos{
+  top:60px !important;
+}
+.side-pre-only #page-content #region-post-box{
+  margin-left:0 !important;
+}
+.side-pre-only #page-content #region-main {
+  margin-left: 0 !important;
+}
+#page-footer{
+  float:none !important;
+  width:auto !important;
+  padding-left: 430px;
+}
+.side-pre-only #page-content #region-pre{
+  display:none;
+}
+.opera #page-footer, .safari #page-footer, .gecko #page-footer{
+  padding-left:0 !important;
+  position: relative;
+  margin-top: -10px;
+}

@@ -1,0 +1,13 @@
+@charset "UTF-8";
+
+#page-content { min-width: 0 }
+#page-header, #page-footer, .block_adminblock, .reportlink, #maincontent { display: none }
+#region-main, #region-post-box { margin: 0 !important }
+
+#content {
+    padding-top: 0 !important;
+}
+
+.pagebreak {
+    page-break-before: always;
+}
