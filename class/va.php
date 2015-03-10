@@ -1597,10 +1597,10 @@ class va {
 
                     $minslotpieces = reset($slotavailpieces);
                     $minpieceslots = reset($pieceavailslots);
-                    if (empty($minslotpieces->pieces) && empty($minpieceslots->slots))
+                    if (empty($minslotpieces->pieces) || empty($minpieceslots->slots))
                         throw new Exception();
 
-                    if (empty($minpieceslots->slots) || !empty($minslotpieces->pieces) && count($minslotpieces->pieces) < count($minpieceslots->slots)) {
+                    if (count($minslotpieces->pieces) < count($minpieceslots->slots)) {
                         $slot  = $minslotpieces->slot;
                         $piece = $minslotpieces->pieces[mt_rand(0, count($minslotpieces->pieces) - 1)];
                     } else {

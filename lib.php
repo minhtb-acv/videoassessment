@@ -1,5 +1,4 @@
 <?php
-
 use videoassess\va;
 
 defined('MOODLE_INTERNAL') || die();
@@ -25,23 +24,25 @@ function videoassessment_add_instance($va, $form) {
  * @return boolean
  */
 function videoassessment_update_instance($va, $form) {
-    global $DB, $CFG;
+	global $DB, $CFG;
 
-    $va->id = $va->instance;
+	$va->id = $va->instance;
 
-    $oldva = $DB->get_record('videoassessment', array('id' => $va->id));
+	$oldva = $DB->get_record('videoassessment', array('id' => $va->id));
 
-    $DB->update_record('videoassessment', $va);
+	$DB->update_record('videoassessment', $va);
 
-    if ($oldva->ratingteacher != $va->ratingteacher || $oldva->ratingself != $va->ratingself || $oldva->ratingpeer != $va->ratingpeer) {
-        require_once $CFG->dirroot . '/mod/videoassessment/locallib.php';
-        $cm = get_coursemodule_from_instance('videoassessment', $va->id, 0, false, MUST_EXIST);
-        $course = $DB->get_record('course', array('id' => $va->course), '*', MUST_EXIST);
-        $vaobj = new videoassess\va(context_module::instance($cm->id), $cm, $course);
-        $vaobj->regrade();
-    }
+	if ($oldva->ratingteacher != $va->ratingteacher
+			|| $oldva->ratingself != $va->ratingself
+			|| $oldva->ratingpeer != $va->ratingpeer) {
+		require_once $CFG->dirroot . '/mod/videoassessment/locallib.php';
+		$cm = get_coursemodule_from_instance('videoassessment', $va->id, 0, false, MUST_EXIST);
+		$course = $DB->get_record('course', array('id' => $va->course), '*', MUST_EXIST);
+		$vaobj = new videoassess\va(context_module::instance($cm->id), $cm, $course);
+		$vaobj->regrade();
+	}
 
-    return true;
+	return true;
 }
 
 /**
@@ -84,15 +85,25 @@ function videoassessment_extend_navigation($navigation, $course, $module, $cm) {
     $isteacher = $vaobj->is_teacher();
 
     if ($isteacher) {
-        if (va::uses_mobile_upload()) {
-            $navigation->add(get_string('takevideo', 'videoassessment'), new moodle_url($viewurl, array('action' => 'upload')));
+    	if (va::uses_mobile_upload()) {
+            $navigation->add(get_string('takevideo', 'videoassessment'),
+                    new moodle_url($viewurl, array('action' => 'upload')));
         } else {
-            $navigation->add(get_string('uploadvideo', 'videoassessment'), new moodle_url($viewurl, array('action' => 'upload')));
-            $navigation->add(get_string('videoassessment:bulkupload', 'videoassessment'), new moodle_url('/mod/videoassessment/bulkupload/index.php', array('cmid' => $cm->id)));
-        }
-        $navigation->add(get_string('associate', 'videoassessment'), new moodle_url($viewurl, array('action' => 'videos')));
+            $navigation->add(get_string('uploadvideo', 'videoassessment'),
+                    new moodle_url($viewurl, array('action' => 'upload')));
+	        $navigation->add(get_string('videoassessment:bulkupload', 'videoassessment'),
+	                new moodle_url('/mod/videoassessment/bulkupload/index.php',
+	                        array('cmid' => $cm->id)));
+    	}
+        $navigation->add(get_string('associate', 'videoassessment'),
+                new moodle_url($viewurl, array('action' => 'videos')));
         $navigation->add(get_string('assess', 'videoassessment'), $viewurl);
-        $navigation->add(get_string('publishvideos', 'videoassessment'), new moodle_url($viewurl, array('action' => 'publish')));
+        $navigation->add(get_string('assignpeers', 'videoassessment'),
+                new moodle_url($viewurl, array('action' => 'peers')));
+        $navigation->add(get_string('publishvideos', 'videoassessment'),
+                new moodle_url($viewurl, array('action' => 'publish')));
+        $navigation->add(get_string('deletevideos', 'videoassessment'),
+                new moodle_url('/mod/videoassessment/deletevideos.php', array('id' => $cm->id)));
     }
 }
 
@@ -103,19 +114,19 @@ function videoassessment_extend_navigation($navigation, $course, $module, $cm) {
  */
 function videoassessment_supports($feature) {
     return in_array($feature, array(
-        FEATURE_GROUPS,
-        FEATURE_GROUPINGS,
-        FEATURE_GROUPMEMBERSONLY,
-        FEATURE_MOD_INTRO,
-        FEATURE_COMPLETION_TRACKS_VIEWS,
-        FEATURE_GRADE_HAS_GRADE,
-        FEATURE_GRADE_OUTCOMES,
-        FEATURE_GRADE_HAS_GRADE,
-        FEATURE_BACKUP_MOODLE2,
-        FEATURE_SHOW_DESCRIPTION,
-        FEATURE_ADVANCED_GRADING,
-        FEATURE_BACKUP_MOODLE2,
-        FEATURE_IDNUMBER
+            FEATURE_GROUPS,
+            FEATURE_GROUPINGS,
+            FEATURE_GROUPMEMBERSONLY,
+            FEATURE_MOD_INTRO,
+            FEATURE_COMPLETION_TRACKS_VIEWS,
+            FEATURE_GRADE_HAS_GRADE,
+            FEATURE_GRADE_OUTCOMES,
+            FEATURE_GRADE_HAS_GRADE,
+            FEATURE_BACKUP_MOODLE2,
+            FEATURE_SHOW_DESCRIPTION,
+            FEATURE_ADVANCED_GRADING,
+            FEATURE_BACKUP_MOODLE2,
+            FEATURE_IDNUMBER
     ));
 }
 
@@ -124,37 +135,12 @@ function videoassessment_supports($feature) {
  */
 function videoassessment_grading_areas_list() {
     return array(
-        'beforeteacher' => get_string('before', 'videoassessment') . ' - ' . get_string('teacher', 'videoassessment'),
-        'beforeself' => get_string('before', 'videoassessment') . ' - ' . get_string('self', 'videoassessment'),
-        'beforepeer' => get_string('before', 'videoassessment') . ' - ' . get_string('peer', 'videoassessment'),
-        'afterteacher' => get_string('after', 'videoassessment') . ' - ' . get_string('teacher', 'videoassessment'),
-        'afterself' => get_string('after', 'videoassessment') . ' - ' . get_string('self', 'videoassessment'),
-        'afterpeer' => get_string('after', 'videoassessment') . ' - ' . get_string('peer', 'videoassessment'));
-}
-
-/**
- * Add tab assign peer and delete video
- * 
- * extend an assigment navigation settings
- *
- * @param settings_navigation $settings
- * @param navigation_node $navref
- * @return void
- * 
- * @author AnhLX <anhlx@atmarkcafe.org>
- */
-function videoassessment_extend_settings_navigation(settings_navigation $settings, navigation_node $navref) {
-    global $PAGE, $DB;
-
-    $cm = $PAGE->cm;
-    if (!$cm) {
-        return;
-    }
-
-    $assignpeersLink = new moodle_url('/mod/videoassessment/view.php', array('id' => $cm->id, 'action' => 'peers'));
-    $navref->add(get_string('assignpeers', 'videoassessment'), $assignpeersLink, navigation_node::TYPE_SETTING);
-    $deletevideosLink = new moodle_url('/mod/videoassessment/deletevideos.php', array('id' => $cm->id));
-    $navref->add(get_string('deletevideos', 'videoassessment'), $deletevideosLink, navigation_node::TYPE_SETTING);
+        'beforeteacher' => get_string('before', 'videoassessment').' - '.get_string('teacher', 'videoassessment'),
+        'beforeself' => get_string('before', 'videoassessment').' - '.get_string('self', 'videoassessment'),
+        'beforepeer' => get_string('before', 'videoassessment').' - '.get_string('peer', 'videoassessment'),
+        'afterteacher' => get_string('after', 'videoassessment').' - '.get_string('teacher', 'videoassessment'),
+        'afterself' => get_string('after', 'videoassessment').' - '.get_string('self', 'videoassessment'),
+        'afterpeer' => get_string('after', 'videoassessment').' - '.get_string('peer', 'videoassessment'));
 }
 
 /**
@@ -169,7 +155,7 @@ function videoassessment_extend_settings_navigation(settings_navigation $setting
 function mod_videoassessment_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload) {
     global $CFG, $DB;
 
-    $fullpath = "/{$context->id}/mod_videoassessment/$filearea/" . implode('/', $args);
+    $fullpath = "/{$context->id}/mod_videoassessment/$filearea/".implode('/', $args);
 
     $fs = get_file_storage();
     if (!$file = $fs->get_file_by_hash(sha1($fullpath)) or $file->is_directory()) {
