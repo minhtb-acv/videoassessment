@@ -170,4 +170,3 @@ function mod_videoassessment_pluginfile($course, $cm, $context, $filearea, $args
     session_get_instance()->write_close(); // unlock session during fileserving
     send_stored_file($file, HOURSECS, 0, $forcedownload);
 }
-
