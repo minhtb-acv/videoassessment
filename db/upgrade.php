@@ -37,5 +37,45 @@ function xmldb_videoassessment_upgrade($oldversion = 0) {
     	upgrade_mod_savepoint(true, 2013080900, 'videoassessment');
     }
 
+    if ($oldversion < 2015032010) {
+        require_once $CFG->dirroot . '/mod/videoassessment/locallib.php';
+
+        $DB->delete_records('grade_items', array('itemnumber' => 4));
+        $DB->delete_records('grade_items', array('itemnumber' => 5));
+        $DB->delete_records('grade_items', array('itemnumber' => 6));
+
+        $courses = videoassess\va::get_courses();
+        foreach ($courses as $course)
+        {
+            $users = videoassess\va::get_users($course->id);
+
+            foreach ($users as $user)
+            {
+                $grade = videoassess\va::get_grade($course->id, $user->id);
+
+                if ($grade->count > 0)
+                {
+                    $course_item = $DB->get_record('grade_items', array(
+                        'itemtype' => 'course',
+                        'courseid' => $course->id,
+                    ));
+
+                    $item_grade = $DB->get_record('grade_grades', array(
+                        'itemid' => $course_item->id,
+                        'userid' => $user->id
+                    ));
+
+                    if (!empty($item_grade))
+                    {
+                        $item_grade->finalgrade = $grade->total / $grade->count;
+                        $DB->update_record('grade_grades', $item_grade);
+                    }
+                }
+            }
+        }
+
+        upgrade_mod_savepoint(true, 2015032010, 'videoassessment');
+    }
+
     return true;
 }

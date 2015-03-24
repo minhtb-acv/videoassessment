@@ -96,7 +96,7 @@ class video_publish extends \moodleform {
                 $timing = $assoc->timing;
 				$prop = 'grade' . $timing;
 				if ($grade->$prop != -1) {
-					$gradecell .= va::str($timing) . ': ' . $grade->$prop . ' ';
+					$gradecell .= va::str('score') . ': ' . $grade->$prop . ' ';
 
 					$videorec->grade = max($videorec->grade, $grade->$prop);
 				}

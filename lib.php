@@ -66,49 +66,6 @@ function videoassessment_delete_instance($id) {
 
 /**
  *
- * @param navigation_node $navigation
- * @param stdClass $course
- * @param stdClass $module
- * @param stdClass $cm
- */
-function videoassessment_extend_navigation($navigation, $course, $module, $cm) {
-    global $CFG, $DB;
-
-    $viewurl = new moodle_url('/mod/videoassessment/view.php', array('id' => $cm->id));
-    $context = context_module::instance($cm->id);
-
-    $va = $DB->get_record('videoassessment', array('id' => $cm->instance));
-    $course = $DB->get_record('course', array('id' => $va->course));
-
-    require_once $CFG->dirroot . '/mod/videoassessment/locallib.php';
-    $vaobj = new va($context, $cm, $course);
-    $isteacher = $vaobj->is_teacher();
-
-    if ($isteacher) {
-    	if (va::uses_mobile_upload()) {
-            $navigation->add(get_string('takevideo', 'videoassessment'),
-                    new moodle_url($viewurl, array('action' => 'upload')));
-        } else {
-            $navigation->add(get_string('uploadvideo', 'videoassessment'),
-                    new moodle_url($viewurl, array('action' => 'upload')));
-	        $navigation->add(get_string('videoassessment:bulkupload', 'videoassessment'),
-	                new moodle_url('/mod/videoassessment/bulkupload/index.php',
-	                        array('cmid' => $cm->id)));
-    	}
-        $navigation->add(get_string('associate', 'videoassessment'),
-                new moodle_url($viewurl, array('action' => 'videos')));
-        $navigation->add(get_string('assess', 'videoassessment'), $viewurl);
-        $navigation->add(get_string('assignpeers', 'videoassessment'),
-                new moodle_url($viewurl, array('action' => 'peers')));
-        $navigation->add(get_string('publishvideos', 'videoassessment'),
-                new moodle_url($viewurl, array('action' => 'publish')));
-        $navigation->add(get_string('deletevideos', 'videoassessment'),
-                new moodle_url('/mod/videoassessment/deletevideos.php', array('id' => $cm->id)));
-    }
-}
-
-/**
- *
  * @param string $feature
  * @return boolean
  */
@@ -135,12 +92,9 @@ function videoassessment_supports($feature) {
  */
 function videoassessment_grading_areas_list() {
     return array(
-        'beforeteacher' => get_string('before', 'videoassessment').' - '.get_string('teacher', 'videoassessment'),
-        'beforeself' => get_string('before', 'videoassessment').' - '.get_string('self', 'videoassessment'),
-        'beforepeer' => get_string('before', 'videoassessment').' - '.get_string('peer', 'videoassessment'),
-        'afterteacher' => get_string('after', 'videoassessment').' - '.get_string('teacher', 'videoassessment'),
-        'afterself' => get_string('after', 'videoassessment').' - '.get_string('self', 'videoassessment'),
-        'afterpeer' => get_string('after', 'videoassessment').' - '.get_string('peer', 'videoassessment'));
+        'beforeteacher' => get_string('teacher', 'videoassessment'),
+        'beforeself' => get_string('self', 'videoassessment'),
+        'beforepeer' => get_string('peer', 'videoassessment'));
 }
 
 /**

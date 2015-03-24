@@ -69,7 +69,7 @@ class va {
      *
      * @var array
      */
-    public $timings = array('before', 'after');
+    public $timings = array('before');
     /**
      *
      * @var array
@@ -580,13 +580,9 @@ class va {
                     continue;
                 }
                 $user = &$users[$assoc->associationid];
-                $timing = '';
-                if ($assoc->timing) {
-                    $timing = $strtimings[$assoc->timing];
-                }
                 $assocdelurl = new \moodle_url($url,
                     array('action' => 'assocdel', 'userid' => $user->id, 'timing' => $assoc->timing));
-                $assocusers[$user->id] = $user->userpicture.$user->fullname.' - '.$timing
+                $assocusers[$user->id] = $user->userpicture.$user->fullname
                     . $OUTPUT->action_icon($assocdelurl, $disassocicon);
                 $user->assocvideos[] = (int)$v->id;
             }
@@ -611,11 +607,9 @@ class va {
                 array('method' => 'get', 'action' => $url->out_omit_querystring(true))
                 );
             $assoccell .= \html_writer::input_hidden_params(
-                new \moodle_url($url, array('sesskey' => sesskey(), 'action' => 'assocadd', 'videoid' => $v->id))
+                new \moodle_url($url, array('sesskey' => sesskey(), 'action' => 'assocadd', 'videoid' => $v->id, 'timing' => 'before'))
                 );
             $assoccell .= \html_writer::select($opts, 'userid');
-            $assoccell .= \html_writer::select(
-                array('before' => $strtimings['before'], 'after' => $strtimings['after']), 'timing');
             $assoccell .= \html_writer::empty_tag('input', array('type' => 'submit', 'value' => $strassociate));
             $assoccell .= \html_writer::end_tag('form');
 
@@ -1070,15 +1064,10 @@ class va {
         $o .= ob_get_contents();
         ob_end_clean();
 
-        $strtimings = array(
-            'before' => $this->timing_str('before'),
-            'after' => $this->timing_str('after')
-        );
         $o .= \html_writer::start_tag('div', array('class' => 'assess-form-videos'));
         foreach ($this->timings as $timing) {
             if ($video = $this->get_associated_video($user->id, $timing)) {
                 $o .= \html_writer::start_tag('div');
-                $o .= \html_writer::tag('div', $strtimings[$timing], array('class' => 'label'));
                 $o .= $this->output->render($video);
                 $o .= \html_writer::end_tag('div');
             }
@@ -1116,7 +1105,7 @@ class va {
                 continue;
             }
 
-            $o .= $OUTPUT->heading($this->timing_str($timing, 'timingscores'));
+            $o .= $OUTPUT->heading($this->str('scores'));
             $timinggrades = array();
             foreach ($this->gradertypes as $gradertype) {
                 $gradingarea = $timing.$gradertype;
@@ -1227,14 +1216,12 @@ class va {
                 $video = $DB->get_record('videoassessment_videos', array('id' => $videoid));
                 $assocs = $this->get_video_associations($videoid);
                 $assocnames = array();
-                $timing = '';
                 foreach ($assocs as $assoc) {
                     $user = $DB->get_record('user', array('id' => $assoc->associationid),
                             'id, lastname, firstname');
                     $assocnames[] = fullname($user);
-                    $timing = ' ('.$this->timing_str($assoc->timing).')';
                 }
-                $modulename = implode(', ', $assocnames).$timing;
+                $modulename = implode(', ', $assocnames);
 
                 // コースモジュール追加
                 $cm = new \stdClass();
@@ -1978,5 +1965,79 @@ class va {
                 $courses[$course->id] = $course;
         }
         return $courses;
+    }
+
+    public static function get_users($courseid) {
+        global $DB;
+
+        $sql = '
+                SELECT u.* FROM {user} u
+                INNER JOIN {user_enrolments} ue ON u.id = ue.userid
+                INNER JOIN {enrol} e ON ue.enrolid = e.id
+                INNER JOIN {grade_grades} gg ON u.id = gg.userid
+                WHERE e.enrol = :enrol AND e.courseid = :courseid
+        ';
+
+        $params = array(
+            'enrol' => 'manual',
+            'courseid' => $courseid,
+        );
+
+        $users = $DB->get_records_sql($sql, $params);
+        return $users;
+    }
+
+    public static function get_courses() {
+        global $DB;
+
+        $sql = '
+                SELECT c.* FROM {course} c
+                INNER JOIN {course_modules} cm ON c.id = cm.course
+                INNER JOIN {modules} m ON cm.module = m.id
+                WHERE m.name = :name
+        ';
+
+        $params = array(
+            'name' => 'videoassessment',
+        );
+
+        return $DB->get_records_sql($sql, $params);
+    }
+
+    public static function get_cm($courseid)
+    {
+        global $DB;
+
+        $sql = '
+                SELECT cm.* FROM {course_modules} cm
+                INNER JOIN {modules} m ON cm.module = m.id
+                WHERE m.name = :name AND cm.course = :courseid
+        ';
+
+        $params = array(
+            'name' => 'videoassessment',
+            'courseid' => $courseid,
+        );
+
+        return $DB->get_record_sql($sql, $params);
+    }
+
+    public static function get_grade($courseid, $userid)
+    {
+        global $DB;
+
+        $sql = '
+                SELECT count(gi.id) as count, sum(gg.finalgrade) as total FROM {grade_items} gi
+                LEFT JOIN {grade_grades} gg ON gi.id = gg.itemid
+                WHERE gi.courseid = :courseid AND gg.userid = :userid AND gi.itemtype = :itemtype
+        ';
+
+        $params = array(
+            'courseid' => $courseid,
+            'userid' => $userid,
+            'itemtype' => 'mod',
+        );
+
+        return $DB->get_record_sql($sql, $params);
     }
 }

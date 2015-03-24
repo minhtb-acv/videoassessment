@@ -7,3 +7,8 @@ $string['backupusersdesc'] = 'バックアップにユーザデータ (ビデオ
 $string['modulename'] = 'ビデオアセスメント';
 $string['pluginadministration'] = 'ビデオアセスメント管理';
 $string['pluginname'] = 'ビデオアセスメント';
+/**
+ * Le Xuan Anh Version2
+ */
+$string['grade'] = 'Grading';
+$string['managevideo'] = 'Manage videos';

@@ -3,3 +3,11 @@
 .pagelayout-report #report-main-content .region-content table {
     background:none;
 }
+
+.center {
+    text-align: center;
+}
+
+.gradetable {
+    width: 100%;
+}

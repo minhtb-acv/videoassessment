@@ -125,10 +125,6 @@ class grade_table {
                 $this->data[2][4] = $this->hiddengradetext;
                 $this->data[2][5] = $this->hiddengradetext;
             }
-            if ($user->gradeafterself == -1) {
-                $this->data[2][9] = $this->hiddengradetext;
-                $this->data[2][10] = $this->hiddengradetext;
-            }
         }
 
         return $this->print_html();
@@ -154,10 +150,6 @@ class grade_table {
                     $this->data[$row][4] = $this->hiddengradetext;
                     $this->data[$row][5] = $this->hiddengradetext;
                 }
-                if ($user->gradeafterself == -1) {
-                    $this->data[$row][9] = $this->hiddengradetext;
-                    $this->data[$row][10] = $this->hiddengradetext;
-                }
             }
         }
 
@@ -170,17 +162,18 @@ class grade_table {
 
         $row1 = array();
         $row2 = array();
-        foreach (array('before', 'after') as $timing) {
-            $s = $this->startcolumns[$timing];
-            $row1[$s + 1] = get_string('self', 'videoassessment');
-            $row1[$s + 2] = get_string('peer', 'videoassessment');
-            $row1[$s + 3] = get_string('teacher', 'videoassessment');
-            $row1[$s + 4] = get_string('total', 'videoassessment');
-            $row2[$s] = get_string('weighting', 'videoassessment');
-            $row2[$s + 1] = $this->va->va->ratingself.'%';
-            $row2[$s + 2] = $this->va->va->ratingpeer.'%';
-            $row2[$s + 3] = $this->va->va->ratingteacher.'%';
-        }
+
+        $timing = 'before';
+        $s = $this->startcolumns[$timing];
+        $row1[$s + 1] = get_string('self', 'videoassessment');
+        $row1[$s + 2] = get_string('peer', 'videoassessment');
+        $row1[$s + 3] = get_string('teacher', 'videoassessment');
+        $row1[$s + 4] = get_string('total', 'videoassessment');
+        $row2[$s] = get_string('weighting', 'videoassessment');
+        $row2[$s + 1] = $this->va->va->ratingself.'%';
+        $row2[$s + 2] = $this->va->va->ratingpeer.'%';
+        $row2[$s + 3] = $this->va->va->ratingteacher.'%';
+
         $this->add_data($row1);
         $this->add_data($row2);
     }
@@ -221,6 +214,14 @@ class grade_table {
                 .$OUTPUT->action_link(new \moodle_url($this->va->viewurl,
                         array('action' => 'report', 'userid' => $user->id)),
                         va::str('seereport'));
+						
+			$url = new \moodle_url('/mod/videoassessment/print.php',
+						array('id' => $this->va->cm->id, 'action' => 'report', 'userid' => $user->id));
+			$row[0] .= \html_writer::empty_tag('br')
+				.$OUTPUT->action_link($url, va::str('printreport'),
+						new \popup_action('click', $url, 'popup',
+                            array('width' => 800, 'height' => 700, 'menubar' => true)));
+						
             if ($this->va->is_teacher()) {
                 $row[0] .= \html_writer::empty_tag('br')
                     .$OUTPUT->action_link(new \moodle_url('/mod/videoassessment/managegrades.php',
@@ -232,84 +233,84 @@ class grade_table {
         //$pixdownload = new \pix_icon('t/download', get_string('download'));
         $strdownload = get_string('download');
         $mobile = va::uses_mobile_upload();
-        foreach (array('before', 'after') as $timing) {
-            $s = $this->startcolumns[$timing];
-            $row[$s + 1] = $this->format_grade($user->{'grade'.$timing.'self'});
-            $row[$s + 2] = $this->format_grade($user->{'grade'.$timing.'peer'});
-            $row[$s + 3] = $this->format_grade($user->{'grade'.$timing.'teacher'});
-            $row[$s + 4] = $this->format_grade($user->{'grade'.$timing});
-            $class[0] = 'user';
-            $class[$s + 1] = $class[$s + 2] = $class[$s + 3] = 'mark';
-            $class[$s + 4] = 'totalmark';
 
-            if ($video = $this->va->get_associated_video($user->id, $timing)) {
-                $url = $video->get_url(true);
-                $content = $video->render_thumbnail(va::str('previewvideo'));
-                $row[$s] = \html_writer::tag(
-                        'a', $content, array(
-                                'onclick' => 'M.mod_videoassessment.videos_show_video_preview_by_user('.$user->id.',\''.$timing.'\')',
-                                'href' => 'javascript:void(0)'
-                        )
-                );
-                if ($this->va->is_teacher() ||
-                    $user->id == $USER->id && $this->is_emptygrade($user->{'grade'.$timing.'peer'})
-                                           && $this->is_emptygrade($user->{'grade'.$timing.'teacher'}))
-                {
-                    $str = $mobile ? va::str('retakevideo') : va::str('reuploadvideo');
-                    $row[$s] .= \html_writer::tag('div',
-                        $OUTPUT->action_link(
-                            new \moodle_url($this->va->viewurl, array('action' => 'upload', 'user' => $user->id, 'timing' => $timing)),
-                            $str, null, array('class' => 'button-upload'))
-                        );
-                }
-                if ($this->va->is_teacher()) {
-                    $row[$s] .= \html_writer::tag('div',
-                        $OUTPUT->action_link($url, $strdownload, null, array('class' => 'button-download')),
-                        array('style' => 'margin-top:5px'));
-                }
+        $timing = 'before';
+        $s = $this->startcolumns[$timing];
+        $row[$s + 1] = $this->format_grade($user->{'grade'.$timing.'self'});
+        $row[$s + 2] = $this->format_grade($user->{'grade'.$timing.'peer'});
+        $row[$s + 3] = $this->format_grade($user->{'grade'.$timing.'teacher'});
+        $row[$s + 4] = $this->format_grade($user->{'grade'.$timing});
+        $class[0] = 'user';
+        $class[$s + 1] = $class[$s + 2] = $class[$s + 3] = 'mark';
+        $class[$s + 4] = 'totalmark';
+
+        if ($video = $this->va->get_associated_video($user->id, $timing)) {
+            $url = $video->get_url(true);
+            $content = $video->render_thumbnail(va::str('previewvideo'));
+            $row[$s] = \html_writer::tag(
+                    'a', $content, array(
+                            'onclick' => 'M.mod_videoassessment.videos_show_video_preview_by_user('.$user->id.',\''.$timing.'\')',
+                            'href' => 'javascript:void(0)'
+                    )
+            );
+            if ($this->va->is_teacher() ||
+                $user->id == $USER->id && $this->is_emptygrade($user->{'grade'.$timing.'peer'})
+                                       && $this->is_emptygrade($user->{'grade'.$timing.'teacher'}))
+            {
+                $str = $mobile ? va::str('retakevideo') : va::str('reuploadvideo');
+                $row[$s] .= \html_writer::tag('div',
+                    $OUTPUT->action_link(
+                        new \moodle_url($this->va->viewurl, array('action' => 'upload', 'user' => $user->id, 'timing' => $timing)),
+                        $str, null, array('class' => 'button-upload'))
+                    );
+            }
+            if ($this->va->is_teacher()) {
+                $row[$s] .= \html_writer::tag('div',
+                    $OUTPUT->action_link($url, $strdownload, null, array('class' => 'button-download')),
+                    array('style' => 'margin-top:5px'));
+            }
+        } else {
+            if ($this->va->is_teacher() ||
+                $user->id == $USER->id && $this->is_emptygrade($user->{'grade'.$timing.'peer'})
+                                       && $this->is_emptygrade($user->{'grade'.$timing.'teacher'}))
+            {
+                $str = $mobile ? va::str('takevideo') : va::str('uploadvideo');
+                $row[$s] = \html_writer::tag('div',
+                    $OUTPUT->action_link(
+                        new \moodle_url($this->va->viewurl, array('action' => 'upload', 'user' => $user->id, 'timing' => $timing)),
+                        $str, null, array('class' => 'button-upload'))
+                    );
             } else {
-                if ($this->va->is_teacher() ||
-                    $user->id == $USER->id && $this->is_emptygrade($user->{'grade'.$timing.'peer'})
-                                           && $this->is_emptygrade($user->{'grade'.$timing.'teacher'}))
-                {
-                    $str = $mobile ? va::str('takevideo') : va::str('uploadvideo');
-                    $row[$s] = \html_writer::tag('div',
-                        $OUTPUT->action_link(
-                            new \moodle_url($this->va->viewurl, array('action' => 'upload', 'user' => $user->id, 'timing' => $timing)),
-                            $str, null, array('class' => 'button-upload'))
-                        );
-                } else {
-                    $row[$s] = get_string('novideo', 'videoassessment');
-                }
+                $row[$s] = get_string('novideo', 'videoassessment');
+            }
+        }
+
+        $type = $this->va->get_grader_type($user->id);
+
+        if ($type) {
+            switch ($type) {
+                case 'self':
+                    $linkcell = $s + 1;
+                    break;
+                case 'peer':
+                    $linkcell = $s + 2;
+                    break;
+                case 'teacher':
+                    $linkcell = $s + 3;
+                    break;
             }
 
-            $type = $this->va->get_grader_type($user->id);
-
-            if ($type) {
-                switch ($type) {
-                    case 'self':
-                        $linkcell = $s + 1;
-                        break;
-                    case 'peer':
-                        $linkcell = $s + 2;
-                        break;
-                    case 'teacher':
-                        $linkcell = $s + 3;
-                        break;
-                }
-
-                //if ($user->{'grade'.$timing.$type} > -1) {
-                if ($this->va->is_graded_by_current_user($user->id, $timing.$type)) {
-                    $button = 'assessagain';
-                } else {
-                    $button = 'firstassess';
-                }
-                $url = new \moodle_url($this->va->viewurl,
-                        array('action' => 'assess', 'userid' => $user->id));
-                $row[$linkcell] .= $OUTPUT->action_link($url,
-                        get_string($button, 'videoassessment'), null,
-                        array('class' => 'button-'.$button));
+            //if ($user->{'grade'.$timing.$type} > -1) {
+            if ($this->va->is_graded_by_current_user($user->id, $timing.$type)) {
+                $button = 'assessagain';
+            } else {
+                $button = 'firstassess';
             }
+            $url = new \moodle_url($this->va->viewurl,
+                    array('action' => 'assess', 'userid' => $user->id));
+            $row[$linkcell] .= '<br />' . $OUTPUT->action_link($url,
+                    get_string($button, 'videoassessment'), null,
+                    array('class' => 'button-'.$button));
         }
         $this->add_data($row, $class);
     }
@@ -331,12 +332,9 @@ class grade_table {
 
         $o .= groups_print_activity_menu($this->va->cm, $this->va->viewurl, true);
 
-        $o .= \html_writer::start_tag('table', $params)
-            .'<tr><td></td><td></td>'
-            .'<td colspan="4"><h3>'.$this->va->timing_str('before', 'timingscores').'</h3></td>'
-            .'<td></td>'
-            .'<td colspan="4"><h3>'.$this->va->timing_str('after', 'timingscores').'</h3></td>'
-            .'</tr>';
+        $o .= '<h3 class="center">'.$this->va->str('scores').'</h3>';
+
+        $o .= \html_writer::start_tag('table', $params);
 
         $columncount = 0;
         foreach ($this->data as $row) {

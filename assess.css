@@ -76,3 +76,6 @@
   position: relative;
   margin-top: -10px;
 }
+textarea[name*='advancedgrading'] {
+    height: 40px!important;
+}

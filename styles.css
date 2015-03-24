@@ -210,8 +210,8 @@
     font-size: 150%;
 }
 .path-mod-videoassessment .report-rubrics .finalgrade {
-	margin: 1em 0;
-	font-size: 150%;
+    margin: 1em 0;
+    font-size: 150%;
 }
 .path-mod-videoassessment .inferiorlevelmarker {
     margin: 0 4px;
@@ -219,22 +219,41 @@
 
 .path-mod-videoassessment #fitem_id_advancedgradingbefore .felement,
 .path-mod-videoassessment #fitem_id_advancedgradingafter .felement {
-	margin: 0;
+    margin: 0;
 }
 .path-mod-videoassessment .gradingform_rubric {
-	clear: both;
+    clear: both;
 }
 .path-mod-videoassessment .gradingform_rubric .criteria {
-	height: auto;
-	margin-top: 0.5em;
+    height: auto;
+    margin-top: 0.5em;
 }
 .path-mod-videoassessment .gradingform_rubric .criterion .description {
-	width: auto;
+    width: auto;
 }
 
 /* ビデオ選択フォーム */
 .path-mod-videoassessment #videohdr .felement {
-	clear: both;
-	margin: 0;
-	width: 100%;
+    clear: both;
+    margin: 0;
+    width: 100%;
+}
+
+/** 
+ * Le Xuan Anh Version2
+ */
+.managelink {
+    font-size: 14px;
+    line-height: 20px;
+    display: block;
+    /*font-weight: bold;*/
+    margin-bottom: 5px;
+    margin-left: 20px;
+    /*text-align: right;*/
+    color: #333;
+}
+
+.managelink:hover {
+    text-decoration: underline;
+    color: #333;
 }

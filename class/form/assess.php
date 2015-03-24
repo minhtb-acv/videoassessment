@@ -67,7 +67,9 @@ class assess extends \moodleform {
         $va = $data->va;
         $attributes = array();
 
-        $mform->addElement('header', 'Grades', get_string('grades', 'grades'));
+        $user = $DB->get_record('user', array('id' => optional_param('userid', 0, PARAM_INT)));
+
+        $mform->addElement('header', 'Grades', $user->firstname . ' ' . $user->lastname);
 
         $grademenu = make_grades_menu($va->va->grade);
         $gradinginstances = $this->use_advanced_grading();
@@ -79,7 +81,7 @@ class assess extends \moodleform {
 //                 $gradinginstance = $gradinginstance->get_controller()->get_current_instance();
                 $gradingelement = $mform->addElement(
                         'grading', 'advancedgrading'.$timing,
-                        $va->timing_str($timing, 'timinggrade').':',
+                        $va->str('grade').':',
                     array('gradinginstance' => $gradinginstance));
                 if ($data->gradingdisabled) {
                     $gradingelement->freeze();
@@ -123,7 +125,7 @@ class assess extends \moodleform {
             $mform->setType('finalgrade'.$timing, PARAM_INT);
 
             $mform->addElement('textarea', 'submissioncomment'.$timing,
-                    get_string('xfeedback', 'videoassessment', $va->timing_str($timing)).':',
+                    get_string('feedback', 'videoassessment').':',
             		array('cols' => 50, 'rows' => 8));
             if (isset($grade->submissioncomment)) {
             	$mform->setDefault('submissioncomment'.$timing, $grade->submissioncomment);
