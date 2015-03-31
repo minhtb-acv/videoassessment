@@ -1105,7 +1105,7 @@ class va {
                 continue;
             }
 
-            $o .= $OUTPUT->heading($this->str('scores'));
+            $o .= $OUTPUT->heading($this->str('allscores'));
             $timinggrades = array();
             foreach ($this->gradertypes as $gradertype) {
                 $gradingarea = $timing.$gradertype;

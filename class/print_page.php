@@ -76,7 +76,7 @@ class print_page {
                     continue;
                 }
 
-                $o .= $OUTPUT->heading($this->va->timing_str($timing, 'timingscores'), 3);
+                $o .= $OUTPUT->heading($this->va->str('allscores'), 3);
                 $timinggrades = array();
                 foreach ($this->va->gradertypes as $gradertype) {
                     $gradingarea = $timing.$gradertype;
