@@ -11,3 +11,25 @@
 .pagebreak {
     page-break-before: always;
 }
+
+#page-content h2 {
+    font-size: 150%;
+}
+
+#page-content h3 {
+    font-size: 130%;
+}
+
+#page-content h2, #page-content h3 {
+    line-height: 1.5;
+    margin: 5px 0;
+}
+
+.gradingform_rubric {
+    padding-bottom: 10px!important;
+}
+
+.finalgrade {
+    font-size: 120%!important;
+    margin: 10px 0!important;
+}
