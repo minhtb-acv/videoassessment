@@ -171,6 +171,11 @@ class va {
             $PAGE->requires->css('/mod/videoassessment/view.css');
         }
 
+        if ($action == 'report')
+        {
+            $PAGE->requires->css('/mod/videoassessment/view.css');
+        }
+
         if ($action == 'assess') {
             $PAGE->blocks->show_only_fake_blocks();
             $PAGE->requires->css('/mod/videoassessment/assess.css');
