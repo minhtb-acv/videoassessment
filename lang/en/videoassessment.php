@@ -16,7 +16,7 @@ $string['allowstudentpeerselection'] = 'Allow students to select peers';
 $string['allowstudentpeerselection_help'] = 'If enabled, students can select peer partners by themselves.';
 $string['allowstudentupload'] = 'Students can upload videos';
 $string['allowstudentupload_help'] = 'If enabled, students can upload before/after videos one by one. Bulk upload is available only for teachers.';
-$string['allscores'] = '<span class="red">Self</span>, <span class="blue">Peer</span> <span class="green">and Teacher</span> Scores';
+$string['allscores'] = '<span class="red">Self,</span> <span class="blue">Peer,</span> <span class="green">and Teacher</span> Scores';
 $string['assess'] = 'Assess';
 $string['assessagain'] = 'Assess again';
 $string['assessedby'] = 'Assessed by';
