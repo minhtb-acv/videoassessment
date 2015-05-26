@@ -34,7 +34,7 @@ class table_export {
         $this->columns = max($this->columns, $column + 1);
     }
 
-    public function xls() {
+    public function xls($width = false) {
         global $CFG;
         require_once $CFG->libdir . '/excellib.class.php';
 
@@ -49,6 +49,10 @@ class table_export {
                     $xls->write_string($row, $column, $value);
                 }
             }
+        }
+        
+        if($width) {
+            $xls->set_column(1, 4, 30);
         }
 
         $workbook->close();

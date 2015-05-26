@@ -74,7 +74,7 @@ class va {
      *
      * @var array
      */
-    public $gradertypes = array('self', 'peer', 'teacher');
+    public $gradertypes = array('self', 'peer', 'teacher', 'class');
     /**
      *
      * @var array
@@ -763,17 +763,23 @@ class va {
      * ユーザの評定権限を調べる
      *
      * @param int $gradeduserid
-     * @return string teacher/self/peer
+     * @return string teacher/self/peer/class
      */
-    public function get_grader_type($gradeduserid) {
+    public function get_grader_type($gradeduserid, $gradertype = null) {
         global $USER;
 
+        if (!empty($gradertype)) return $gradertype;
+
+        $peers = $this->get_peers($USER->id);
+        
         if (has_capability('mod/videoassessment:grade', $this->context)) {
             return 'teacher';
         } else if ($gradeduserid == $USER->id) {
             return 'self';
+        } else if (in_array($gradeduserid, $peers)) {
+            return 'peer';
         }
-        return 'peer';
+        return 'class';
     }
 
     /**
@@ -952,6 +958,8 @@ class va {
             $o .= $gradetable->print_self_grade_table();
             $o .= $this->output->heading(self::str('peerassessments'));
             $o .= $gradetable->print_peer_grade_table();
+            $o .= $this->output->heading(self::str('classassessments'));
+            $o .= $gradetable->print_class_grade_table();
         }
 
         $o .= \html_writer::tag('div', '', array('id' => 'videopreview'));
@@ -988,15 +996,19 @@ class va {
 
         $user = $DB->get_record('user', array('id' => optional_param('userid', 0, PARAM_INT)));
 
+        $gradertype = optional_param('gradertype', '', PARAM_ALPHA);
+        if ($gradertype != 'class')
+            $gradertype = $this->get_grader_type($user->id);
+
         $mformdata = (object)array(
                 'va' => $this,
                 'cm' => $this->cm,
                 'userid' => optional_param('userid', 0, PARAM_INT),
                 'user' => $user,
-                'gradingdisabled' => false
+                'gradingdisabled' => false,
+                'gradertype' => $gradertype
         );
 
-        $gradertype = $this->get_grader_type($user->id);
         $gradingareas = array('before'.$gradertype);
         if ($this->get_associated_video($user->id, 'after')) {
             $gradingareas[] = 'after'.$gradertype;
@@ -1027,17 +1039,17 @@ class va {
 
         if ($form->is_cancelled()) {
             $this->view_redirect();
-        } else if ($data = $form->get_data()) {
+        } else if ($data = $form->get_data($gradertype)) {
             $gradinginstance = $form->use_advanced_grading();
             foreach ($this->timings as $timing) {
                 if (!empty($gradinginstance->$timing)) {
-                    $gradingarea = $timing . $this->get_grader_type($data->userid);
+                    $gradingarea = $timing . $this->get_grader_type($data->userid, $gradertype);
                     $_POST['xgrade' . $timing] = $gradinginstance->$timing->submit_and_get_grade(
                             $data->{'advancedgrading' . $timing},
                             $this->get_grade_item($gradingarea, $data->userid));
                 }
             }
-            $gradertype = $this->get_grader_type($data->userid);
+            $gradertype = $this->get_grader_type($data->userid, $gradertype);
             foreach ($this->timings as $timing) {
                 $gradingarea = $timing . $gradertype;
                 $itemid = $this->get_grade_item($gradingarea, $data->userid);
@@ -1064,19 +1076,24 @@ class va {
             $this->view_redirect();
         }
 
+        $o .= \html_writer::start_tag('div', array('class' => 'clearfix'));
+        if ($gradertype != 'class') {
+            $o .= \html_writer::start_tag('div', array('class' => 'assess-form-videos'));
+            foreach ($this->timings as $timing) {
+                if ($video = $this->get_associated_video($user->id, $timing)) {
+                    $o .= \html_writer::start_tag('div');
+                    $o .= $this->output->render($video);
+                    $o .= \html_writer::end_tag('div');
+                }
+            }
+            $o .= \html_writer::end_tag('div');
+        }
+
         ob_start();
         $form->display();
         $o .= ob_get_contents();
         ob_end_clean();
 
-        $o .= \html_writer::start_tag('div', array('class' => 'assess-form-videos'));
-        foreach ($this->timings as $timing) {
-            if ($video = $this->get_associated_video($user->id, $timing)) {
-                $o .= \html_writer::start_tag('div');
-                $o .= $this->output->render($video);
-                $o .= \html_writer::end_tag('div');
-            }
-        }
         $o .= \html_writer::end_tag('div');
 
         return $o;
@@ -1113,6 +1130,10 @@ class va {
             $o .= $OUTPUT->heading($this->str('allscores'));
             $timinggrades = array();
             foreach ($this->gradertypes as $gradertype) {
+                if ($this->va->class && $gradertype == 'class' && !has_capability('mod/videoassessment:grade', $this->context)) {
+                    continue;
+                }
+
                 $gradingarea = $timing.$gradertype;
                 $o .= $OUTPUT->heading(
                         self::str($timing).' - '.self::str($gradertype),
@@ -1453,11 +1474,17 @@ class va {
                         ), $gradingarea);
             }
 
-            $agg->{'grade' . $timing} = ($agg->{'grade' . $timing . 'teacher'} *
+            $gradeself = ($agg->{'grade' . $timing . 'self'} < 0) ? 0 : $agg->{'grade' . $timing . 'self'};
+            $gradepeer = ($agg->{'grade' . $timing . 'peer'} < 0) ? 0 : $agg->{'grade' . $timing . 'peer'};
+            $gradeteacher = ($agg->{'grade' . $timing . 'teacher'} < 0) ? 0 : $agg->{'grade' . $timing . 'teacher'};
+            $gradeclass = ($agg->{'grade' . $timing . 'class'} < 0) ? 0 : $agg->{'grade' . $timing . 'class'};
+
+            $agg->{'grade' . $timing} = ($gradeteacher *
                      $this->va->ratingteacher +
-                     $agg->{'grade' . $timing . 'self'} * $this->va->ratingself +
-                     $agg->{'grade' . $timing . 'peer'} * $this->va->ratingpeer) / ($this->va->ratingteacher +
-                     $this->va->ratingself + $this->va->ratingpeer);
+                     $gradeself * $this->va->ratingself +
+                     $gradepeer * $this->va->ratingpeer +
+                     $gradeclass * $this->va->ratingclass) / ($this->va->ratingteacher +
+                     $this->va->ratingself + $this->va->ratingpeer + $this->va->ratingclass);
         }
 
         // PostgreSQL はINTへの暗黙キャストが行われないので明示的にキャスト
@@ -1730,12 +1757,12 @@ class va {
         $fullnamestr = util::get_fullname_label();
         $table->set(0, 0, get_string('idnumber'));
         $table->set(0, 1, $fullnamestr);
-        $table->set(0, 2, va::str('beforeafter'));
-        $table->set(0, 3, va::str('teacherselfpeer'));
-        $table->set(0, 4, va::str('assessedby').' ('.get_string('idnumber').')');
-        $table->set(0, 5, va::str('assessedby').' ('.$fullnamestr.')');
-        $table->set(0, 6, va::str('total'));
-        $fixedcolumns = 7;
+//         $table->set(0, 2, va::str('beforeafter'));
+        $table->set(0, 2, va::str('teacherselfpeer'));
+        $table->set(0, 3, va::str('assessedby').' ('.get_string('idnumber').')');
+        $table->set(0, 4, va::str('assessedby').' ('.$fullnamestr.')');
+        $table->set(0, 5, va::str('total'));
+        $fixedcolumns = 6;
 
         $rubric = new rubric($this);
         $headercriteria = array();
@@ -1764,7 +1791,8 @@ class va {
         $gradertypestrs = array(
             'teacher' => self::str('teacher'),
             'self' => self::str('self'),
-            'peer' => self::str('peer')
+            'peer' => self::str('peer'),
+            'class' => self::str('class'),
         );
         $row = 1;
         foreach ($users as $user) {
@@ -1775,9 +1803,9 @@ class va {
                     foreach ($gradeitems as $gradeitem) {
                         $table->set($row, 0, $user->idnumber);
                         $table->set($row, 1, $fullname);
-                        if (preg_match('/^(before|after)(self|peer|teacher)$/', $gradingarea, $m)) {
-                            $table->set($row, 2, $timingstrs[$m[1]]);
-                            $table->set($row, 3, $gradertypestrs[$m[2]]);
+                        if (preg_match('/^(before|after)(self|peer|teacher|class)$/', $gradingarea, $m)) {
+//                             $table->set($row, 2, $timingstrs[$m[1]]);
+                            $table->set($row, 2, $gradertypestrs[$m[2]]);
 
                             if (empty($grader) || $grader->id != $gradeitem->grader) {
                                 $grader = $DB->get_record('user', array('id' => $gradeitem->grader),
@@ -1787,8 +1815,8 @@ class va {
                                 }
                             }
                             if ($grader) {
-                                $table->set($row, 4, $grader->idnumber);
-                                $table->set($row, 5, $gradername);
+                                $table->set($row, 3, $grader->idnumber);
+                                $table->set($row, 4, $gradername);
                             }
                         }
                         $instances = $controller->get_active_instances($gradeitem->id);
@@ -1797,7 +1825,7 @@ class va {
                             $instance = $instances[0];
                             $definition = $instance->get_controller()->get_definition();
                             $filling = $instance->get_rubric_filling();
-                            $table->set($row, 6, $gradeitem->grade);
+                            $table->set($row, 5, $gradeitem->grade);
 
                             foreach ($definition->rubric_criteria as $id => $criterion) {
                                 $critfilling = $filling['criteria'][$id];
@@ -1817,7 +1845,7 @@ class va {
         if (optional_param('csv', 0, PARAM_BOOL)) {
             $table->csv();
         } else {
-            $table->xls();
+            $table->xls(true);
         }
         exit();
     }

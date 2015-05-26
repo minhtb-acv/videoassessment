@@ -18,7 +18,9 @@
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="grade" NEXT="ratingteacher"/>
         <FIELD NAME="ratingteacher" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="timemodified" NEXT="ratingself"/>
         <FIELD NAME="ratingself" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="ratingteacher" NEXT="ratingpeer"/>
-        <FIELD NAME="ratingpeer" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="ratingself" NEXT="usedpeers"/>
+        <FIELD NAME="ratingpeer" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="ratingself" NEXT="ratingclass"/>
+        <FIELD NAME="ratingclass" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="ratingpeer" NEXT="class"/>
+        <FIELD NAME="class" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="ratingclass" NEXT="usedpeers"/>
         <FIELD NAME="usedpeers" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="ratingpeer" NEXT="beforelabel"/>
         <FIELD NAME="beforelabel" TYPE="char" LENGTH="40" NOTNULL="true" SEQUENCE="false" PREVIOUS="usedpeers" NEXT="afterlabel"/>
         <FIELD NAME="afterlabel" TYPE="char" LENGTH="40" NOTNULL="true" SEQUENCE="false" PREVIOUS="beforelabel" NEXT="delayedteachergrade"/>
@@ -45,7 +47,8 @@
         <FIELD NAME="gradeafter" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="gradebefore" NEXT="gradebeforeteacher"/>
         <FIELD NAME="gradebeforeteacher" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="gradeafter" NEXT="gradebeforeself"/>
         <FIELD NAME="gradebeforeself" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="gradebeforeteacher" NEXT="gradebeforepeer"/>
-        <FIELD NAME="gradebeforepeer" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="gradebeforeself" NEXT="gradeafterteacher"/>
+        <FIELD NAME="gradebeforepeer" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="gradebeforeself" NEXT="gradebeforeclass"/>
+        <FIELD NAME="gradebeforeclass" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="gradebeforepeer" NEXT="gradeafterteacher"/>
         <FIELD NAME="gradeafterteacher" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="gradebeforepeer" NEXT="gradeafterself"/>
         <FIELD NAME="gradeafterself" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="gradeafterteacher" NEXT="gradeafterpeer"/>
         <FIELD NAME="gradeafterpeer" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="gradeafterself"/>

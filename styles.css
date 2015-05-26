@@ -72,11 +72,6 @@
 #page-mod-videoassessment-submissions .optionspref {width: 50%;}
 #page-mod-videoassessment-submissions .fastgbutton {text-align: center;}
 
-.path-mod-videoassessment .assess-form-videos {
-    position: absolute;
-    top: 100px;
-    left: 20px
-}
 .path-mod-videoassessment .gradingform {
     margin-left: 405px;
 }
@@ -205,6 +200,9 @@
 }
 .path-mod-videoassessment .report-rubrics .rubrictext-peer {
     color: blue;
+}
+.path-mod-videoassessment .report-rubrics .rubrictext-class {
+    color: #ffa500;
 }
 .path-mod-videoassessment .report-rubrics .rubrictext-total {
     font-size: 150%;

@@ -12,3 +12,4 @@ $string['pluginname'] = 'ビデオアセスメント';
  */
 $string['grade'] = 'Grading';
 $string['managevideo'] = 'Manage videos';
+$string['class'] = 'Class';

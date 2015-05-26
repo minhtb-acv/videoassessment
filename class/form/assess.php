@@ -40,6 +40,8 @@ class assess extends \moodleform {
         $mform->setType('saveuserid', PARAM_INT);
         $mform->addElement('hidden', 'filter', "0");
         $mform->setType('filter', PARAM_INT);
+        $mform->addElement('hidden', 'gradertype', $data->gradertype);
+        $mform->setType('gradertype', PARAM_ALPHA);
 
         $this->add_grades_section();
 
@@ -59,7 +61,7 @@ class assess extends \moodleform {
     }
 
     function add_grades_section() {
-        global $CFG, $DB, $USER;
+        global $CFG, $DB, $USER, $OUTPUT;
 
         $mform = $this->_form;
         $data = $this->_customdata;
@@ -69,7 +71,7 @@ class assess extends \moodleform {
 
         $user = $DB->get_record('user', array('id' => optional_param('userid', 0, PARAM_INT)));
 
-        $mform->addElement('header', 'Grades', $user->firstname . ' ' . $user->lastname);
+        $mform->addElement('header', 'Grades', $user->firstname . ' ' . $user->lastname . $OUTPUT->user_picture($user, array('size' => 100)));
 
         $grademenu = make_grades_menu($va->va->grade);
         $gradinginstances = $this->use_advanced_grading();
@@ -176,7 +178,7 @@ class assess extends \moodleform {
         return parent::set_data($data);
     }
 
-    public function get_data() {
+    public function get_data($gradertype = null) {
         $data = parent::get_data();
 
         if (!$data) {
@@ -196,7 +198,7 @@ class assess extends \moodleform {
         $gradinginstance = $this->use_advanced_grading();
         foreach (array('before', 'after') as $timing) {
             if (!empty($gradinginstance->$timing)) {
-                $gradingarea = $timing.$this->_customdata->va->get_grader_type($data->userid);
+                $gradingarea = $timing.$this->_customdata->va->get_grader_type($data->userid, $gradertype);
                 $data->{'xgrade'.$timing} = $gradinginstance->$timing->submit_and_get_grade(
                         $data->{'advancedgrading'.$timing},
                         $this->_customdata->va->get_grade_item($gradingarea, $data->userid)

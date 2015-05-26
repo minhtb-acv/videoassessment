@@ -51,9 +51,9 @@ class video_upload extends \moodleform {
 			$mform->addElement('static', 'mobilevideo', va::str('video'), $input);
         } else {
             $str = va::str('video');
-            if ($timing = optional_param('timing', null, PARAM_ALPHA)) {
-                $str .= ' (' . $va->timing_str($timing) . ')';
-            }
+//            if ($timing = optional_param('timing', null, PARAM_ALPHA)) {
+//                $str .= ' (' . $va->timing_str($timing) . ')';
+//            }
             $mform->addElement('filemanager', 'video',
                     $str,
                     null,

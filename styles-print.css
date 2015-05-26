@@ -67,3 +67,24 @@
 .green {
     color: #40aa55!important;
 }
+
+.orange {
+    color: #ffa500!important;
+}
+
+.report-rubrics h4.main {
+    display: none!important;
+}
+
+.path-mod-videoassessment .report-rubrics .rubrictext-teacher {
+    color: green!important;
+}
+.path-mod-videoassessment .report-rubrics .rubrictext-self {
+    color: red!important;
+}
+.path-mod-videoassessment .report-rubrics .rubrictext-peer {
+    color: blue!important;
+}
+.path-mod-videoassessment .report-rubrics .rubrictext-class {
+    color: #ffa500!important;
+}

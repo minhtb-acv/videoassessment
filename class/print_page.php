@@ -79,6 +79,10 @@ class print_page {
                 $o .= $OUTPUT->heading($this->va->str('allscores'), 3);
                 $timinggrades = array();
                 foreach ($this->va->gradertypes as $gradertype) {
+                    if ($this->va->va->class && $gradertype == 'class' && !has_capability('mod/videoassessment:grade', $this->va->context)) {
+                        continue;
+                    }
+
                     $gradingarea = $timing.$gradertype;
                     $o .= $OUTPUT->heading(
                             $this->va->timing_str($timing, null, 'ucfirst').' - '.va::str($gradertype),

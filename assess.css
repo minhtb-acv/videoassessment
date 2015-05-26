@@ -51,11 +51,13 @@
   right:0 !important;
 }
 .path-mod-videoassessment .gradingform{
-  margin-left: 430px !important;
+  float: left;
+  margin-left: 0px !important;
   min-height: 660px;
 }
 .path-mod-videoassessment .assess-form-videos{
-  top:60px !important;
+  float: left;
+  margin: 10px 50px 0 0;
 }
 .side-pre-only #page-content #region-post-box{
   margin-left:0 !important;
@@ -78,4 +80,24 @@
 }
 textarea[name*='advancedgrading'] {
     height: 40px!important;
+}
+
+.gradingform .ftoggler {
+    padding-bottom: 15px;
+}
+
+.gradingform .ftoggler .fheader {
+    font-size: 28px;
+    line-height: 100px;
+}
+
+.gradingform .ftoggler a:not(.fheader) {
+    display: block;
+    float: right;
+}
+
+.gradingform .ftoggler a:not(.fheader) img {
+    width: auto;
+    height: auto;
+    vertical-align: middle;
 }

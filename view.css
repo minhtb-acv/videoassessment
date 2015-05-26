@@ -23,3 +23,11 @@
 .green {
     color: #40aa55!important;
 }
+
+.orange {
+    color: #ffa500!important;
+}
+
+.report-rubrics h2.main {
+    display: none!important;
+}

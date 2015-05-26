@@ -94,7 +94,9 @@ function videoassessment_grading_areas_list() {
     return array(
         'beforeteacher' => get_string('teacher', 'videoassessment'),
         'beforeself' => get_string('self', 'videoassessment'),
-        'beforepeer' => get_string('peer', 'videoassessment'));
+        'beforepeer' => get_string('peer', 'videoassessment'),
+        'beforeclass' => get_string('class', 'videoassessment'),
+    );
 }
 
 /**

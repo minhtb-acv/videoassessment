@@ -91,9 +91,8 @@ class grade_table {
             foreach ($users as $user) {
                 $agg = $this->va->get_aggregated_grades($user->id);
                     foreach (array(
-                            'userid', 'gradebeforeteacher', 'gradebeforeself', 'gradebeforepeer', 'gradeafterteacher',
-                            'gradeafterself', 'gradeafterpeer',
-                            'gradebefore', 'gradeafter', 'videoassessment')
+                            'userid', 'gradebeforeteacher', 'gradebeforeself', 'gradebeforepeer', 'gradebeforeclass',
+                            'gradebefore', 'videoassessment')
                             as $field) {
                         if ($agg) {
                             $user->$field = $agg->$field;
@@ -155,6 +154,57 @@ class grade_table {
 
         return $this->print_html();
     }
+    
+    /**
+     * TienNV Version2
+     */
+    
+    public function print_class_grade_table() {
+        global $DB, $USER;
+        
+        $this->domid = 'gradetableclass';
+        
+        $this->setup_header();
+        
+        $cm = $this->cm;
+        $context = $this->va->context;
+        
+        $users = $this->va->get_students();
+        if (!empty($users)) {
+            $users = array_keys($users);
+        }
+        
+        // if groupmembersonly used, remove users who are not in any group
+        if ($users and !empty($CFG->enablegroupmembersonly) and $cm->groupmembersonly) {
+            if ($groupingusers = groups_get_grouping_members($cm->groupingid, 'u.id', 'u.id')) {
+                $users = array_intersect($users, array_keys($groupingusers));
+            }
+        }
+        
+        $peers = $this->va->get_peers($USER->id);
+        
+        if ($users) {
+            $users = $this->va->get_students();
+        
+            foreach ($users as $user) {
+                if($user->id == $USER->id) {
+                    continue;
+                }
+                
+                $user = $this->va->get_aggregated_grades($user->id);
+                $this->add_user_data($user);
+                if ($this->va->va->delayedteachergrade) {
+                    $row = count($this->data) - 1;
+                    if ($user->gradebeforeself == -1) {
+                        $this->data[$row][4] = $this->hiddengradetext;
+                        $this->data[$row][5] = $this->hiddengradetext;
+                    }
+                }
+            }
+        }
+        
+        return $this->print_html();
+    }
 
     private function setup_header() {
         $this->data = array();
@@ -165,14 +215,16 @@ class grade_table {
 
         $timing = 'before';
         $s = $this->startcolumns[$timing];
-        $row1[$s + 1] = get_string('self', 'videoassessment');
-        $row1[$s + 2] = get_string('peer', 'videoassessment');
-        $row1[$s + 3] = get_string('teacher', 'videoassessment');
-        $row1[$s + 4] = get_string('total', 'videoassessment');
+        $row1[$s + 1] = get_string('class', 'videoassessment');
+        $row1[$s + 2] = get_string('self', 'videoassessment');
+        $row1[$s + 3] = get_string('peer', 'videoassessment');
+        $row1[$s + 4] = get_string('teacher', 'videoassessment');
+        $row1[$s + 5] = get_string('total', 'videoassessment');
         $row2[$s] = get_string('weighting', 'videoassessment');
-        $row2[$s + 1] = $this->va->va->ratingself.'%';
-        $row2[$s + 2] = $this->va->va->ratingpeer.'%';
-        $row2[$s + 3] = $this->va->va->ratingteacher.'%';
+        $row2[$s + 1] = $this->va->va->ratingclass.'%';
+        $row2[$s + 2] = $this->va->va->ratingself.'%';
+        $row2[$s + 3] = $this->va->va->ratingpeer.'%';
+        $row2[$s + 4] = $this->va->va->ratingteacher.'%';
 
         $this->add_data($row1);
         $this->add_data($row2);
@@ -236,10 +288,15 @@ class grade_table {
 
         $timing = 'before';
         $s = $this->startcolumns[$timing];
-        $row[$s + 1] = $this->format_grade($user->{'grade'.$timing.'self'});
-        $row[$s + 2] = $this->format_grade($user->{'grade'.$timing.'peer'});
-        $row[$s + 3] = $this->format_grade($user->{'grade'.$timing.'teacher'});
-        $row[$s + 4] = $this->format_grade($user->{'grade'.$timing});
+        if ($this->va->va->class && !has_capability('mod/videoassessment:grade', $this->va->context)) {
+            $row[$s + 1] = $this->emptygradetext;
+        } else {
+            $row[$s + 1] = $this->format_grade($user->{'grade'.$timing.'class'});
+        }
+        $row[$s + 2] = $this->format_grade($user->{'grade'.$timing.'self'});
+        $row[$s + 3] = $this->format_grade($user->{'grade'.$timing.'peer'});
+        $row[$s + 4] = $this->format_grade($user->{'grade'.$timing.'teacher'});
+        $row[$s + 5] = $this->format_grade($user->{'grade'.$timing});
         $class[0] = 'user';
         $class[$s + 1] = $class[$s + 2] = $class[$s + 3] = 'mark';
         $class[$s + 4] = 'totalmark';
@@ -285,18 +342,25 @@ class grade_table {
             }
         }
 
-        $type = $this->va->get_grader_type($user->id);
+        if ($this->domid == 'gradetableclass') {
+            $type = 'class';
+        } else {
+            $type = $this->va->get_grader_type($user->id);
+        }
 
         if ($type) {
             switch ($type) {
                 case 'self':
-                    $linkcell = $s + 1;
-                    break;
-                case 'peer':
                     $linkcell = $s + 2;
                     break;
-                case 'teacher':
+                case 'peer':
                     $linkcell = $s + 3;
+                    break;
+                case 'teacher':
+                    $linkcell = $s + 4;
+                    break;
+                case 'class':
+                    $linkcell = $s + 1;
                     break;
             }
 
@@ -306,11 +370,22 @@ class grade_table {
             } else {
                 $button = 'firstassess';
             }
-            $url = new \moodle_url($this->va->viewurl,
+
+            if ($this->domid == 'gradetableclass' && $this->va->va->class) {
+                $url = new \moodle_url($this->va->viewurl,
+                    array('action' => 'assess', 'userid' => $user->id, 'gradertype' => 'class'));
+            } else {
+                $url = new \moodle_url($this->va->viewurl,
                     array('action' => 'assess', 'userid' => $user->id));
-            $row[$linkcell] .= '<br />' . $OUTPUT->action_link($url,
-                    get_string($button, 'videoassessment'), null,
-                    array('class' => 'button-'.$button));
+            }
+            
+            if($this->domid == 'gradetableclass' && !$this->va->va->class) {
+                $row[$linkcell] .= '<br />';
+            } else {
+                $row[$linkcell] .= '<br />' . $OUTPUT->action_link($url,
+                        get_string($button, 'videoassessment'), null,
+                        array('class' => 'button-'.$button));
+            }
         }
         $this->add_data($row, $class);
     }

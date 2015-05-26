@@ -44,20 +44,25 @@ class mod_videoassessment_mod_form extends moodleform_mod {
         $this->standard_grading_coursemodule_elements_to_grading();
         //---
         
+        $mform->addElement('radio', 'class', get_string('class', 'videoassessment'), get_string('open', 'videoassessment'), 1);
+        $mform->addElement('radio', 'class', null, get_string('close', 'videoassessment'), 0);
+        $mform->setType('class', PARAM_INT);
+        $mform->setDefault('class', 1);
+        
         if (empty($this->_instance)) {
             foreach (array('before', 'after') as $timing) {
-                foreach (array('teacher', 'self', 'peer') as $gradingtype) {
+                foreach (array('teacher', 'self', 'peer', 'class') as $gradingtype) {
                     $this->current->{'advancedgradingmethod_' . $timing . $gradingtype} = 'rubric';
                 }
             }
         }
 
-        $mform->addElement('text', 'beforelabel', get_string('yourwordforx', '', get_string('before', 'videoassessment')), array('maxlength' => 40));
-        $mform->setType('beforelabel', PARAM_TEXT);
-        $mform->addHelpButton('beforelabel', 'timinglabel', 'videoassessment');
-        $mform->addElement('text', 'afterlabel', get_string('yourwordforx', '', get_string('after', 'videoassessment')), array('maxlength' => 40));
-        $mform->setType('afterlabel', PARAM_TEXT);
-        $mform->addHelpButton('afterlabel', 'timinglabel', 'videoassessment');
+//         $mform->addElement('text', 'beforelabel', get_string('yourwordforx', '', get_string('before', 'videoassessment')), array('maxlength' => 40));
+//         $mform->setType('beforelabel', PARAM_TEXT);
+//         $mform->addHelpButton('beforelabel', 'timinglabel', 'videoassessment');
+//         $mform->addElement('text', 'afterlabel', get_string('yourwordforx', '', get_string('after', 'videoassessment')), array('maxlength' => 40));
+//         $mform->setType('afterlabel', PARAM_TEXT);
+//         $mform->addHelpButton('afterlabel', 'timinglabel', 'videoassessment');
 
         $mform->addElement('header', 'ratings', get_string('ratings', 'videoassessment'));
         $mform->addElement('static', 'ratingerror');
@@ -65,7 +70,7 @@ class mod_videoassessment_mod_form extends moodleform_mod {
             $ratingopts[$i] = $i . '%';
         }
         $mform->addElement('select', 'ratingteacher', get_string('teacher', 'videoassessment'), $ratingopts);
-        $mform->setDefault('ratingteacher', 60);
+        $mform->setDefault('ratingteacher', 40);
         $mform->addHelpButton('ratingteacher', 'ratingteacher', 'videoassessment');
         $mform->addElement('select', 'ratingself', get_string('self', 'videoassessment'), $ratingopts);
         $mform->setDefault('ratingself', 20);
@@ -73,6 +78,9 @@ class mod_videoassessment_mod_form extends moodleform_mod {
         $mform->addElement('select', 'ratingpeer', get_string('peer', 'videoassessment'), $ratingopts);
         $mform->setDefault('ratingpeer', 20);
         $mform->addHelpButton('ratingpeer', 'ratingpeer', 'videoassessment');
+        $mform->addElement('select', 'ratingclass', get_string('class', 'videoassessment'), $ratingopts);
+        $mform->setDefault('ratingclass', 20);
+        $mform->addHelpButton('ratingclass', 'ratingclass', 'videoassessment');
 
         $mform->addElement('selectyesno', 'delayedteachergrade', get_string('delayedteachergrade', 'videoassessment'));
         $mform->addHelpButton('delayedteachergrade', 'delayedteachergrade', 'videoassessment');
@@ -94,7 +102,7 @@ class mod_videoassessment_mod_form extends moodleform_mod {
         // Allow plugin videoassessment types to do any extra validation after the form has been submitted
         $errors = parent::validation($data, $files);
 
-        $ratingsum = $data['ratingteacher'] + $data['ratingself'] + $data['ratingpeer'];
+        $ratingsum = $data['ratingteacher'] + $data['ratingself'] + $data['ratingpeer'] + $data['ratingclass'];
         if ($ratingsum != 100) {
             $errors['ratingerror'] = get_string('settotalratingtoahundredpercent', 'videoassessment');
         }
