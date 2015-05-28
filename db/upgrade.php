@@ -81,7 +81,6 @@ function xmldb_videoassessment_upgrade($oldversion = 0) {
         // Define field ratingclass to be added to videoassessment
         $table = new xmldb_table('videoassessment');
         $field = new xmldb_field('ratingclass', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'ratingpeer');
-        $field = new xmldb_field('class', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'ratingclass');
         
         // Conditionally launch add field ratingclass
         if (!$dbman->field_exists($table, $field)) {
