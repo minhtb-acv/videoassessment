@@ -13,3 +13,14 @@ $string['pluginname'] = 'ビデオアセスメント';
 $string['grade'] = 'Grading';
 $string['managevideo'] = 'Manage videos';
 $string['class'] = 'Class';
+
+/* MinhTB VERSION 2 */
+$string['assignclass'] = 'Assign class';
+$string['sortid'] = 'Sort by ID';
+$string['sortname'] = 'Sort by name';
+$string['sortmanually'] = 'Sort manually';
+$string['sortby'] = 'Sort by';
+$string['order'] = 'Order';
+$string['save'] = 'Save';
+$string['orderasc'] = '昇順';
+$string['orderdesc'] = '降順';

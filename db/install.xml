@@ -26,7 +26,9 @@
         <FIELD NAME="afterlabel" TYPE="char" LENGTH="40" NOTNULL="true" SEQUENCE="false" PREVIOUS="beforelabel" NEXT="delayedteachergrade"/>
         <FIELD NAME="delayedteachergrade" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="afterlabel" NEXT="allowstudentupload"/>
         <FIELD NAME="allowstudentupload" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="delayedteachergrade" NEXT="allowstudentpeerselection"/>
-        <FIELD NAME="allowstudentpeerselection" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="allowstudentupload"/>
+        <FIELD NAME="allowstudentpeerselection" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="allowstudentupload" NEXT="sort"/>
+        <FIELD NAME="sort" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="allowstudentpeerselection" NEXT="order"/>
+        <FIELD NAME="order" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="sort"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

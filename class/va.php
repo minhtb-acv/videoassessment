@@ -954,12 +954,14 @@ class va {
         if ($this->is_teacher()) {
             $o .= $gradetable->print_teacher_grade_table();
         } else {
+            if ($this->va->class) {
+                $o .= $this->output->heading(self::str('classassessments'));
+                $o .= $gradetable->print_class_grade_table();
+            }
             $o .= $this->output->heading(self::str('selfassessments'));
             $o .= $gradetable->print_self_grade_table();
             $o .= $this->output->heading(self::str('peerassessments'));
             $o .= $gradetable->print_peer_grade_table();
-            $o .= $this->output->heading(self::str('classassessments'));
-            $o .= $gradetable->print_class_grade_table();
         }
 
         $o .= \html_writer::tag('div', '', array('id' => 'videopreview'));
@@ -2073,4 +2075,72 @@ class va {
 
         return $DB->get_record_sql($sql, $params);
     }
+
+    /* MinhTB VERSION 2 */
+    public function get_students_sort($sort_manually = false, $order = null) {
+        global $DB;
+
+        if (function_exists('get_all_user_name_fields')) {
+            $userfields = 'u.id, ' . get_all_user_name_fields(true, 'u') . ', ue.id as ueid, ue.order as sortorder';
+        } else {
+            $userfields = 'u.id, u.firstname, u.lastname';
+        }
+
+        if ($sort_manually) {
+            $order = ' ORDER BY sortorder ASC';
+        }
+
+        $contextcourse = \context_course::instance($this->course->id);
+        $sql = "
+            SELECT $userfields
+            FROM {user} u
+            JOIN {role_assignments} ra ON u.id = ra.userid
+            JOIN {user_enrolments} ue ON u.id = ue.userid
+            JOIN {enrol} e ON ue.enrolid = e.id
+            WHERE ra.contextid = :contextid AND ra.roleid = :roleid AND e.courseid = :courseid
+        " . $order;
+
+        $params = array(
+            'contextid' => $contextcourse->id,
+            'roleid' => 5,
+            'courseid' => $this->course->id
+        );
+
+        $students = $DB->get_records_sql($sql, $params);
+        return $students;
+    }
+
+    public function get_peers_sort($userid, $sort_manually = false, $order = null) {
+        global $DB;
+
+        if ($sort_manually) {
+            $order = ' ORDER BY sortorder ASC';
+        }
+
+        $contextcourse = \context_course::instance($this->course->id);
+        $sql = "
+            SELECT vp.userid, ue.order as sortorder
+            FROM {videoassessment_peers} vp
+            JOIN {user} u ON vp.userid = u.id
+            JOIN {role_assignments} ra ON u.id = ra.userid
+            JOIN {user_enrolments} ue ON vp.userid = ue.userid
+            JOIN {enrol} e ON ue.enrolid = e.id
+            WHERE vp.videoassessment = :videoassessment AND vp.peerid = :peerid AND ra.contextid = :contextid
+        " . $order;
+
+        $params = array(
+            'videoassessment' => $this->instance,
+            'peerid' => $userid,
+            'contextid' => $contextcourse->id
+        );
+
+        $students = $DB->get_records_sql($sql, $params);
+        $peerids = array();
+        foreach ($students as $student) {
+            $peerids[] = $student->userid;
+        }
+
+        return $peerids;
+    }
+    /* End */
 }

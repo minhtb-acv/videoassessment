@@ -9,6 +9,10 @@
 
 namespace videoassess;
 
+use videoassess\form\assign_class;
+
+require_once $CFG->dirroot . '/mod/videoassessment/class/form/assign_class.php';
+
 class grade_table {
     /**
      * @var va
@@ -86,7 +90,31 @@ class grade_table {
         }
 
         if ($users) {
-            $users = $this->va->get_students();
+            /* MinhTB VERSION 2 */
+            $sort = $this->va->va->sort;
+            if ($sort == assign_class::SORT_MANUALLY) {
+                $users = $this->va->get_students_sort(true);
+            } else {
+                $order = $this->va->va->order;
+                if (in_array($sort, array(assign_class::SORT_ID, assign_class::SORT_NAME))) {
+                    if ($sort == assign_class::SORT_ID) {
+                        $order_str = ' ORDER BY u.id';
+                    } else {
+                        $order_str = ' ORDER BY u.firstname, u.lastname';
+                    }
+
+                    if ($order == assign_class::ORDER_ASC) {
+                        $order_str .= ' ASC';
+                    } else {
+                        $order_str .= ' DESC';
+                    }
+                } else {
+                    $order_str = '';
+                }
+
+                $users = $this->va->get_students_sort(false, $order_str);
+            }
+            /* End */
 
             foreach ($users as $user) {
                 $agg = $this->va->get_aggregated_grades($user->id);
@@ -139,7 +167,32 @@ class grade_table {
 
         $this->setup_header();
 
-        $peers = $this->va->get_peers($USER->id);
+        /* MinhTB VERSION 2 */
+        $sort = $this->va->va->sort;
+        if ($sort == assign_class::SORT_MANUALLY) {
+            $peers = $this->va->get_peers_sort($USER->id, true);
+        } else {
+            $order = $this->va->va->order;
+            if (in_array($sort, array(assign_class::SORT_ID, assign_class::SORT_NAME))) {
+                if ($sort == assign_class::SORT_ID) {
+                    $order_str = ' ORDER BY u.id';
+                } else {
+                    $order_str = ' ORDER BY u.firstname, u.lastname';
+                }
+
+                if ($order == assign_class::ORDER_ASC) {
+                    $order_str .= ' ASC';
+                } else {
+                    $order_str .= ' DESC';
+                }
+            } else {
+                $order_str = '';
+            }
+
+            $peers = $this->va->get_peers_sort($USER->id, false, $order_str);
+        }
+        /* End */
+
         foreach ($peers as $peer) {
             $user = $this->va->get_aggregated_grades($peer);
             $this->add_user_data($user);
@@ -184,7 +237,31 @@ class grade_table {
         $peers = $this->va->get_peers($USER->id);
         
         if ($users) {
-            $users = $this->va->get_students();
+            /* MinhTB VERSION 2 */
+            $sort = $this->va->va->sort;
+            if ($sort == assign_class::SORT_MANUALLY) {
+                $users = $this->va->get_students_sort(true);
+            } else {
+                $order = $this->va->va->order;
+                if (in_array($sort, array(assign_class::SORT_ID, assign_class::SORT_NAME))) {
+                    if ($sort == assign_class::SORT_ID) {
+                        $order_str = ' ORDER BY u.id';
+                    } else {
+                        $order_str = ' ORDER BY u.firstname, u.lastname';
+                    }
+
+                    if ($order == assign_class::ORDER_ASC) {
+                        $order_str .= ' ASC';
+                    } else {
+                        $order_str .= ' DESC';
+                    }
+                } else {
+                    $order_str = '';
+                }
+
+                $users = $this->va->get_students_sort(false, $order_str);
+            }
+            /* End */
         
             foreach ($users as $user) {
                 if($user->id == $USER->id) {
@@ -298,8 +375,8 @@ class grade_table {
         $row[$s + 4] = $this->format_grade($user->{'grade'.$timing.'teacher'});
         $row[$s + 5] = $this->format_grade($user->{'grade'.$timing});
         $class[0] = 'user';
-        $class[$s + 1] = $class[$s + 2] = $class[$s + 3] = 'mark';
-        $class[$s + 4] = 'totalmark';
+        $class[$s + 1] = $class[$s + 2] = $class[$s + 3] = $class[$s + 4] = 'mark';
+        $class[$s + 5] = 'totalmark';
 
         if ($video = $this->va->get_associated_video($user->id, $timing)) {
             $url = $video->get_url(true);
@@ -382,9 +459,9 @@ class grade_table {
             if($this->domid == 'gradetableclass' && !$this->va->va->class) {
                 $row[$linkcell] .= '<br />';
             } else {
-                $row[$linkcell] .= '<br />' . $OUTPUT->action_link($url,
+                $row[$linkcell] = $OUTPUT->action_link($url,
                         get_string($button, 'videoassessment'), null,
-                        array('class' => 'button-'.$button));
+                        array('class' => 'button-'.$button)) . '<br />' . $row[$linkcell];
             }
         }
         $this->add_data($row, $class);

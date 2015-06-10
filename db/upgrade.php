@@ -112,5 +112,47 @@ function xmldb_videoassessment_upgrade($oldversion = 0) {
         upgrade_mod_savepoint(true, 2015051902, 'videoassessment');
     }
 
+    if ($oldversion < 2015060501) {
+        // Define field sort to be added to videoassessment
+        $table = new xmldb_table('videoassessment');
+        $field = new xmldb_field('sort', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '1');
+
+        // Conditionally launch add field sort
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // videoassessment savepoint reached
+        upgrade_mod_savepoint(true, 2015060501, 'videoassessment');
+    }
+
+    if ($oldversion < 2015060502) {
+        // Define field order to be added to user_enrolments
+        $table = new xmldb_table('user_enrolments');
+        $field = new xmldb_field('order', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'enrolid');
+
+        // Conditionally launch add field sort
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // videoassessment savepoint reached
+        upgrade_mod_savepoint(true, 2015060502, 'videoassessment');
+    }
+
+    if ($oldversion < 2015060503) {
+        // Define field order to be added to videoassessment
+        $table = new xmldb_table('videoassessment');
+        $field = new xmldb_field('order', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '1');
+
+        // Conditionally launch add field sort
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // videoassessment savepoint reached
+        upgrade_mod_savepoint(true, 2015060503, 'videoassessment');
+    }
+
     return true;
 }

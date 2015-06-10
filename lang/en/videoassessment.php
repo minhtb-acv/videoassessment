@@ -178,3 +178,14 @@ $string['class'] = 'Class';
 $string['open'] = 'Open Class Grading';
 $string['close'] = 'Close Class Grading';
 $string['classassessments'] = 'Class Assessments';
+
+/* MinhTB VERSION 2 */
+$string['assignclass'] = 'Assign class';
+$string['sortid'] = 'Sort by ID';
+$string['sortname'] = 'Sort by name';
+$string['sortmanually'] = 'Sort manually';
+$string['sortby'] = 'Sort by';
+$string['order'] = 'Order';
+$string['save'] = 'Save';
+$string['orderasc'] = '昇順';
+$string['orderdesc'] = '降順';

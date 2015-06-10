@@ -56,7 +56,7 @@
 #page-mod-videoassessment-view .gradetable .mark,
 #page-mod-videoassessment-view .gradetable .totalmark {
     vertical-align: bottom;
-    line-height: 50px;
+    padding-bottom: 20px;
     white-space: nowrap;
 }
 #page-mod-videoassessment-view .gradetable .mark { font-size: 160% }
@@ -111,11 +111,7 @@
     white-space: nowrap;
     cursor: pointer;
 }
-.path-mod-videoassessment .button-firstassess,
-.path-mod-videoassessment .button-assessagain {
-    position: relative;
-    top: -20px;
-}
+
 .path-mod-videoassessment .button-firstassess {
     border-top: 1px solid #fcd96f;
     background: #ffc17f;
@@ -254,4 +250,38 @@
 .managelink:hover {
     text-decoration: underline;
     color: #333;
+}
+
+/* MinhTB VERSION 2 */
+#id_manually {
+    padding: 0;
+    margin: 0;
+}
+
+#id_manually li {
+    margin-bottom: 5px;
+    list-style-type: none;
+}
+
+#id_manually li .name {
+    width: 200px;
+    height: 40px;
+    line-height: 40px;
+    padding: 0 10px;
+    border-radius: 3px;
+    border: 1px solid #ccc;
+    margin-right: 5px;
+    float: left;
+}
+
+#id_manually li .sort-button {
+    float: left;
+}
+
+#id_manually li .sort-button a {
+    margin-right: 5px;
+}
+
+#id_manually li .sort-button i {
+    line-height: 40px;
 }
