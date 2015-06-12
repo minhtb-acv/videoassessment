@@ -76,7 +76,7 @@ if (isset($_POST['sort']) && isset($_POST['id']) && isset($_POST['order'])) {
     } else {
         $order_sql = '';
         if ($sort == assign_class::SORT_NAME) {
-            $order_sql .= ' ORDER BY u.firstname, u.lastname';
+            $order_sql .= ' ORDER BY CONCAT(u.firstname, " ", u.lastname)';
         } else {
             $order_sql .= ' ORDER BY u.id';
         }

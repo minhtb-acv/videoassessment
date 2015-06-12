@@ -247,7 +247,7 @@ class grade_table {
                     if ($sort == assign_class::SORT_ID) {
                         $order_str = ' ORDER BY u.id';
                     } else {
-                        $order_str = ' ORDER BY u.firstname, u.lastname';
+                        $order_str = ' ORDER BY CONCAT(u.firstname, " ", u.lastname)';
                     }
 
                     if ($order == assign_class::ORDER_ASC) {
