@@ -187,5 +187,5 @@ $string['sortmanually'] = 'Sort manually';
 $string['sortby'] = 'Sort by';
 $string['order'] = 'Order';
 $string['save'] = 'Save';
-$string['orderasc'] = '昇順';
-$string['orderdesc'] = '降順';
+$string['orderasc'] = 'Ascending';
+$string['orderdesc'] = 'Descending';

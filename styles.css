@@ -253,17 +253,17 @@
 }
 
 /* MinhTB VERSION 2 */
-#id_manually {
+.id_order_students, #manually-list {
     padding: 0;
     margin: 0;
 }
 
-#id_manually li {
+.id_order_students li, #manually-list li {
     margin-bottom: 5px;
     list-style-type: none;
 }
 
-#id_manually li .name {
+.id_order_students li .name, #manually-list .name {
     width: 200px;
     height: 40px;
     line-height: 40px;
@@ -274,14 +274,25 @@
     float: left;
 }
 
-#id_manually li .sort-button {
-    float: left;
+.id_order_students .placeholder, #manually-list .placeholder {
+    display: block;
+    width: 0px;
+    height: 0px;
+    border: 5px solid transparent;
+    border-left-color: #333;
+    position: relative;
 }
 
-#id_manually li .sort-button a {
-    margin-right: 5px;
+#manually-list li {
+    cursor: move;
 }
 
-#id_manually li .sort-button i {
-    line-height: 40px;
+.dragged {
+    position: absolute;
+    opacity: 0.5;
+    z-index: 2000;
+}
+
+body.dragging, body.dragging * {
+    cursor: move !important;
 }

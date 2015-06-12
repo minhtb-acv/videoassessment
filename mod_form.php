@@ -218,7 +218,7 @@ class mod_videoassessment_mod_form extends moodleform_mod {
             $mform->addElement('html', "<a class='managelink' href='$publishvideosLink'>$publishvideosText</a>");
 
             /* MinhTB VERSION 2 */
-            $assignClassLink = new moodle_url('/mod/videoassessment/assignclass.php', array('id' => $cm->id));
+            $assignClassLink = new moodle_url('/mod/videoassessment/assignclass/index.php', array('id' => $cm->id));
             $assignClassText = get_string('assignclass', 'videoassessment');
             $mform->addElement('html', "<a class='managelink' href='$assignClassLink'>$assignClassText</a>");
             /* End */

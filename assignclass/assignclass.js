@@ -3,61 +3,72 @@
 jQuery(function($) {
 
     /* Load sort manually list */
-    $(document).on('change', '#sortby', function() {
+    $(document).on('change', '#sortby, #id_order', function() {
         var t = $(this);
-        var $load = t.data('load');
-        var $sort = t.val();
+        var $sort = $('#sortby').val();
+        var $order = $('#id_order').val();
+        var $load = $('#sortby').data('load');
 
-        if ($sort == 3) {
+        $('.id_order_students').remove();
+
+        if ($sort == 3 && $load == 1) {
+            $('#manually-list').removeClass('hidden');
             $('#id_order').addClass('hidden');
-            $('#id_manually').removeClass('hidden');
-            if ($load == 0) {
-                var $url = t.closest('form').attr('action');
-                var $id = t.closest('form').find('input[type="hidden"][name="id"]').val();
-                $('#id_order').after('<i class="fa fa-refresh fa-spin fa-3x fa-fw margin-bottom"></i>');
-
-                $.ajax({
-                    url: $url,
-                    method: 'post',
-                    data: {
-                        sort: $sort,
-                        id: $id
-                    },
-                    success: function ($html) {
-                        t.data('load', 1);
-                        $('#id_order').after($html);
-                        $('#id_order').parent().find('i.fa-refresh').remove();
-                    }
-                });
-            }
         } else {
-            $('#id_order').removeClass('hidden');
-            $('#id_manually').addClass('hidden');
-        }
-    });
-
-    $(window).load(function() {
-        var $sort = $('#sortby').data('sort');
-
-        if ($sort == 3) {
-            var $id = $('.sort-form input[type="hidden"][name="id"]').val();
-            var $url = $('.sort-form').attr('action');
-            $('#id_order').after('<i class="fa fa-refresh fa-spin fa-3x fa-fw margin-bottom"></i>');
+            var $url = t.closest('form').attr('action');
+            var $id = t.closest('form').find('input[type="hidden"][name="id"]').val();
+            $('#id_order').after('<div class="loading-icon"><i class="fa fa-refresh fa-spin fa-3x fa-fw margin-bottom"></i></div>');
 
             $.ajax({
                 url: $url,
                 method: 'post',
                 data: {
                     sort: $sort,
+                    order: $order,
                     id: $id
                 },
                 success: function ($html) {
-                    $('#sortby').data('load', 1);
+                    if ($sort == 3) {
+                        $('#sortby').data('load', 1);
+                    }
                     $('#id_order').after($html);
-                    $('#id_order').parent().find('i.fa-refresh').remove();
+                    $('#id_order').parent().find('.loading-icon').remove();
                 }
             });
+
+            if ($sort == 3) {
+                $('#id_order').addClass('hidden');
+            } else {
+                $('#id_order').removeClass('hidden');
+                $('#manually-list').addClass('hidden');
+            }
         }
+    });
+
+    $(window).load(function() {
+        var $sort = $('#sortby').val();
+        var $order = $('#id_order').val();
+
+        var $id = $('.sort-form input[type="hidden"][name="id"]').val();
+        var $url = $('.sort-form').attr('action');
+        $('#id_order').after('<div class="loading-icon"><i class="fa fa-refresh fa-spin fa-3x fa-fw margin-bottom"></i></div>');
+
+        $.ajax({
+            url: $url,
+            method: 'post',
+            data: {
+                sort: $sort,
+                order: $order,
+                id: $id
+            },
+            success: function ($html) {
+                if ($sort == 3) {
+                    $('#sortby').data('load', 1);
+                }
+                $('#id_order').after($html);
+                $('#id_order').parent().find('.loading-icon').remove();
+            }
+        });
     });
 
     /* Sort up */
