@@ -206,7 +206,7 @@ if ($data = $form->get_data()) {
 
 /* Group */
 
-$courseid = required_param('id', PARAM_INT);
+$courseid = $cm->course;
 $groupid  = optional_param('group', false, PARAM_INT);
 $userid   = optional_param('user', false, PARAM_INT);
 $action   = groups_param_action();
