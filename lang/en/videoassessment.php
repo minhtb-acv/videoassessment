@@ -180,6 +180,7 @@ $string['close'] = 'Close Class Grading';
 $string['classassessments'] = 'Class Assessments';
 
 /* MinhTB VERSION 2 */
+$string['allparticipants'] = 'All participants';
 $string['assignclass'] = 'Assign class';
 $string['sortid'] = 'Sort by ID';
 $string['sortname'] = 'Sort by name';
@@ -189,3 +190,4 @@ $string['order'] = 'Order';
 $string['save'] = 'Save';
 $string['orderasc'] = 'Ascending';
 $string['orderdesc'] = 'Descending';
+$string['namesort'] = 'First name / Surname';

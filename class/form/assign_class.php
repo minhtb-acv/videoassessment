@@ -13,9 +13,6 @@ class assign_class extends \moodleform {
     CONST SORT_NAME = 2;
     CONST SORT_MANUALLY = 3;
 
-    CONST ORDER_ASC = 1;
-    CONST ORDER_DESC = 2;
-
     public function definition() {
         global $DB, $OUTPUT;
 
@@ -36,21 +33,17 @@ class assign_class extends \moodleform {
         );
         $mform->addElement('select', 'sortby', get_string('sortby', 'videoassessment'), $sort_options, array('id' => 'sortby', 'data-load' => 0));
         $mform->setType('sortby', PARAM_INT);
-        $mform->setDefault('sortby', $this->_customdata->sort);
+        $mform->setDefault('sortby', $this->_customdata->sortby);
 
-        $order_options = array(
-            self::ORDER_ASC => get_string('orderasc', 'videoassessment'),
-            self::ORDER_DESC => get_string('orderdesc', 'videoassessment')
+        $group_options = array(
+            0 => get_string('allparticipants', 'videoassessment')
         );
-
-        $attributes = array();
-        if ($this->_customdata->sort == self::SORT_MANUALLY) {
-            $attributes['class'] = 'hidden';
+        foreach ($this->_customdata->groups as $k => $group) {
+            $group_options[$k] = $group->name;
         }
-
-        $mform->addElement('select', 'order', get_string('order', 'videoassessment'), $order_options, $attributes);
-        $mform->setType('order', PARAM_INT);
-        $mform->setDefault('order', $this->_customdata->order);
+        $mform->addElement('select', 'groupid', get_string('groupsseparate', 'group'), $group_options, array('id' => 'separate-group'));
+        $mform->setType('groupid', PARAM_INT);
+        $mform->setDefault('groupid', $this->_customdata->groupid);
 
         $this->add_action_buttons(false, va::str('save'));
     }

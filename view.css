@@ -31,3 +31,7 @@
 .report-rubrics h2.main {
     display: none!important;
 }
+
+.name-sort i {
+    margin-left: 5px;
+}

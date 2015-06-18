@@ -169,6 +169,7 @@ class va {
             // 横に長いページはスクロールバーが出るレイアウトを使用
             $PAGE->set_pagelayout('report');
             $PAGE->requires->css('/mod/videoassessment/view.css');
+            $PAGE->requires->css('/mod/videoassessment/font/font-awesome/css/font-awesome.min.css');
         }
 
         if ($action == 'report')
@@ -2077,11 +2078,11 @@ class va {
     }
 
     /* MinhTB VERSION 2 */
-    public function get_students_sort($sort_manually = false, $order = null) {
+    public function get_students_sort($groupid = null, $sort_manually = false, $order = null) {
         global $DB;
 
         if (function_exists('get_all_user_name_fields')) {
-            $userfields = 'u.id, ' . get_all_user_name_fields(true, 'u') . ', ue.id as ueid, ue.order as sortorder';
+            $userfields = 'u.id, ' . get_all_user_name_fields(true, 'u');
         } else {
             $userfields = 'u.id, u.firstname, u.lastname';
         }
@@ -2091,48 +2092,71 @@ class va {
         }
 
         $contextcourse = \context_course::instance($this->course->id);
-        $sql = "
-            SELECT $userfields
-            FROM {user} u
-            JOIN {role_assignments} ra ON u.id = ra.userid
-            JOIN {user_enrolments} ue ON u.id = ue.userid
-            JOIN {enrol} e ON ue.enrolid = e.id
-            WHERE ra.contextid = :contextid AND ra.roleid = :roleid AND e.courseid = :courseid
-        " . $order;
-
         $params = array(
             'contextid' => $contextcourse->id,
             'roleid' => 5,
             'courseid' => $this->course->id
         );
 
+        if (!empty($groupid)) {
+            $join = ' JOIN {groups_members} gm ON gm.userid = u.id';
+            $where = ' AND gm.groupid = :groupid';
+            $params['groupid'] = $groupid;
+            $userfields .= ', gm.id as orderid, gm.order as sortorder';
+        } else {
+            $join = '';
+            $where = '';
+            $userfields .= ', ue.id as orderid, ue.order as sortorder';
+        }
+
+        $sql = "
+            SELECT $userfields
+            FROM {user} u
+            JOIN {role_assignments} ra ON u.id = ra.userid
+            JOIN {user_enrolments} ue ON u.id = ue.userid
+            JOIN {enrol} e ON ue.enrolid = e.id" . $join . "
+            WHERE ra.contextid = :contextid AND ra.roleid = :roleid AND e.courseid = :courseid
+        " . $where . $order;
+
         $students = $DB->get_records_sql($sql, $params);
         return $students;
     }
 
-    public function get_peers_sort($userid, $sort_manually = false, $order = null) {
+    public function get_peers_sort($groupid = 0, $userid, $sort_manually = false, $order = null) {
         global $DB;
 
-        if ($sort_manually) {
-            $order = ' ORDER BY sortorder ASC';
-        }
-
         $contextcourse = \context_course::instance($this->course->id);
-        $sql = "
-            SELECT vp.userid, ue.order as sortorder
-            FROM {videoassessment_peers} vp
-            JOIN {user} u ON vp.userid = u.id
-            JOIN {role_assignments} ra ON u.id = ra.userid
-            JOIN {user_enrolments} ue ON vp.userid = ue.userid
-            JOIN {enrol} e ON ue.enrolid = e.id
-            WHERE vp.videoassessment = :videoassessment AND vp.peerid = :peerid AND ra.contextid = :contextid
-        " . $order;
-
         $params = array(
             'videoassessment' => $this->instance,
             'peerid' => $userid,
             'contextid' => $contextcourse->id
         );
+
+        if ($sort_manually) {
+            $order = ' ORDER BY sortorder ASC';
+        }
+
+        if (!empty($groupid)) {
+            $join = ' JOIN {groups_members} gm ON gm.userid = u.id';
+            $where = ' AND gm.groupid = :groupid';
+            $params['groupid'] = $groupid;
+            $fields = ', gm.order as sortorder';
+        } else {
+            $join = '';
+            $where = '';
+            $fields = ', ue.order as sortorder';
+        }
+
+        $sql = "
+            SELECT vp.userid $fields
+            FROM {videoassessment_peers} vp
+            JOIN {user} u ON vp.userid = u.id
+            JOIN {role_assignments} ra ON u.id = ra.userid
+            JOIN {user_enrolments} ue ON vp.userid = ue.userid
+            JOIN {enrol} e ON ue.enrolid = e.id
+            $join
+            WHERE vp.videoassessment = :videoassessment AND vp.peerid = :peerid AND ra.contextid = :contextid
+        " .$where . $order;
 
         $students = $DB->get_records_sql($sql, $params);
         $peerids = array();

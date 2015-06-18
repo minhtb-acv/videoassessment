@@ -14,9 +14,9 @@ $cmid = optional_param('id', null, PARAM_INT);
 $cm = get_coursemodule_from_id('videoassessment', $cmid, 0, false, MUST_EXIST);
 require_login($cm->course, true, $cm);
 
-if (isset($_POST['sort']) && isset($_POST['id']) && isset($_POST['order'])) {
+if (isset($_POST['sort']) && isset($_POST['id']) && isset($_POST['groupid'])) {
     $sort = $_POST['sort'];
-    $order = $_POST['order'];
+    $groupid = $_POST['groupid'];
     $id = $_POST['id'];
 
     $cm = get_coursemodule_from_id('videoassessment', $id, 0, false, MUST_EXIST);
@@ -26,11 +26,10 @@ if (isset($_POST['sort']) && isset($_POST['id']) && isset($_POST['order'])) {
     $va = new \videoassess\va($context, $cm, $course);
 
     if ($sort == assign_class::SORT_MANUALLY) {
-        $students = $va->get_students_sort(true);
+        $students = $va->get_students_sort($groupid, true);
 
         $i = 1;
         $html = '<ul id="manually-list">';
-        $count_student = count($students);
         foreach ($students as $k => $student) {
             $sql = "
                 UPDATE {user_enrolments} ue
@@ -40,12 +39,12 @@ if (isset($_POST['sort']) && isset($_POST['id']) && isset($_POST['order'])) {
 
             $params = array(
                 'order' => $i,
-                'id' => $student->ueid
+                'id' => $student->orderid
             );
 
             $DB->execute($sql, $params);
 
-            $html .= '<li data-ueid="' . $student->ueid . '" class="clearfix">';
+            $html .= '<li data-orderid="' . $student->orderid . '" class="clearfix">';
             $html .= '<div class="name">' . fullname($student) . '</div>';
             $html .= '</li>';
             $i++;
@@ -63,7 +62,7 @@ if (isset($_POST['sort']) && isset($_POST['id']) && isset($_POST['order'])) {
                     var html = '';
                     for (x in data[0]) {
                         var obj = data[0][x];
-                        html += '<input type=\"hidden\" name=\"ueid[]\" value=\"' + obj.ueid + '\" />';
+                        html += '<input type=\"hidden\" name=\"orderid[]\" value=\"' + obj.orderid + '\" />';
                     }
 
                     $('#manually-hidden').html(html);
@@ -81,13 +80,9 @@ if (isset($_POST['sort']) && isset($_POST['id']) && isset($_POST['order'])) {
             $order_sql .= ' ORDER BY u.id';
         }
 
-        if ($order == assign_class::ORDER_ASC) {
-            $order_sql .= ' ASC';
-        } else {
-            $order_sql .= ' DESC';
-        }
+        $order_sql .= ' ASC';
 
-        $students = $va->get_students_sort(false, $order_sql);
+        $students = $va->get_students_sort($groupid, false, $order_sql);
 
         $html = '<ul class="id_order_students">';
         foreach ($students as $k => $student) {
@@ -100,41 +95,6 @@ if (isset($_POST['sort']) && isset($_POST['id']) && isset($_POST['order'])) {
     }
 
     echo $html; die;
-}
-
-if (isset($_POST['resort'])) {
-    $ueid_1 = $_POST['ueid_1'];
-    $ueid_2 = $_POST['ueid_2'];
-
-    $ue_1 = $DB->get_record('user_enrolments', array('id' => $ueid_1));
-    $ue_2 = $DB->get_record('user_enrolments', array('id' => $ueid_2));
-
-    $sql_1 = "
-        UPDATE {user_enrolments} ue
-        SET ue.order = :order
-        WHERE ue.id = :id
-    ";
-
-    $params_1 = array(
-        'order' => $ue_2->order,
-        'id' => $ueid_1
-    );
-
-    $sql_2 = "
-        UPDATE {user_enrolments} ue
-        SET ue.order = :order
-        WHERE ue.id = :id
-    ";
-
-    $params_2 = array(
-        'order' => $ue_1->order,
-        'id' => $ueid_2
-    );
-
-    $DB->execute($sql_1, $params_1);
-    $DB->execute($sql_2, $params_2);
-
-    echo 1; die;
 }
 
 $cmid = optional_param('id', null, PARAM_INT);
@@ -157,30 +117,43 @@ $PAGE->set_url($url);
 
 $students = $va->get_students_sort(true);
 
+$groups = $DB->get_records('groups', array('courseid' => $course->id), '', 'id, name');
+$groupid = optional_param('groupid', 0, PARAM_INT);
+$group = $DB->get_record('groups', array('id' => $groupid), 'sortby');
+$sortby = (empty($groupid)) ? $course->sortby : $group->sortby;
+
 $form = new assign_class(null, (object)array(
     'va' => $va,
-    'sort' => $va->va->sort,
-    'order' => $va->va->order,
+    'sortby' => $sortby,
     'students' => $students,
+    'groups' => $groups,
+    'groupid' => $groupid
 ));
 
 if ($data = $form->get_data()) {
     $sortby = optional_param('sortby', $form::SORT_ID, PARAM_INT);
-    $order = optional_param('order', $form::ORDER_ASC, PARAM_INT);
-    $ueid_arr = optional_param_array('ueid', array(), PARAM_INT);
+    $groupid = optional_param('groupid', 0, PARAM_INT);
+    $orderid_arr = optional_param_array('orderid', array(), PARAM_INT);
 
-    if (!empty($ueid_arr)) {
+    if (!empty($orderid_arr)) {
         $i = 1;
-        foreach ($ueid_arr as $ueid) {
+
+        if (!empty($groupid)) {
+            $table = '{groups_members}';
+        } else {
+            $table = '{user_enrolments}';
+        }
+
+        foreach ($orderid_arr as $orderid) {
             $sql = "
-                UPDATE {user_enrolments} ue
-                SET ue.order = :order
-                WHERE ue.id = :id
+                UPDATE $table as t
+                SET t.order = :order
+                WHERE t.id = :id
             ";
 
             $params = array(
                 'order' => $i,
-                'id' => $ueid
+                'id' => $orderid
             );
 
             $DB->execute($sql, $params);
@@ -188,16 +161,24 @@ if ($data = $form->get_data()) {
         }
     }
 
+    if (!empty($groupid)) {
+        $table = '{groups}';
+        $url .= '&groupid=' . $groupid;
+    } else {
+        $table = '{course}';
+    }
+
     $sql = "
-        UPDATE {videoassessment} v
-        SET v.sort = :sortby, v.order = :order
-        WHERE v.id = :id
+        UPDATE $table
+        SET sortby = :sortby
+        WHERE id = :id
     ";
+
+    $id = (!empty($groupid)) ? $groupid : $course->id;
 
     $params = array(
         'sortby' => $sortby,
-        'order' => $order,
-        'id' => $va->va->id
+        'id' => $id
     );
 
     $DB->execute($sql, $params);

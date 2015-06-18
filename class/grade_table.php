@@ -14,6 +14,10 @@ use videoassess\form\assign_class;
 require_once $CFG->dirroot . '/mod/videoassessment/class/form/assign_class.php';
 
 class grade_table {
+
+    CONST ORDER_ASC = 1;
+    CONST ORDER_DESC = 2;
+
     /**
      * @var va
      */
@@ -41,7 +45,7 @@ class grade_table {
     /**
      * @var array
      */
-    public $startcolumns = array('before' => 1, 'after' => 6);
+    public $startcolumns = array('before' => 0, 'after' => 6);
     /**
      * @var string
     */
@@ -68,7 +72,7 @@ class grade_table {
      * 教員用一覧表示
      */
     public function print_teacher_grade_table() {
-        global $CFG, $DB;
+        global $CFG, $DB, $USER;
 
         $this->domid = 'gradetableteacher';
 
@@ -91,28 +95,53 @@ class grade_table {
 
         if ($users) {
             /* MinhTB VERSION 2 */
-            $sort = $this->va->va->sort;
-            if ($sort == assign_class::SORT_MANUALLY) {
-                $users = $this->va->get_students_sort(true);
-            } else {
-                $order = $this->va->va->order;
-                if (in_array($sort, array(assign_class::SORT_ID, assign_class::SORT_NAME))) {
-                    if ($sort == assign_class::SORT_ID) {
-                        $order_str = ' ORDER BY u.id';
-                    } else {
-                        $order_str = ' ORDER BY u.firstname, u.lastname';
-                    }
+            $groupmode = groups_get_activity_groupmode($cm);
+            $aag = has_capability('moodle/site:accessallgroups', $context);
 
-                    if ($order == assign_class::ORDER_ASC) {
-                        $order_str .= ' ASC';
-                    } else {
-                        $order_str .= ' DESC';
-                    }
+            if ($groupmode == VISIBLEGROUPS or $aag) {
+                $allowedgroups = groups_get_all_groups($cm->course, 0, $cm->groupingid); // any group in grouping
+            } else {
+                $allowedgroups = groups_get_all_groups($cm->course, $USER->id, $cm->groupingid); // only assigned groups
+            }
+
+            $groupid = groups_get_activity_group($cm, true, $allowedgroups);
+            $groupid = optional_param('group', $groupid, PARAM_INT);
+            if (!empty($groupid)) {
+                $group = $DB->get_record('groups', array('id' => $groupid), 'sortby');
+                $sort = $group->sortby;
+            } else {
+                $course = $DB->get_record('course', array('id' => $cm->course), 'sortby');
+                $sort = $course->sortby;
+            }
+
+            $nsort = optional_param('nsort', null, PARAM_INT);
+
+            if (!empty($nsort)) {
+                $order_str = ' ORDER BY CONCAT(u.firstname, " ", u.lastname)';
+
+                if ($nsort == self::ORDER_ASC) {
+                    $order_str .= ' ASC';
                 } else {
-                    $order_str = '';
+                    $order_str .= ' DESC';
                 }
 
-                $users = $this->va->get_students_sort(false, $order_str);
+                $users = $this->va->get_students_sort($groupid, false, $order_str);
+            } else {
+                if ($sort == assign_class::SORT_MANUALLY) {
+                    $users = $this->va->get_students_sort($groupid, true);
+                } else {
+                    if (in_array($sort, array(assign_class::SORT_ID, assign_class::SORT_NAME))) {
+                        if ($sort == assign_class::SORT_ID) {
+                            $order_str = ' ORDER BY u.id';
+                        } else {
+                            $order_str = ' ORDER BY CONCAT(u.firstname, " ", u.lastname)';
+                        }
+                    } else {
+                        $order_str = '';
+                    }
+
+                    $users = $this->va->get_students_sort($groupid, false, $order_str);
+                }
             }
             /* End */
 
@@ -168,28 +197,55 @@ class grade_table {
         $this->setup_header();
 
         /* MinhTB VERSION 2 */
-        $sort = $this->va->va->sort;
-        if ($sort == assign_class::SORT_MANUALLY) {
-            $peers = $this->va->get_peers_sort($USER->id, true);
-        } else {
-            $order = $this->va->va->order;
-            if (in_array($sort, array(assign_class::SORT_ID, assign_class::SORT_NAME))) {
-                if ($sort == assign_class::SORT_ID) {
-                    $order_str = ' ORDER BY u.id';
-                } else {
-                    $order_str = ' ORDER BY u.firstname, u.lastname';
-                }
+        $cm = $this->cm;
+        $context = $this->va->context;
+        $groupmode = groups_get_activity_groupmode($cm);
+        $aag = has_capability('moodle/site:accessallgroups', $context);
 
-                if ($order == assign_class::ORDER_ASC) {
-                    $order_str .= ' ASC';
-                } else {
-                    $order_str .= ' DESC';
-                }
+        if ($groupmode == VISIBLEGROUPS or $aag) {
+            $allowedgroups = groups_get_all_groups($cm->course, 0, $cm->groupingid); // any group in grouping
+        } else {
+            $allowedgroups = groups_get_all_groups($cm->course, $USER->id, $cm->groupingid); // only assigned groups
+        }
+
+        $groupid = groups_get_activity_group($cm, true, $allowedgroups);
+        $groupid = optional_param('group', $groupid, PARAM_INT);
+        if (!empty($groupid)) {
+            $group = $DB->get_record('groups', array('id' => $groupid), 'sortby');
+            $sort = $group->sortby;
+        } else {
+            $course = $DB->get_record('course', array('id' => $cm->course), 'sortby');
+            $sort = $course->sortby;
+        }
+
+        $nsort = optional_param('nsort', null, PARAM_INT);
+
+        if (!empty($nsort)) {
+            $order_str = ' ORDER BY CONCAT(u.firstname, " ", u.lastname)';
+
+            if ($nsort == self::ORDER_ASC) {
+                $order_str .= ' ASC';
             } else {
-                $order_str = '';
+                $order_str .= ' DESC';
             }
 
-            $peers = $this->va->get_peers_sort($USER->id, false, $order_str);
+            $peers = $this->va->get_peers_sort($groupid, $USER->id, false, $order_str);
+        } else {
+            if ($sort == assign_class::SORT_MANUALLY) {
+                $peers = $this->va->get_peers_sort($groupid, $USER->id, true);
+            } else {
+                if (in_array($sort, array(assign_class::SORT_ID, assign_class::SORT_NAME))) {
+                    if ($sort == assign_class::SORT_ID) {
+                        $order_str = ' ORDER BY u.id';
+                    } else {
+                        $order_str = ' ORDER BY CONCAT(u.firstname, " ", u.lastname)';
+                    }
+                } else {
+                    $order_str = '';
+                }
+
+                $peers = $this->va->get_peers_sort($groupid, $USER->id, false, $order_str);
+            }
         }
         /* End */
 
@@ -216,7 +272,7 @@ class grade_table {
         global $DB, $USER;
         
         $this->domid = 'gradetableclass';
-        
+
         $this->setup_header();
         
         $cm = $this->cm;
@@ -238,28 +294,53 @@ class grade_table {
         
         if ($users) {
             /* MinhTB VERSION 2 */
-            $sort = $this->va->va->sort;
-            if ($sort == assign_class::SORT_MANUALLY) {
-                $users = $this->va->get_students_sort(true);
-            } else {
-                $order = $this->va->va->order;
-                if (in_array($sort, array(assign_class::SORT_ID, assign_class::SORT_NAME))) {
-                    if ($sort == assign_class::SORT_ID) {
-                        $order_str = ' ORDER BY u.id';
-                    } else {
-                        $order_str = ' ORDER BY CONCAT(u.firstname, " ", u.lastname)';
-                    }
+            $groupmode = groups_get_activity_groupmode($cm);
+            $aag = has_capability('moodle/site:accessallgroups', $context);
 
-                    if ($order == assign_class::ORDER_ASC) {
-                        $order_str .= ' ASC';
-                    } else {
-                        $order_str .= ' DESC';
-                    }
+            if ($groupmode == VISIBLEGROUPS or $aag) {
+                $allowedgroups = groups_get_all_groups($cm->course, 0, $cm->groupingid); // any group in grouping
+            } else {
+                $allowedgroups = groups_get_all_groups($cm->course, $USER->id, $cm->groupingid); // only assigned groups
+            }
+
+            $groupid = groups_get_activity_group($cm, true, $allowedgroups);
+            $groupid = optional_param('group', $groupid, PARAM_INT);
+            if (!empty($groupid)) {
+                $group = $DB->get_record('groups', array('id' => $groupid), 'sortby');
+                $sort = $group->sortby;
+            } else {
+                $course = $DB->get_record('course', array('id' => $cm->course), 'sortby');
+                $sort = $course->sortby;
+            }
+
+            $nsort = optional_param('nsort', null, PARAM_INT);
+
+            if (!empty($nsort)) {
+                $order_str = ' ORDER BY CONCAT(u.firstname, " ", u.lastname)';
+
+                if ($nsort == self::ORDER_ASC) {
+                    $order_str .= ' ASC';
                 } else {
-                    $order_str = '';
+                    $order_str .= ' DESC';
                 }
 
-                $users = $this->va->get_students_sort(false, $order_str);
+                $users = $this->va->get_students_sort($groupid, false, $order_str);
+            } else {
+                if ($sort == assign_class::SORT_MANUALLY) {
+                    $users = $this->va->get_students_sort($groupid, true);
+                } else {
+                    if (in_array($sort, array(assign_class::SORT_ID, assign_class::SORT_NAME))) {
+                        if ($sort == assign_class::SORT_ID) {
+                            $order_str = ' ORDER BY u.id';
+                        } else {
+                            $order_str = ' ORDER BY CONCAT(u.firstname, " ", u.lastname)';
+                        }
+                    } else {
+                        $order_str = '';
+                    }
+
+                    $users = $this->va->get_students_sort($groupid, false, $order_str);
+                }
             }
             /* End */
         
@@ -292,16 +373,41 @@ class grade_table {
 
         $timing = 'before';
         $s = $this->startcolumns[$timing];
-        $row1[$s + 1] = get_string('class', 'videoassessment');
-        $row1[$s + 2] = get_string('self', 'videoassessment');
-        $row1[$s + 3] = get_string('peer', 'videoassessment');
-        $row1[$s + 4] = get_string('teacher', 'videoassessment');
-        $row1[$s + 5] = get_string('total', 'videoassessment');
-        $row2[$s] = get_string('weighting', 'videoassessment');
-        $row2[$s + 1] = $this->va->va->ratingclass.'%';
-        $row2[$s + 2] = $this->va->va->ratingself.'%';
-        $row2[$s + 3] = $this->va->va->ratingpeer.'%';
-        $row2[$s + 4] = $this->va->va->ratingteacher.'%';
+        $row1[$s + 2] = get_string('class', 'videoassessment');
+        $row1[$s + 3] = get_string('self', 'videoassessment');
+        $row1[$s + 4] = get_string('peer', 'videoassessment');
+        $row1[$s + 5] = get_string('teacher', 'videoassessment');
+        $row1[$s + 6] = get_string('total', 'videoassessment');
+
+        /* MinhTB VERSION 2 */
+        $params = array('id' => $this->cm->id);
+        $group = optional_param('group', null, PARAM_INT);
+        $nsort = optional_param('nsort', null, PARAM_INT);
+
+        if (!empty($group)) $params['group'] = $group;
+        if (empty($nsort)) {
+            $nsort = self::ORDER_ASC;
+            $arrow = '';
+        } else {
+            if ($nsort == self::ORDER_ASC) {
+                $nsort = self::ORDER_DESC;
+                $arrow = '<i class="fa fa-caret-up"></i>';
+            } else {
+                $nsort = self::ORDER_ASC;
+                $arrow = '<i class="fa fa-caret-down"></i>';
+            }
+        }
+
+        $params['nsort'] = $nsort;
+        $url = new \moodle_url('/mod/videoassessment/view.php', $params);
+
+        $row2[$s] = '<a href="' . $url . '" class="name-sort">' . get_string("namesort", "videoassessment") . $arrow . '</a>';
+        $row2[$s + 1] = get_string('weighting', 'videoassessment');
+        $row2[$s + 2] = $this->va->va->ratingclass.'%';
+        $row2[$s + 3] = $this->va->va->ratingself.'%';
+        $row2[$s + 4] = $this->va->va->ratingpeer.'%';
+        $row2[$s + 5] = $this->va->va->ratingteacher.'%';
+        /* End */
 
         $this->add_data($row1);
         $this->add_data($row2);
@@ -366,22 +472,22 @@ class grade_table {
         $timing = 'before';
         $s = $this->startcolumns[$timing];
         if ($this->va->va->class && !has_capability('mod/videoassessment:grade', $this->va->context)) {
-            $row[$s + 1] = $this->emptygradetext;
+            $row[$s + 2] = $this->emptygradetext;
         } else {
-            $row[$s + 1] = $this->format_grade($user->{'grade'.$timing.'class'});
+            $row[$s + 2] = $this->format_grade($user->{'grade'.$timing.'class'});
         }
-        $row[$s + 2] = $this->format_grade($user->{'grade'.$timing.'self'});
-        $row[$s + 3] = $this->format_grade($user->{'grade'.$timing.'peer'});
-        $row[$s + 4] = $this->format_grade($user->{'grade'.$timing.'teacher'});
-        $row[$s + 5] = $this->format_grade($user->{'grade'.$timing});
+        $row[$s + 3] = $this->format_grade($user->{'grade'.$timing.'self'});
+        $row[$s + 4] = $this->format_grade($user->{'grade'.$timing.'peer'});
+        $row[$s + 5] = $this->format_grade($user->{'grade'.$timing.'teacher'});
+        $row[$s + 6] = $this->format_grade($user->{'grade'.$timing});
         $class[0] = 'user';
-        $class[$s + 1] = $class[$s + 2] = $class[$s + 3] = $class[$s + 4] = 'mark';
-        $class[$s + 5] = 'totalmark';
+        $class[$s + 2] = $class[$s + 3] = $class[$s + 4] = $class[$s + 5] = 'mark';
+        $class[$s + 6] = 'totalmark';
 
         if ($video = $this->va->get_associated_video($user->id, $timing)) {
             $url = $video->get_url(true);
             $content = $video->render_thumbnail(va::str('previewvideo'));
-            $row[$s] = \html_writer::tag(
+            $row[$s + 1] = \html_writer::tag(
                     'a', $content, array(
                             'onclick' => 'M.mod_videoassessment.videos_show_video_preview_by_user('.$user->id.',\''.$timing.'\')',
                             'href' => 'javascript:void(0)'
@@ -392,14 +498,14 @@ class grade_table {
                                        && $this->is_emptygrade($user->{'grade'.$timing.'teacher'}))
             {
                 $str = $mobile ? va::str('retakevideo') : va::str('reuploadvideo');
-                $row[$s] .= \html_writer::tag('div',
+                $row[$s + 1] .= \html_writer::tag('div',
                     $OUTPUT->action_link(
                         new \moodle_url($this->va->viewurl, array('action' => 'upload', 'user' => $user->id, 'timing' => $timing)),
                         $str, null, array('class' => 'button-upload'))
                     );
             }
             if ($this->va->is_teacher()) {
-                $row[$s] .= \html_writer::tag('div',
+                $row[$s + 1] .= \html_writer::tag('div',
                     $OUTPUT->action_link($url, $strdownload, null, array('class' => 'button-download')),
                     array('style' => 'margin-top:5px'));
             }
@@ -409,13 +515,13 @@ class grade_table {
                                        && $this->is_emptygrade($user->{'grade'.$timing.'teacher'}))
             {
                 $str = $mobile ? va::str('takevideo') : va::str('uploadvideo');
-                $row[$s] = \html_writer::tag('div',
+                $row[$s + 1] = \html_writer::tag('div',
                     $OUTPUT->action_link(
                         new \moodle_url($this->va->viewurl, array('action' => 'upload', 'user' => $user->id, 'timing' => $timing)),
                         $str, null, array('class' => 'button-upload'))
                     );
             } else {
-                $row[$s] = get_string('novideo', 'videoassessment');
+                $row[$s + 1] = get_string('novideo', 'videoassessment');
             }
         }
 
@@ -428,16 +534,16 @@ class grade_table {
         if ($type) {
             switch ($type) {
                 case 'self':
-                    $linkcell = $s + 2;
-                    break;
-                case 'peer':
                     $linkcell = $s + 3;
                     break;
-                case 'teacher':
+                case 'peer':
                     $linkcell = $s + 4;
                     break;
+                case 'teacher':
+                    $linkcell = $s + 5;
+                    break;
                 case 'class':
-                    $linkcell = $s + 1;
+                    $linkcell = $s + 2;
                     break;
             }
 
