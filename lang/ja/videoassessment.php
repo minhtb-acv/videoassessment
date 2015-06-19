@@ -15,7 +15,7 @@ $string['managevideo'] = 'Manage videos';
 $string['class'] = 'Class';
 
 /* MinhTB VERSION 2 */
-$string['allparticipants'] = 'All participants';
+$string['allparticipants'] = 'すべての参加者';
 $string['assignclass'] = 'Assign class';
 $string['sortid'] = 'Sort by ID';
 $string['sortname'] = 'Sort by name';
