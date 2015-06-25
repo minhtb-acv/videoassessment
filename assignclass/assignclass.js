@@ -71,6 +71,7 @@ jQuery(function($) {
         var $url = $(this).closest('form').attr('action');
         var $id = $(this).closest('form').find('input[type="hidden"][name="id"]').val();
         var $groupid = $(this).val();
+    	M.core_formchangechecker.set_form_submitted();
         window.location.replace($url + '?id=' + $id + '&groupid=' + $groupid);
     });
 
