@@ -12,6 +12,10 @@ $course = $DB->get_record('course', array('id' => $cm->course));
 require_login($cm->course, true, $cm);
 $PAGE->set_url($url);
 $PAGE->set_heading($cm->name);
+/* MinhTB VERSION 2 */
+$PAGE->requires->jquery();
+/* END */
+
 $context = context_module::instance($cm->id);
 
 $va = new videoassess\va($context, $cm, $course);

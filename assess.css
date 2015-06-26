@@ -98,3 +98,7 @@
     height: auto;
     vertical-align: middle;
 }
+
+.assess-form-videos .mediaplugin.mediaplugin_flv {
+    margin: 0;
+}

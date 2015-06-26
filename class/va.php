@@ -994,7 +994,9 @@ class va {
         global $DB, $PAGE, $USER, $OUTPUT;
 
         $PAGE->requires->js_init_call('M.mod_videoassessment.assess_init', null, true, $this->jsmodule);
-
+        /* MinhTB VERSION 2 */
+        $PAGE->requires->js('/mod/videoassessment/assess.js');
+        /* END */
         $o = '';
 
         $user = $DB->get_record('user', array('id' => optional_param('userid', 0, PARAM_INT)));
