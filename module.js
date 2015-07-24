@@ -240,7 +240,9 @@ if (!M.mod_videoassessment) {
 
                     node.one("#heading-"+timing+"teacher").setStyle("display", "none");
 
-                    Y.Array.each(["self", "peer"], function(gradertype) {
+                    /* MinhTB VERSION 2 */
+                    Y.Array.each(["self", "peer", "class"], function(gradertype) {
+                    /* END */
                         node.one("#rubrics-"+timing+gradertype).all(".criterion").each(function(crit) {
                             var critname = crit.one(".description").getHTML();
                             var levelname = crit.one(".checked .definition").getHTML();

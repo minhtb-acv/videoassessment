@@ -110,10 +110,13 @@ class va {
                 'requires' => array('panel', 'dd-plugin', 'json-stringify')
         );
 
+        /* MinhTB VERSION 2*/
         $PAGE->requires->strings_for_js(array(
                 'liststudents', 'unassociated', 'associated', 'before', 'after', 'saveassociations',
-                'teacher', 'self', 'peer', 'reallyresetallpeers', 'reallydeletevideo'
+                'teacher', 'self', 'peer', 'class', 'reallyresetallpeers', 'reallydeletevideo'
         ), 'videoassessment');
+        /* END */
+
         $PAGE->requires->strings_for_js(array('all'), 'moodle');
 
         foreach ($this->timings as $timing) {
@@ -207,7 +210,7 @@ class va {
                 break;
         }
         $o .= $this->output->footer();
-
+        echo $o; die;
         return $o;
     }
 
