@@ -56,8 +56,16 @@
   min-height: 660px;
 }
 .path-mod-videoassessment .assess-form-videos{
-  float: left;
-  margin: 10px 50px 0 0;
+    float: left;
+    margin: 10px 2.9761% 0 0;
+    width: 23.8095%;
+}
+.path-mod-videoassessment .assess-form-videos object {
+    width: 100%!important;
+    display: block;
+}
+.path-mod-videoassessment form.gradingform {
+     width: 73.2144%;
 }
 .side-pre-only #page-content #region-post-box{
   margin-left:0 !important;
@@ -101,4 +109,18 @@
 
 .assess-form-videos .mediaplugin.mediaplugin_flv {
     margin: 0;
+}
+
+@media only screen and (max-width: 768px) {
+    .path-mod-videoassessment .assess-form-videos, .path-mod-videoassessment form.gradingform {
+        float: none!important;
+    }
+
+    .path-mod-videoassessment .assess-form-videos object {
+        width: 400px!important;
+    }
+
+    .assess-form-videos .video {
+        padding: 0!important;
+    }
 }
