@@ -2,7 +2,7 @@
 jQuery(function($) {
 
     $(window).scroll(function() {
-        var $video = $('.assess-form-videos .video');
+        var $video = $('.assess-form-videos > .video-wrap');
         var $video_top = $video.parent().offset().top;
         var $video_height = $video.height();
         var $form = $('.path-mod-videoassessment .gradingform');
@@ -14,6 +14,6 @@ jQuery(function($) {
         } else if ($(this).scrollTop() < ($video_top - 62)) {
             $video.css({'padding-top' : 0});
         }
-    });
+    })
 
 });

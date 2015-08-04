@@ -1089,7 +1089,7 @@ class va {
             $o .= \html_writer::start_tag('div', array('class' => 'assess-form-videos'));
             foreach ($this->timings as $timing) {
                 if ($video = $this->get_associated_video($user->id, $timing)) {
-                    $o .= \html_writer::start_tag('div');
+                    $o .= \html_writer::start_tag('div', array('class' => 'video-wrap'));
                     $o .= $this->output->render($video);
                     $o .= \html_writer::end_tag('div');
                 }
