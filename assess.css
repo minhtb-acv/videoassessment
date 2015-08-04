@@ -110,17 +110,3 @@
 .assess-form-videos .mediaplugin.mediaplugin_flv {
     margin: 0;
 }
-
-@media only screen and (max-width: 768px) {
-    .path-mod-videoassessment .assess-form-videos, .path-mod-videoassessment form.gradingform {
-        float: none!important;
-    }
-
-    .path-mod-videoassessment .assess-form-videos object {
-        width: 400px!important;
-    }
-
-    .assess-form-videos .video {
-        padding: 0!important;
-    }
-}
