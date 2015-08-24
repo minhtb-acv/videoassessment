@@ -252,13 +252,13 @@ class grade_table {
         foreach ($peers as $peer) {
             $user = $this->va->get_aggregated_grades($peer);
             $this->add_user_data($user);
-            if ($this->va->va->delayedteachergrade) {
-                $row = count($this->data) - 1;
-                if ($user->gradebeforeself == -1) {
-                    $this->data[$row][4] = $this->hiddengradetext;
-                    $this->data[$row][5] = $this->hiddengradetext;
-                }
-            }
+//            if ($this->va->va->delayedteachergrade) {
+//                $row = count($this->data) - 1;
+//                if ($user->gradebeforeself == -1) {
+//                    $this->data[$row][4] = $this->hiddengradetext;
+//                    $this->data[$row][5] = $this->hiddengradetext;
+//                }
+//            }
         }
 
         return $this->print_html();
