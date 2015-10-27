@@ -27,13 +27,19 @@ if (isset($_POST['sort']) && isset($_POST['id']) && isset($_POST['groupid'])) {
     if ($sort == assign_class::SORT_MANUALLY) {
         $students = $va->get_students_sort($groupid, true);
 
+        if (!empty($groupid)) {
+            $table = '{groups_members}';
+        } else {
+            $table = '{user_enrolments}';
+        }
+
         $i = 1;
         $html = '<ul id="manually-list">';
         foreach ($students as $k => $student) {
             $sql = "
-                UPDATE {user_enrolments} ue
-                SET ue.order = :order
-                WHERE ue.id = :id
+                UPDATE $table t
+                SET t.order = :order
+                WHERE t.id = :id
             ";
 
             $params = array(

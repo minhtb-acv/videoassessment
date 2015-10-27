@@ -383,7 +383,7 @@ class va {
                 $peernames[] = fullname($allusers[$peer])
                     .' '.$OUTPUT->action_icon($this->viewurl, $delicon);
             }
-            \collatorlib::asort($peernames);
+            \core_collator::asort($peernames);
             $peercell = implode(\html_writer::empty_tag('br'), $peernames);
 
             $opts = array();
@@ -595,7 +595,7 @@ class va {
                     . $OUTPUT->action_icon($assocdelurl, $disassocicon);
                 $user->assocvideos[] = (int)$v->id;
             }
-            \collatorlib::asort($assocusers);
+            \core_collator::asort($assocusers);
             $assoccell .= implode(\html_writer::empty_tag('br'), $assocusers);
             $assoccell .= \html_writer::empty_tag('br');
 //            $assoccell .= \html_writer::empty_tag('br')
