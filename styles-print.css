@@ -1,0 +1,90 @@
+@charset "UTF-8";
+
+#page-content { min-width: 0 }
+#page-header, #page-footer, .block_adminblock, .reportlink, #maincontent { display: none }
+#region-main, #region-post-box { margin: 0 !important }
+
+#content {
+    padding-top: 0 !important;
+}
+
+.pagebreak {
+    page-break-before: always;
+}
+
+#page-content h2 {
+    font-size: 150%;
+}
+
+#page-content h3 {
+    font-size: 130%;
+}
+
+#page-content h2, #page-content h3 {
+    line-height: 1.5;
+    margin: 5px 0;
+}
+
+.gradingform_rubric {
+    padding-bottom: 10px!important;
+}
+
+.finalgrade {
+    font-size: 120%!important;
+    margin: 10px 0!important;
+}
+
+/*
+@page {
+    size: A4;
+    margin: 0;
+}
+@media print {
+    html, body {
+        width: 210mm;
+        height: 297mm;
+    }
+    #page-content {
+        margin: 0;
+        border: initial;
+        border-radius: initial;
+        width: initial;
+        min-height: initial;
+        box-shadow: initial;
+        background: initial;
+        page-break-after: always;
+    }
+}
+*/
+.red {
+    color: #ff0000!important;
+}
+
+.blue {
+    color: #0000ff!important;
+}
+
+.green {
+    color: #40aa55!important;
+}
+
+.orange {
+    color: #ffa500!important;
+}
+
+.report-rubrics h4.main {
+    display: none!important;
+}
+
+.path-mod-videoassessment .report-rubrics .rubrictext-teacher {
+    color: green!important;
+}
+.path-mod-videoassessment .report-rubrics .rubrictext-self {
+    color: red!important;
+}
+.path-mod-videoassessment .report-rubrics .rubrictext-peer {
+    color: blue!important;
+}
+.path-mod-videoassessment .report-rubrics .rubrictext-class {
+    color: #ffa500!important;
+}

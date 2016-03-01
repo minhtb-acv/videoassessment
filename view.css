@@ -1,0 +1,37 @@
+@charset "UTF-8";
+
+.pagelayout-report #report-main-content .region-content table {
+    background:none;
+}
+
+.center {
+    text-align: center;
+}
+
+.gradetable {
+    width: 100%;
+}
+
+.red {
+    color: #ff0000!important;
+}
+
+.blue {
+    color: #0000ff!important;
+}
+
+.green {
+    color: #40aa55!important;
+}
+
+.orange {
+    color: #ffa500!important;
+}
+
+.report-rubrics h2.main {
+    display: none!important;
+}
+
+.name-sort i {
+    margin-left: 5px;
+}
