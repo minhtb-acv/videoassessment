@@ -191,3 +191,5 @@ $string['save'] = 'Save';
 $string['orderasc'] = 'Ascending';
 $string['orderdesc'] = 'Descending';
 $string['namesort'] = 'First name / Surname';
+$string['title'] = 'Title';
+$string['groupname'] = 'Group name';

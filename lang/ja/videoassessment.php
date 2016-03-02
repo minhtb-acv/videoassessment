@@ -26,3 +26,5 @@ $string['save'] = 'Save';
 $string['orderasc'] = '昇順';
 $string['orderdesc'] = '降順';
 $string['namesort'] = 'First name / Surname';
+$string['title'] = 'Title';
+$string['groupname'] = 'Group name';
