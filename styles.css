@@ -223,7 +223,7 @@
     margin-top: 0.5em;
 }
 .path-mod-videoassessment .gradingform_rubric .criterion .description {
-    width: auto;
+    /*width: auto;*/
 }
 
 /* ビデオ選択フォーム */

@@ -110,3 +110,23 @@
 .assess-form-videos .mediaplugin.mediaplugin_flv {
     margin: 0;
 }
+
+/**
+ * Le Xuan Anh Ver2
+ */
+#page-mod-videoassessment-view.assess-page #page.container-fluid {
+    max-width: none;
+}
+
+#page-mod-videoassessment-view.assess-page.path-mod-videoassessment #page.container-fluid .gradingform_rubric {
+    width: 100%;
+    max-width: none;
+}
+
+.remark {
+    text-align: center;
+}
+
+.remark textarea[cols] {
+    width: 90%;
+}
