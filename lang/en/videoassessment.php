@@ -193,3 +193,7 @@ $string['orderdesc'] = 'Descending';
 $string['namesort'] = 'First name / Surname';
 $string['title'] = 'Title';
 $string['groupname'] = 'Group name';
+$string['existingcourseornewcourse'] = 'Publish to an existing course<br /> or a new course';
+$string['insertintosection'] = 'Insert into section';
+$string['addprefixtolabel'] = 'Add prefix to label name';
+$string['addsuffixtolabel'] = 'Add suffix to label name';

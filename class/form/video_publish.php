@@ -30,25 +30,59 @@ class video_publish extends \moodleform {
 
         $courseopts = array();
         $categories = \coursecat::make_categories_list('moodle/course:create');
-        if (!empty($categories)) {
-            $courseopts[0] = '('.get_string('new').')';
-        }
-        $courses = \videoassess\va::get_courses_managed_by($USER->id);
-        array_walk($courses, function (\stdClass $a) use (&$courseopts) {
-            $courseopts[$a->id] = $a->fullname;
-        });
-        $mform->addElement('select', 'course', get_string('existingcourse', 'videoassessment'), $courseopts);
-        $mform->addHelpButton('course', 'existingcourse', 'videoassessment');
+        /* MinhTB VERSION 2 03-03-2016 */
 
+        $sectionopts = array();
+        $sectionopts[0] = '';
         if (!empty($categories)) {
-            $mform->addElement('static', 'courseor', get_string('or', 'videoassessment'));
-            $mform->addElement('select', 'category', get_string('category'), $categories);
-            $mform->addElement('text', 'fullname', get_string('fullnamecourse'), array('size' => 64));
+            //$mform->addElement('static', 'courseor', get_string('or', 'videoassessment'));
+            $mform->addElement('select', 'category', get_string('category'), $categories, array('id' => 'publish-category'));
+            if (!empty($categories)) {
+                $courseopts[0] = '('.get_string('new').')';
+            }
+            $courses = \videoassess\va::get_courses_managed_by($USER->id);
+            array_walk($courses, function (\stdClass $a) use (&$courseopts, &$sectionopts) {
+                $courseopts[$a->id] = $a->fullname;
+
+                $modinfo = get_fast_modinfo($a->id);
+                $sections = $modinfo->get_section_info_all();
+
+                foreach ($sections as $key => $section) {
+                    $sectionopts[$section->__get('id')] = get_section_name($a->id, $section->__get('section'));
+                }
+            });
+            $mform->addElement('select', 'course', get_string('existingcourseornewcourse', 'videoassessment'), $courseopts, array(
+                'style' => 'min-width: 100px',
+                'id' => 'publish-course'
+            ));
+            $mform->addHelpButton('course', 'existingcourse', 'videoassessment');
+            $mform->addElement('select', 'section', get_string('insertintosection', 'videoassessment'), $sectionopts, array(
+                'disabled' => 'disabled',
+                'style' => 'min-width: 100px',
+                'id' => 'publish-section'
+            ));
+            $mform->addElement('text', 'fullname', get_string('fullnamecourse'), array(
+                'size' => 64,
+                'id' => 'publish-fullname'
+            ));
             $mform->setType('fullname', PARAM_TEXT);
-            $mform->addElement('text', 'shortname', get_string('shortnamecourse'), array('size' => 64));
+            $mform->addElement('text', 'shortname', get_string('shortnamecourse'), array(
+                'size' => 64,
+                'id' => 'publish-shortname'
+            ));
             $mform->setType('shortname', PARAM_TEXT);
+            $mform->addElement('text', 'prefix', get_string('addprefixtolabel', 'videoassessment'), array(
+                'size' => 32,
+                'id' => 'publish-prefix'
+            ));
+            $mform->setType('prefix', PARAM_TEXT);
+            $mform->addElement('text', 'suffix', get_string('addsuffixtolabel', 'videoassessment'), array(
+                'size' => 32,
+                'id' => 'publish-suffix'
+            ));
+            $mform->setType('suffix', PARAM_TEXT);
         }
-
+        /* END MinhTB VERSION 2 03-03-2016 */
         ob_start();
         $table = new \flexible_table('video-publish');
         $table->set_attribute('class', 'generaltable');
