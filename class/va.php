@@ -182,7 +182,6 @@ class va {
 
         if ($action == 'assess') {
             $PAGE->blocks->show_only_fake_blocks();
-            $PAGE->add_body_class('assess-page'); //Le Xuan Anh Ver2 Add
             $PAGE->requires->css('/mod/videoassessment/assess.css');
         }
 
@@ -1477,10 +1476,12 @@ class va {
                 } else {
                     $agg->{'grade'.$gradingarea} = -1;
                 }
-                $this->update_grade_item(array(
-                        'userid' => $userid,
-                        'rawgrade' => $agg->{'grade'.$gradingarea}
-                        ), $gradingarea);
+                /* MinhTB VERSION 2 02-03-2016 */
+//                $this->update_grade_item(array(
+//                        'userid' => $userid,
+//                        'rawgrade' => $agg->{'grade'.$gradingarea}
+//                        ), $gradingarea);
+                /* END MinhTB VERSIOn 2 02-03-2016 */
             }
 
             $gradeself = ($agg->{'grade' . $timing . 'self'} < 0) ? 0 : $agg->{'grade' . $timing . 'self'};
@@ -1504,11 +1505,19 @@ class va {
             $agg->{'grade'.$timing} = (int)round($agg->{'grade'.$timing});
         }
 
+        /* MinhTB VERSION 2 02-03-2016 */
+        if (!empty($agg->gradebefore)) {
+            $rawgrade = $agg->gradebefore;
+        } else {
+            $rawgrade = 0;
+        }
+
         $this->update_grade_item(
                 array(
                     'userid' => $userid,
-                    'rawgrade' => 0
+                    'rawgrade' => $rawgrade
                 ));
+        /* END MinhTB VERSION 2 02-03-2016 */
 
         $agg->timemodified = time();
         $DB->update_record('videoassessment_aggregation', $agg);
@@ -1761,16 +1770,30 @@ class va {
     private function download_xls_report() {
         global $CFG, $DB;
 
+        /* MinhTB VERSION 2 02-03-2016 */
+        $groupid = groups_get_activity_group($this->cm, true);
+        $group = groups_get_group($groupid, 'name');
+
+        if (!empty($group)) {
+            $groupname = $group->name;
+        } else {
+            $groupname = get_string('allparticipants');
+        }
+
         $table = new table_export();
         $table->filename = $this->cm->name.'.xls';
         $fullnamestr = util::get_fullname_label();
-        $table->set(0, 0, get_string('idnumber'));
-        $table->set(0, 1, $fullnamestr);
+        $table->set(0, 0, va::str('title') . ': ' . $this->cm->name);
+        $table->set(0, 1, va::str('groupname') . ': ' . $groupname);
+        /* END MinhTB VERSION 2 02-03-2016 */
+
+        $table->set(1, 0, get_string('idnumber'));
+        $table->set(1, 1, $fullnamestr);
 //         $table->set(0, 2, va::str('beforeafter'));
-        $table->set(0, 2, va::str('teacherselfpeer'));
-        $table->set(0, 3, va::str('assessedby').' ('.get_string('idnumber').')');
-        $table->set(0, 4, va::str('assessedby').' ('.$fullnamestr.')');
-        $table->set(0, 5, va::str('total'));
+        $table->set(1, 2, va::str('teacherselfpeer'));
+        $table->set(1, 3, va::str('assessedby').' ('.get_string('idnumber').')');
+        $table->set(1, 4, va::str('assessedby').' ('.$fullnamestr.')');
+        $table->set(1, 5, va::str('total'));
         $fixedcolumns = 6;
 
         $rubric = new rubric($this);
@@ -1789,10 +1812,10 @@ class va {
         $headercriteria = array_flip($headercriteria);
 
         foreach ($headercriteria as $criterion => $index) {
-            $table->set(0, $index + $fixedcolumns, $criterion);
+            $table->set(1, $index + $fixedcolumns, $criterion);
         }
 
-        $users = $this->get_students('u.id, u.lastname, u.firstname, u.idnumber');
+        $users = $this->get_students('u.id, u.lastname, u.firstname, u.idnumber', $groupid);
         $timingstrs = array(
             'before' => $this->timing_str('before'),
             'after' => $this->timing_str('after')
@@ -1803,7 +1826,7 @@ class va {
             'peer' => self::str('peer'),
             'class' => self::str('class'),
         );
-        $row = 1;
+        $row = 2;
         foreach ($users as $user) {
             $fullname = fullname($user);
             foreach ($this->gradingareas as $gradingarea) {
