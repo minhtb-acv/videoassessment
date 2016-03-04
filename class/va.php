@@ -183,6 +183,7 @@ class va {
         if ($action == 'assess') {
             $PAGE->blocks->show_only_fake_blocks();
             $PAGE->requires->css('/mod/videoassessment/assess.css');
+            $PAGE->add_body_class('assess-page');
         }
 
         $o .= $this->output->header($this);
