@@ -8,8 +8,15 @@
     padding-top: 0 !important;
 }
 
+/* AnhLX Add */
 .pagebreak {
-    page-break-before: always;
+    /*page-break-before: always;*/
+    border-bottom: 1px solid rgba(17, 17, 17, 0.85);
+    padding-top: 15px;
+}
+
+.report-rubrics {
+    page-break-after: always;
 }
 
 #page-content h2 {
@@ -87,4 +94,10 @@
 }
 .path-mod-videoassessment .report-rubrics .rubrictext-class {
     color: #ffa500!important;
+}
+
+@media print {
+    .pagebreak {
+        border-bottom: 0;
+    }
 }
