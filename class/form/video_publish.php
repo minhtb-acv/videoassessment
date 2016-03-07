@@ -158,9 +158,18 @@ class video_publish extends \moodleform {
         	return $b->grade - $a->grade;
         });
 
+        /* MinhTB VERSION 2 07-03-2016 */
+        $videos = array_keys($this->_customdata->videos);
+
         foreach ($videorecs as $videorec) {
+            if (in_array($videorec->id, $videos)) {
+                $checked = true;
+            } else {
+                $checked = false;
+            }
+
             $table->add_data(array(
-                    \html_writer::checkbox('videos['.$videorec->id.']', 1, false, '',
+                    \html_writer::checkbox('videos['.$videorec->id.']', 1, $checked, '',
                     		array('class' => 'video-check')),
                     $videorec->link,
             		$videorec->originalname,
@@ -168,6 +177,7 @@ class video_publish extends \moodleform {
                     $videorec->gradecell
             ));
         }
+        /* END MinhTB VERSION 2 07-03-2016 */
 
         $table->finish_output();
         $o .= ob_get_contents();
