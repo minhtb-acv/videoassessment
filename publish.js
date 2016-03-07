@@ -57,4 +57,30 @@ jQuery(function($) {
         }
     });
 
+    $(document).on('change', '.video-check', function() {
+        var check = $(this).prop('checked');
+        var count = $('#video-count').val();
+
+        if (check) {
+            count++;
+        } else {
+            count--;
+        }
+
+        $('#video-count').val(count);
+    });
+
+    $(document).on('change', '#all-video-check', function() {
+        var check = $(this).prop('checked');
+        var count;
+
+        if (check) {
+            count = $('.video-check').size();
+        } else {
+            count = 0;
+        }
+
+        $('#video-count').val(count);
+    });
+
 });

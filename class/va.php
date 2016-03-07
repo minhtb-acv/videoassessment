@@ -1223,7 +1223,11 @@ class va {
 
         $o .= $OUTPUT->heading(self::str('publishvideostocourse'));
 
-        $form = new form\video_publish(null, (object)array('va' => $this));
+        /* MinhTB VERSION 2 07-03-2016 */
+        $videos = optional_param_array('videos', array(), PARAM_BOOL);
+
+        $form = new form\video_publish(null, (object)array('va' => $this, 'videos' => $videos));
+        /* END MinhTB VERSION 2 07-03-2016 */
 
         if ($form->is_cancelled()) {
             $this->view_redirect();

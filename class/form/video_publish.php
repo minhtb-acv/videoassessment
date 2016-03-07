@@ -81,6 +81,11 @@ class video_publish extends \moodleform {
                 'id' => 'publish-suffix'
             ));
             $mform->setType('suffix', PARAM_TEXT);
+            /* MinhTB VERSION 2 07-03-2016 */
+            $mform->addElement('hidden', 'video_count', 0, array('id' => 'video-count'));
+            $mform->setType('video_count', PARAM_INT);
+            /* END MinhTB VERSION 2 07-03-2016 */
+
         }
         /* END MinhTB VERSION 2 03-03-2016 */
         ob_start();
@@ -153,9 +158,18 @@ class video_publish extends \moodleform {
         	return $b->grade - $a->grade;
         });
 
+        /* MinhTB VERSION 2 07-03-2016 */
+        $videos = array_keys($this->_customdata->videos);
+
         foreach ($videorecs as $videorec) {
+            if (in_array($videorec->id, $videos)) {
+                $checked = true;
+            } else {
+                $checked = false;
+            }
+
             $table->add_data(array(
-                    \html_writer::checkbox('videos['.$videorec->id.']', 1, false, '',
+                    \html_writer::checkbox('videos['.$videorec->id.']', 1, $checked, '',
                     		array('class' => 'video-check')),
                     $videorec->link,
             		$videorec->originalname,
@@ -163,6 +177,7 @@ class video_publish extends \moodleform {
                     $videorec->gradecell
             ));
         }
+        /* END MinhTB VERSION 2 07-03-2016 */
 
         $table->finish_output();
         $o .= ob_get_contents();
@@ -181,10 +196,26 @@ class video_publish extends \moodleform {
      * @return array
      */
     public function validation($data, $files) {
+        global $DB;
+
         $errors = parent::validation($data, $files);
 
-        if (!$data['course'] && !$data['fullname']) {
-            $errors['fullname'] = va::str('inputnewcoursename');
+        if (!$data['course']) {
+            if (!$data['fullname']) {
+                $errors['fullname'] = va::str('inputnewcoursename');
+            }
+
+            if (!$data['shortname']) {
+                $errors['shortname'] = va::str('inputnewcourseshortname');
+            } else {
+                if ($DB->get_record('course', array('shortname' => $data['shortname']))) {
+                    $errors['shortname'] = va::str('courseshortnameexist');
+                }
+            }
+        }
+
+        if (!$data['video_count']) {
+            $errors['videos'] = va::str('pleasechoosevideos');
         }
 
         return $errors;
