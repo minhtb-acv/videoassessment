@@ -13,6 +13,10 @@ $string['pluginname'] = 'ビデオアセスメント';
 $string['grade'] = 'Grading';
 $string['managevideo'] = 'Manage videos';
 $string['class'] = 'Class';
+$string['open'] = 'Open Class Grading';
+$string['close'] = 'Close Class Grading';
+$string['classassessments'] = 'Class Assessments';
+$string['duplicaterubric'] = 'Duplicate Rubric';
 
 /* MinhTB VERSION 2 */
 $string['allparticipants'] = 'すべての参加者';

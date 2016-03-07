@@ -1138,6 +1138,8 @@ class va {
 
             $o .= $OUTPUT->heading($this->str('allscores'));
             $timinggrades = array();
+            $rubricTextClass = 0; //Le Xuan Anh Ver2
+            $nameRubricTextClass = ''; //Le Xuan Anh Ver2
             foreach ($this->gradertypes as $gradertype) {
                 if ($this->va->class && $gradertype == 'class' && !has_capability('mod/videoassessment:grade', $this->context)) {
                     continue;
@@ -1161,7 +1163,7 @@ class va {
                         }
                         $o .= $tmp;
 
-                        $timinggrades[] = \html_writer::tag('span', (int)$gradeitem->grade, array('class' => 'rubrictext-'.$gradertype));
+                        $timinggrades[] = \html_writer::tag('span', (int)$gradeitem->grade, array('class' => 'rubrictext-' . $gradertype));
 
                         // hide teacher feedback
                         if (!($gradertype == 'teacher' && $hideteacher->$timing)
@@ -1178,7 +1180,10 @@ class va {
                 }
                 $o .= \html_writer::end_tag('div');
             }
-            if ($timinggrades) {
+
+
+
+            if ($timinggrades || $rubricTextClass > 0) {
                 $timinggrades[] = \html_writer::tag('span', (int)$usergrades->{'grade'.$timing}, array('class' => 'rubrictext-total'));
                 $o .= $OUTPUT->container(get_string('grade').': '.implode(', ', $timinggrades), 'finalgrade');
             }
