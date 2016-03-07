@@ -81,6 +81,11 @@ class video_publish extends \moodleform {
                 'id' => 'publish-suffix'
             ));
             $mform->setType('suffix', PARAM_TEXT);
+            /* MinhTB VERSION 2 07-03-2016 */
+            $mform->addElement('hidden', 'video_count', 0, array('id' => 'video-count'));
+            $mform->setType('video_count', PARAM_INT);
+            /* END MinhTB VERSION 2 07-03-2016 */
+
         }
         /* END MinhTB VERSION 2 03-03-2016 */
         ob_start();
@@ -181,10 +186,26 @@ class video_publish extends \moodleform {
      * @return array
      */
     public function validation($data, $files) {
+        global $DB;
+
         $errors = parent::validation($data, $files);
 
-        if (!$data['course'] && !$data['fullname']) {
-            $errors['fullname'] = va::str('inputnewcoursename');
+        if (!$data['course']) {
+            if (!$data['fullname']) {
+                $errors['fullname'] = va::str('inputnewcoursename');
+            }
+
+            if (!$data['shortname']) {
+                $errors['shortname'] = va::str('inputnewcourseshortname');
+            } else {
+                if ($DB->get_record('course', array('shortname' => $data['shortname']))) {
+                    $errors['shortname'] = va::str('courseshortnameexist');
+                }
+            }
+        }
+
+        if (!$data['video_count']) {
+            $errors['videos'] = va::str('pleasechoosevideos');
         }
 
         return $errors;

@@ -32,3 +32,6 @@ $string['existingcourseornewcourse'] = 'Publish to an existing course<br /> or a
 $string['insertintosection'] = 'Insert into section';
 $string['addprefixtolabel'] = 'Add prefix to label name';
 $string['addsuffixtolabel'] = 'Add suffix to label name';
+$string['inputnewcourseshortname'] = 'Input a new course short name';
+$string['courseshortnameexist'] = 'Short name is already used for another course';
+$string['pleasechoosevideos'] = 'Please choose videos';
