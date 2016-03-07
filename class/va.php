@@ -1200,6 +1200,11 @@ class va {
     private function view_publish() {
         global $CFG, $OUTPUT, $PAGE, $DB, $USER;
         require_once $CFG->dirroot . '/mod/resource/lib.php';
+
+        /* MinhTB VERSION 2 03-03-2016 */
+        $PAGE->requires->js('/mod/videoassessment/publish.js');
+        /* END */
+
         if ($CFG->version < self::MOODLE_VERSION_23) {
             require_once $CFG->dirroot . '/mod/resource/locallib.php'; // resource_set_mainfile
         }
@@ -1268,7 +1273,7 @@ class va {
                 // モジュールオプション追加
                 $resource = new \stdClass();
                 $resource->course = $course->id;
-                $resource->name = $modulename;
+                $resource->name = $data->prefix . $modulename . $data->suffix;
                 $resource->display = 1;
                 $resource->timemodified = time();
                 $resource->coursemodule = $cm->id;
@@ -1280,7 +1285,11 @@ class va {
                 $DB->set_field('course_modules', 'instance', $resource->id, array('id' => $cm->id));
 
                 // コースセクションに追加
-                $sectionnum = 1;
+                if (!isset($data->section)) {
+                    $sectionnum = 1;
+                } else {
+                    $sectionnum = $DB->get_field('course_sections', 'section', array('id' => $data->section));
+                }
                 course_create_sections_if_missing($course, array($sectionnum));
 
                 $cm->coursemodule = $cm->id;
@@ -1786,8 +1795,6 @@ class va {
         $fullnamestr = util::get_fullname_label();
         $table->set(0, 0, va::str('title') . ': ' . $this->cm->name);
         $table->set(0, 1, va::str('groupname') . ': ' . $groupname);
-        /* END MinhTB VERSION 2 02-03-2016 */
-
         $table->set(1, 0, get_string('idnumber'));
         $table->set(1, 1, $fullnamestr);
 //         $table->set(0, 2, va::str('beforeafter'));
@@ -1828,6 +1835,7 @@ class va {
             'class' => self::str('class'),
         );
         $row = 2;
+		/* END MinhTB VERSION 2 02-03-2016 */
         foreach ($users as $user) {
             $fullname = fullname($user);
             foreach ($this->gradingareas as $gradingarea) {
@@ -2019,19 +2027,23 @@ class va {
      * @param int $userid
      * @return object[]
      */
-    public static function get_courses_managed_by($userid) {
+    /* MinhTB VERSION 2 03-03-2016 */
+    public static function get_courses_managed_by($userid, $catid = null) {
         global $CFG;
 
         $managerroles = explode(',', $CFG->coursecontact);
         $courses = array();
         foreach (\enrol_get_all_users_courses($userid) as $course) {
-            $ctx = \context_course::instance($course->id);
-            $rusers = \get_role_users($managerroles, $ctx, true, 'u.id');
-            if (isset($rusers[$userid]))
-                $courses[$course->id] = $course;
+            if (empty($catid) || $catid == $course->category) {
+                $ctx = \context_course::instance($course->id);
+                $rusers = \get_role_users($managerroles, $ctx, true, 'u.id');
+                if (isset($rusers[$userid]))
+                    $courses[$course->id] = $course;
+            }
         }
         return $courses;
     }
+    /* END MinhTB VERSION 2 03-03-2016 */
 
     public static function get_users($courseid) {
         global $DB;
