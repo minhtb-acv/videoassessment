@@ -183,7 +183,7 @@ class va {
         if ($action == 'assess') {
             $PAGE->blocks->show_only_fake_blocks();
             $PAGE->requires->css('/mod/videoassessment/assess.css');
-            $PAGE->add_body_class('assess-page');
+            $PAGE->add_body_class('assess-page'); //Le Xuan Anh Ver2
         }
 
         $o .= $this->output->header($this);

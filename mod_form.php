@@ -48,7 +48,7 @@ class mod_videoassessment_mod_form extends moodleform_mod {
         $mform->addElement('radio', 'class', null, get_string('close', 'videoassessment'), 0);
         $mform->setType('class', PARAM_INT);
         $mform->setDefault('class', 1);
-        
+
         if (empty($this->_instance)) {
             foreach (array('before', 'after') as $timing) {
                 foreach (array('teacher', 'self', 'peer', 'class') as $gradingtype) {
@@ -129,6 +129,14 @@ class mod_videoassessment_mod_form extends moodleform_mod {
                 $mform->addHelpButton('grade', 'modgrade', 'grades');
                 $mform->setDefault('grade', $CFG->gradepointdefault);
             }
+
+            /**
+             * @author Le Xuan Anh Ver2
+             */
+            $yesOrNo = array('No', 'Yes');
+            $mform->addElement('select', 'allowduplicate', get_string('CopyRubricFromTeacher', 'videoassessment'), $yesOrNo);
+            $mform->setDefault('allowduplicate', 1);
+            //--
 
             if ($this->_features->advancedgrading
                     and ! empty($this->current->_advancedgradingdata['methods'])

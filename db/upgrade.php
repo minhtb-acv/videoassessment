@@ -163,5 +163,25 @@ function xmldb_videoassessment_upgrade($oldversion = 0) {
         upgrade_mod_savepoint(true, 2015061702, 'videoassessment');
     }
 
+    /**
+     * @author Le Xuan Anh Ver2
+     *
+     * Add field duplicate to videoassessment table
+     */
+    if ($oldversion < 2016022902) {
+
+        // Define field allowstudentpeerselection to be added to videoassessment
+        $table = new xmldb_table('videoassessment');
+        $field = new xmldb_field('allowduplicate', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'allowstudentpeerselection');
+
+        // Conditionally launch add field allowstudentpeerselection
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // videoassessment savepoint reached
+        upgrade_mod_savepoint(true, 2016022902, 'videoassessment');
+    }
+
     return true;
 }
