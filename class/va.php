@@ -139,7 +139,6 @@ class va {
         $this->action = $action;
 
         $o = '';
-
         switch ($action) {
             case 'peeradd':
                 $this->view_peer_add();
@@ -182,12 +181,13 @@ class va {
             $PAGE->requires->css('/mod/videoassessment/view.css');
         }
 
-        if ($action == 'assess' || $action == 'assesstraining') {
+        if ($action == 'assess') {
             $PAGE->blocks->show_only_fake_blocks();
             $PAGE->requires->css('/mod/videoassessment/assess.css');
             $PAGE->add_body_class('assess-page'); //Le Xuan Anh Ver2
         }
 
+        /* MinhTB VERSION2 08-03-2016 */
         $o .= $this->output->header($this);
         switch ($action) {
             case 'upload':
@@ -208,10 +208,14 @@ class va {
             case 'publish':
                 $o .= $this->view_publish();
                 break;
+            case 'trainingresult':
+                $o .= $this->view_result();
+                break;
             default:
                 $o .= $this->view_main();
                 break;
         }
+        /* END MinhTB VERSION2 08-03-2016 */
         $o .= $this->output->footer();
         return $o;
     }
@@ -1096,7 +1100,13 @@ class va {
 
             $this->aggregate_grades($user->id);
 
-            $this->view_redirect();
+            /* MinhTB VERSION 2 08-03-2016 */
+            if ($gradertype == 'training' && !$this->is_teacher()) {
+                $this->view_redirect('trainingresult', array('userid' => $user->id));
+            } else {
+                $this->view_redirect();
+            }
+            /* END MinhTB VERSION 2 08-03-2016 */
         }
 
         $o .= \html_writer::start_tag('div', array('class' => 'clearfix'));
