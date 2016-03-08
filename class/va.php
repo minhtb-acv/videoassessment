@@ -74,7 +74,7 @@ class va {
      *
      * @var array
      */
-    public $gradertypes = array('self', 'peer', 'teacher', 'class');
+    public $gradertypes = array('self', 'peer', 'teacher', 'class', 'training');
     /**
      *
      * @var array
@@ -180,7 +180,7 @@ class va {
             $PAGE->requires->css('/mod/videoassessment/view.css');
         }
 
-        if ($action == 'assess') {
+        if ($action == 'assess' || $action == 'assesstraining') {
             $PAGE->blocks->show_only_fake_blocks();
             $PAGE->requires->css('/mod/videoassessment/assess.css');
             $PAGE->add_body_class('assess-page'); //Le Xuan Anh Ver2
@@ -211,7 +211,6 @@ class va {
                 break;
         }
         $o .= $this->output->footer();
-        echo $o; die;
         return $o;
     }
 
@@ -1006,8 +1005,9 @@ class va {
         $user = $DB->get_record('user', array('id' => optional_param('userid', 0, PARAM_INT)));
 
         $gradertype = optional_param('gradertype', '', PARAM_ALPHA);
-        if ($gradertype != 'class')
+        if ($gradertype != 'class' && $gradertype != 'training') {
             $gradertype = $this->get_grader_type($user->id);
+        }
 
         $mformdata = (object)array(
                 'va' => $this,
@@ -1018,7 +1018,7 @@ class va {
                 'gradertype' => $gradertype
         );
 
-        $gradingareas = array('before'.$gradertype);
+        $gradingareas = array('before' . $gradertype);
         if ($this->get_associated_video($user->id, 'after')) {
             $gradingareas[] = 'after'.$gradertype;
         }
@@ -1088,13 +1088,25 @@ class va {
         $o .= \html_writer::start_tag('div', array('class' => 'clearfix'));
         if ($gradertype != 'class') {
             $o .= \html_writer::start_tag('div', array('class' => 'assess-form-videos'));
-            foreach ($this->timings as $timing) {
-                if ($video = $this->get_associated_video($user->id, $timing)) {
-                    $o .= \html_writer::start_tag('div', array('class' => 'video-wrap'));
-                    $o .= $this->output->render($video);
-                    $o .= \html_writer::end_tag('div');
+            if ($gradertype == 'training') {
+                $data = $DB->get_record('videoassessment_videos', array('id' => $this->va->trainingvideoid));
+                if ($data) {
+                    if ($video = new video($this->context, $data)) {
+                        $o .= \html_writer::start_tag('div', array('class' => 'video-wrap'));
+                        $o .= $this->output->render($video);
+                        $o .= \html_writer::end_tag('div');
+                    }
+                }
+            } else {
+                foreach ($this->timings as $timing) {
+                    if ($video = $this->get_associated_video($user->id, $timing)) {
+                        $o .= \html_writer::start_tag('div', array('class' => 'video-wrap'));
+                        $o .= $this->output->render($video);
+                        $o .= \html_writer::end_tag('div');
+                    }
                 }
             }
+            
             $o .= \html_writer::end_tag('div');
         }
 

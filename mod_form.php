@@ -3,6 +3,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 require_once $CFG->dirroot . '/course/moodleform_mod.php';
+require_once $CFG->dirroot . '/mod/videoassessment/bulkupload/lib.php';
 
 use videoassess\va;
 
@@ -49,13 +50,13 @@ class mod_videoassessment_mod_form extends moodleform_mod {
         $mform->setType('class', PARAM_INT);
         $mform->setDefault('class', 1);
 
-        if (empty($this->_instance)) {
-            foreach (array('before', 'after') as $timing) {
-                foreach (array('teacher', 'self', 'peer', 'class') as $gradingtype) {
-                    $this->current->{'advancedgradingmethod_' . $timing . $gradingtype} = 'rubric';
-                }
+        /* MinhTB VERSION 2 07-03-2016 */
+        foreach (array('teacher', 'self', 'peer', 'class', 'training') as $gradingtype) {
+            if (empty($this->current->{'advancedgradingmethod_before' . $gradingtype})) {
+                $this->current->{'advancedgradingmethod_before' . $gradingtype} = 'rubric';
             }
         }
+        /* END MinhTB VERSION 2 07-03-2016 */
 
 //         $mform->addElement('text', 'beforelabel', get_string('yourwordforx', '', get_string('before', 'videoassessment')), array('maxlength' => 40));
 //         $mform->setType('beforelabel', PARAM_TEXT);
@@ -109,12 +110,57 @@ class mod_videoassessment_mod_form extends moodleform_mod {
 
         return $errors;
     }
+    
+    public function get_data() {
+        global $USER;
+    
+        $mform =& $this->_form;
+    
+        if (!$this->is_cancelled() and $this->is_submitted() and $this->is_validated()) {
+            $data = $mform->exportValues();
+            unset($data['sesskey']); // we do not need to return sesskey
+            unset($data['_qf__'.$this->_formname]);   // we do not need the submission marker too
+            if (empty($data)) {
+                return NULL;
+            } else {
+                if ($data['training'] && !empty($data['trainingvideo'])) {
+                    $fs = get_file_storage();
+                    $upload = new \videoassessment_bulkupload($data['coursemodule']);
+    
+                    $files = $fs->get_area_files(\context_user::instance($USER->id)->id, 'user', 'draft', $data['trainingvideo']);
+    
+                    if (!empty($files)) {
+                        foreach ($files as $file) {
+                            if ($file->get_filename() == '.') {
+                                continue;
+                            }
+    
+                            $upload->create_temp_dirs();
+                            $tmpname = $upload->get_temp_name($file->get_filename());
+                            $tmppath = $upload->get_tempdir().'/upload/'.$tmpname;
+                            $file->copy_content_to($tmppath);
+    
+                            $data['trainingvideoid'] = $upload->video_data_add($tmpname, $file->get_filename());
+    
+                            $upload->convert($tmpname);
+                        }
+                    }
+                }
+                
+                $data['trainingvideo'] = 0;
+    
+                return (object)$data;
+            }
+        } else {
+            return NULL;
+        }
+    }
 
     /**
      * @author Le Xuan Anh Version2
      */
     public function standard_grading_coursemodule_elements_to_grading() {
-        global $COURSE, $CFG;
+        global $COURSE, $CFG, $DB, $PAGE;
         $mform = & $this->_form;
 
         if ($this->_features->hasgrades) {
@@ -123,20 +169,40 @@ class mod_videoassessment_mod_form extends moodleform_mod {
                 $mform->addElement('header', 'modstandardgrade', get_string('grade', 'videoassessment'));
             }
 
+            /* MinhTB VERSION 2 07-03-2016 */
+            $mform->addElement('select', 'training', get_string('trainingpretest', 'videoassessment'), array(
+                '0' => get_string('no', 'videoassessment'),
+                '1' => get_string('yes', 'videoassessment')
+            ));
+            $mform->setDefault('training', 0);
+            /* END MinhTB VERSION 2 07-03-2016 */
+            
+            $mform->addElement('filemanager', 'trainingvideo',
+                get_string('trainingvideo', 'videoassessment'),
+                null,
+                array(
+                    'subdirs' => 0,
+                    'maxbytes' => $COURSE->maxbytes,
+                    'maxfiles' => 1,
+                    'accepted_types' => array('video', 'audio')
+                )
+            );
+            $mform->addElement('hidden', 'trainingvideoid');
+            $mform->setType('trainingvideoid', PARAM_INT);
+            
+            for ($i = 100; $i >= 0; $i--) {
+                $ratingopts[$i] = $i . '%';
+            }
+            $mform->addElement('select', 'accepteddifference', get_string('accepteddifference', 'videoassessment'), $ratingopts);
+            $mform->setDefault('accepteddifference', 20);
+            $mform->addHelpButton('accepteddifference', 'accepteddifference', 'videoassessment');
+
             //if supports grades and grades arent being handled via ratings
             if (!$this->_features->rating) {
                 $mform->addElement('modgrade', 'grade', get_string('grade'));
                 $mform->addHelpButton('grade', 'modgrade', 'grades');
                 $mform->setDefault('grade', $CFG->gradepointdefault);
             }
-
-            /**
-             * @author Le Xuan Anh Ver2
-             */
-            $yesOrNo = array('No', 'Yes');
-            $mform->addElement('select', 'allowduplicate', get_string('CopyRubricFromTeacher', 'videoassessment'), $yesOrNo);
-            $mform->setDefault('allowduplicate', 1);
-            //--
 
             if ($this->_features->advancedgrading
                     and ! empty($this->current->_advancedgradingdata['methods'])
@@ -165,6 +231,15 @@ class mod_videoassessment_mod_form extends moodleform_mod {
                 $mform->addElement('select', 'gradecat', get_string('gradecategoryonmodform', 'grades'), grade_get_categories_menu($COURSE->id, $this->_outcomesused));
                 $mform->addHelpButton('gradecat', 'gradecategoryonmodform', 'grades');
             }
+            
+            $module = array(
+                    'name' => 'mod_videoassessment',
+                    'fullpath' => '/mod/videoassessment/mod_form.js',
+                    'requires' => array('node', 'event'),
+                    'strings' => array(array('changetraingingwarning', 'mod_videoassessment'))
+            );
+            
+            $PAGE->requires->js_init_call('M.mod_videoassessment.init_training_change', null, false, $module);
         }
     }
 
@@ -238,5 +313,4 @@ class mod_videoassessment_mod_form extends moodleform_mod {
             /* End */
         }
     }
-
 }
