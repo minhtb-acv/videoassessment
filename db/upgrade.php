@@ -209,6 +209,20 @@ function xmldb_videoassessment_upgrade($oldversion = 0) {
         // videoassessment savepoint reached
         upgrade_mod_savepoint(true, 2016030702, 'videoassessment');
     }
+
+    if ($oldversion < 2016030703) {
+        // Define field gradebeforetraining to be added to videoassessment_aggregation
+        $table = new xmldb_table('videoassessment_aggregation');
+        $field = new xmldb_field('gradebeforetraining', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'gradebeforeclass');
+
+        // Conditionally launch add field gradebeforetraining
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // videoassessment savepoint reached
+        upgrade_mod_savepoint(true, 2016030703, 'videoassessment');
+    }
     
     if ($oldversion < 2016030803) {
         // Define field trainingvideoid to be added to videoassessment
@@ -227,7 +241,7 @@ function xmldb_videoassessment_upgrade($oldversion = 0) {
     if ($oldversion < 2016030804) {
         // Define field passtraining to be added to videoassessment_aggregation
         $table = new xmldb_table('videoassessment_aggregation');
-        $field = new xmldb_field('passtraining', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'gradebeforeclass');
+        $field = new xmldb_field('passtraining', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'gradebeforetraining');
 
         // Conditionally launch add field passtraining
         if (!$dbman->field_exists($table, $field)) {

@@ -372,16 +372,35 @@ class grade_table {
      */
     public function print_training_grade_table()
     {
-        global $DB, $USER;
+        global $DB, $USER, $OUTPUT;
 
         $this->domid = 'gradetabletraining';
 
         $user = $this->va->get_aggregated_grades($USER->id);
 
-        if ($user->gradebeforetraining === 1) {
-            $row[0] = va::str('passed');
+        $this->add_data(array('', '', ''));
+
+        $header = array();
+        $header[0] = va::str('namesort');
+        $header[1] = va::str('weighting');
+        $header[2] = '';
+
+        $this->add_data($header);
+
+        if (!isset($user->picture)) {
+            $tmp = $DB->get_record('user', array('id' => $user->userid), \user_picture::fields());
+            foreach (explode(',', \user_picture::fields()) as $field) {
+                $user->$field = $tmp->$field;
+            }
+        }
+
+        $row = array();
+        $row[0] = $OUTPUT->user_picture($user).' '.fullname($user);
+
+        if ($user->passtraining === 1) {
+            $row[2] = va::str('passed');
         } else {
-            $row[0] = va::str('failed');
+            $row[2] = va::str('failed');
         }
 
         if ($this->va->is_graded_by_current_user($user->id, 'beforetraining')) {
@@ -391,11 +410,13 @@ class grade_table {
         }
 
         $url = new \moodle_url($this->va->viewurl,
-            array('action' => 'assesstraining', 'userid' => $user->id));
+            array('action' => 'assess', 'userid' => $user->id, 'gradertype' => 'training'));
 
-        $row[0] = $OUTPUT->action_link($url,
+        $row[2] = $OUTPUT->action_link($url,
                 get_string($button, 'videoassessment'), null,
                 array('class' => 'button-'.$button)) . '<br />' . $row[0];
+
+        $this->add_data($row);
 
         return $this->print_html();
     }
@@ -520,7 +541,7 @@ class grade_table {
 
         if ($this->domid == 'gradetableteacher') {
             $n = 1;
-            $passed = $DB->get_field('videoassessment_aggregation', 'gradebeforetraining', array(
+            $passed = $DB->get_field('videoassessment_aggregation', 'passtraining', array(
                 'videoassessment' => $this->va->va->id,
                 'userid' => $user->id
             ));
@@ -643,7 +664,7 @@ class grade_table {
                 }
 
                 $url = new \moodle_url($this->va->viewurl,
-                    array('action' => 'assesstraining', 'userid' => $user->id));
+                    array('action' => 'assess', 'userid' => $user->id, 'gradertype' => 'training'));
 
                 $row[$s + $n + 1] = $OUTPUT->action_link($url,
                         get_string($button, 'videoassessment'), null,
