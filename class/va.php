@@ -74,7 +74,9 @@ class va {
      *
      * @var array
      */
+    /* MinhTB VERSION 2 08-03-2016 */
     public $gradertypes = array('self', 'peer', 'teacher', 'class', 'training');
+    /* END MinhTB VERSION 2 08-03-2016 */
     /**
      *
      * @var array
@@ -950,22 +952,33 @@ class va {
     /**
      * @return string
      */
+    /* MinhTB VERSION 2 08-03-2016 */
     private function view_main() {
-        global $OUTPUT, $PAGE;
+        global $OUTPUT, $PAGE, $DB, $USER;
 
         $o = '';
         $gradetable = new grade_table($this);
         if ($this->is_teacher()) {
             $o .= $gradetable->print_teacher_grade_table();
         } else {
-            if ($this->va->class) {
-                $o .= $this->output->heading(self::str('classassessments'));
-                $o .= $gradetable->print_class_grade_table();
+            $trainingPassed = $DB->get_field('videoassessment_aggregation', 'passtraining', array(
+                'videoassessment' => $this->va->id,
+                'userid' => $USER->id
+            ));
+
+            if ($trainingPassed === 1) {
+                if ($this->va->class) {
+                    $o .= $this->output->heading(self::str('classassessments'));
+                    $o .= $gradetable->print_class_grade_table();
+                }
+                $o .= $this->output->heading(self::str('selfassessments'));
+                $o .= $gradetable->print_self_grade_table();
+                $o .= $this->output->heading(self::str('peerassessments'));
+                $o .= $gradetable->print_peer_grade_table();
+            } else {
+                $o .= $this->output->heading(self::str('trainingpretest'));
+                $o .= $gradetable->print_training_grade_table();
             }
-            $o .= $this->output->heading(self::str('selfassessments'));
-            $o .= $gradetable->print_self_grade_table();
-            $o .= $this->output->heading(self::str('peerassessments'));
-            $o .= $gradetable->print_peer_grade_table();
         }
 
         $o .= \html_writer::tag('div', '', array('id' => 'videopreview'));
@@ -989,6 +1002,7 @@ class va {
 
         return $o;
     }
+    /* END MinhTB VERSION 2 08-03-2016 */
 
     /**
      * @return string

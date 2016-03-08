@@ -90,9 +90,11 @@
                 <FIELD NAME="gradebeforepeer" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false"
                        PREVIOUS="gradebeforeself" NEXT="gradebeforeclass"/>
                 <FIELD NAME="gradebeforeclass" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false"
-                       PREVIOUS="gradebeforepeer" NEXT="passtraining"/>
+                       PREVIOUS="gradebeforepeer" NEXT="gradebeforetraining"/>
+                <FIELD NAME="gradebeforetraining" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false"
+                       PREVIOUS="gradebeforeclass" NEXT="passtraining"/>
                 <FIELD NAME="passtraining" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false"
-                       PREVIOUS="gradebeforeclass" NEXT="gradeafterteacher"/>
+                       PREVIOUS="gradebeforetraining" NEXT="gradeafterteacher"/>
                 <FIELD NAME="gradeafterteacher" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false"
                        PREVIOUS="passtraining" NEXT="gradeafterself"/>
                 <FIELD NAME="gradeafterself" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false"
