@@ -200,9 +200,6 @@ class va {
             case 'assess':
                 $o .= $this->view_assess();
                 break;
-            case 'assesstraining':
-                $o .= $this->view_assess_training();
-                break;
             case 'report':
                 $o .= $this->view_report();
                 break;
@@ -1008,8 +1005,9 @@ class va {
         $user = $DB->get_record('user', array('id' => optional_param('userid', 0, PARAM_INT)));
 
         $gradertype = optional_param('gradertype', '', PARAM_ALPHA);
-        if ($gradertype != 'class')
+        if ($gradertype != 'class' && $gradertype != 'training') {
             $gradertype = $this->get_grader_type($user->id);
+        }
 
         $mformdata = (object)array(
                 'va' => $this,
@@ -1020,7 +1018,7 @@ class va {
                 'gradertype' => $gradertype
         );
 
-        $gradingareas = array('before'.$gradertype);
+        $gradingareas = array('before' . $gradertype);
         if ($this->get_associated_video($user->id, 'after')) {
             $gradingareas[] = 'after'.$gradertype;
         }
@@ -1090,13 +1088,25 @@ class va {
         $o .= \html_writer::start_tag('div', array('class' => 'clearfix'));
         if ($gradertype != 'class') {
             $o .= \html_writer::start_tag('div', array('class' => 'assess-form-videos'));
-            foreach ($this->timings as $timing) {
-                if ($video = $this->get_associated_video($user->id, $timing)) {
-                    $o .= \html_writer::start_tag('div', array('class' => 'video-wrap'));
-                    $o .= $this->output->render($video);
-                    $o .= \html_writer::end_tag('div');
+            if ($gradertype == 'training') {
+                $data = $DB->get_record('videoassessment_videos', array('id' => $this->va->trainingvideoid));
+                if ($data) {
+                    if ($video = new video($this->context, $data)) {
+                        $o .= \html_writer::start_tag('div', array('class' => 'video-wrap'));
+                        $o .= $this->output->render($video);
+                        $o .= \html_writer::end_tag('div');
+                    }
+                }
+            } else {
+                foreach ($this->timings as $timing) {
+                    if ($video = $this->get_associated_video($user->id, $timing)) {
+                        $o .= \html_writer::start_tag('div', array('class' => 'video-wrap'));
+                        $o .= $this->output->render($video);
+                        $o .= \html_writer::end_tag('div');
+                    }
                 }
             }
+            
             $o .= \html_writer::end_tag('div');
         }
 
@@ -1107,117 +1117,6 @@ class va {
 
         $o .= \html_writer::end_tag('div');
 
-        return $o;
-    }
-    
-    /**
-     * @return string
-     */
-    private function view_assess_training() {
-        global $DB, $PAGE, $USER, $OUTPUT;
-    
-        $PAGE->requires->js_init_call('M.mod_videoassessment.assess_init', null, true, $this->jsmodule);
-        /* MinhTB VERSION 2 */
-        $PAGE->requires->js('/mod/videoassessment/assess.js');
-        /* END */
-        $o = '';
-    
-        $user = $DB->get_record('user', array('id' => optional_param('userid', 0, PARAM_INT)));
-    
-        $gradertype = 'training';
-        $mformdata = (object)array(
-                'va' => $this,
-                'cm' => $this->cm,
-                'userid' => optional_param('userid', 0, PARAM_INT),
-                'user' => $user,
-                'gradingdisabled' => false,
-                'gradertype' => $gradertype,
-                'action' => 'accesstraining'
-        );
-    
-        $gradingareas = array('beforetraining');
-        $rubric = new rubric($this, $gradingareas);
-    
-        foreach ($this->timings as $timing) {
-            $gradingarea = $timing . $gradertype;
-            if ($controller = $rubric->get_available_controller($gradingarea)) {
-                $itemid = null;
-                $itemid = $this->get_grade_item($gradingarea, $user->id);
-                $mformdata->{'grade' . $timing} = $DB->get_record(self::TABLE_GRADES,
-                        array(
-                                'gradeitem' => $itemid
-                        ));
-                $instanceid = optional_param('advancedgradinginstanceid', 0, PARAM_INT);
-                if (!isset($mformdata->advancedgradinginstance)) {
-                    $mformdata->advancedgradinginstance = new \stdClass();
-                }
-                $mformdata->advancedgradinginstance->$timing = $controller->get_or_create_instance(
-                        $instanceid, $USER->id, $itemid);
-            }
-        }
-
-        $form = new form\assess('', $mformdata, 'post', '', array(
-                'class' => 'gradingform'
-        ));
-
-        if ($form->is_cancelled()) {
-            $this->view_redirect();
-        } else if ($data = $form->get_data($gradertype)) {
-            $gradinginstance = $form->use_advanced_grading();
-            foreach ($this->timings as $timing) {
-                if (!empty($gradinginstance->$timing)) {
-                    $gradingarea = $timing . 'training';
-                    $_POST['xgrade' . $timing] = $gradinginstance->$timing->submit_and_get_grade(
-                            $data->{'advancedgrading' . $timing},
-                            $this->get_grade_item($gradingarea, $data->userid));
-                }
-            }
-            $gradertype = 'training';
-            foreach ($this->timings as $timing) {
-                $gradingarea = $timing . $gradertype;
-                $itemid = $this->get_grade_item($gradingarea, $data->userid);
-    
-                if (!($grade = $DB->get_record('videoassessment_grades',
-                        array(
-                                'gradeitem' => $itemid
-                        )))) {
-                    $grade = new \stdClass();
-                    $grade->videoassessment = $this->instance;
-                    $grade->gradeitem = $itemid;
-                    $grade->id = $DB->insert_record('videoassessment_grades', $grade);
-                }
-                $grade->grade = $data->{'xgrade' . $timing};
-                if (isset($data->{'submissioncomment' . $timing})) {
-                    $grade->submissioncomment = $data->{'submissioncomment' . $timing};
-                }
-                $grade->timemarked = time();
-                $DB->update_record('videoassessment_grades', $grade);
-            }
-    
-            $this->aggregate_grades($user->id);
-    
-            $this->view_redirect();
-        }
-    
-        $o .= \html_writer::start_tag('div', array('class' => 'clearfix'));
-        $o .= \html_writer::start_tag('div', array('class' => 'assess-form-videos'));
-        $data = $DB->get_record('videoassessment_videos', array('id' => $this->va->trainingvideoid));
-        if ($data) {
-            if ($video = new video($this->context, $data)) {
-                $o .= \html_writer::start_tag('div', array('class' => 'video-wrap'));
-                $o .= $this->output->render($video);
-                $o .= \html_writer::end_tag('div');
-            }
-        }
-        $o .= \html_writer::end_tag('div');
-    
-        ob_start();
-        $form->display();
-        $o .= ob_get_contents();
-        ob_end_clean();
-    
-        $o .= \html_writer::end_tag('div');
-    
         return $o;
     }
 

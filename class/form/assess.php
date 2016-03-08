@@ -24,7 +24,7 @@ class assess extends \moodleform {
         $formattr['id'] = 'submitform';
         $mform->setAttributes($formattr);
         // hidden params
-        $mform->addElement('hidden', 'action', 'assesstraining');
+        $mform->addElement('hidden', 'action', 'assesst');
         $mform->setType('action', PARAM_ALPHA);
         $mform->addElement('hidden', 'userid', $data->userid);
         $mform->setType('userid', PARAM_INT);
