@@ -365,6 +365,41 @@ class grade_table {
     }
 
     /* MinhTB VERSION 2 08-03-2016 */
+    /**
+     * @author MinhTB VERSION 2
+     *
+     * get grade table for training pre-test
+     */
+    public function print_training_grade_table()
+    {
+        global $DB, $USER;
+
+        $this->domid = 'gradetabletraining';
+
+        $user = $this->va->get_aggregated_grades($USER->id);
+
+        if ($user->gradebeforetraining === 1) {
+            $row[0] = va::str('passed');
+        } else {
+            $row[0] = va::str('failed');
+        }
+
+        if ($this->va->is_graded_by_current_user($user->id, 'beforetraining')) {
+            $button = 'assessagain';
+        } else {
+            $button = 'firstassess';
+        }
+
+        $url = new \moodle_url($this->va->viewurl,
+            array('action' => 'assesstraining', 'userid' => $user->id));
+
+        $row[0] = $OUTPUT->action_link($url,
+                get_string($button, 'videoassessment'), null,
+                array('class' => 'button-'.$button)) . '<br />' . $row[0];
+
+        return $this->print_html();
+    }
+
     private function setup_header() {
         $this->data = array();
         $this->classes = array();
@@ -606,6 +641,9 @@ class grade_table {
                 } else {
                     $button = 'firstassess';
                 }
+
+                $url = new \moodle_url($this->va->viewurl,
+                    array('action' => 'assesstraining', 'userid' => $user->id));
 
                 $row[$s + $n + 1] = $OUTPUT->action_link($url,
                         get_string($button, 'videoassessment'), null,
