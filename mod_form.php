@@ -238,6 +238,12 @@ class mod_videoassessment_mod_form extends moodleform_mod {
             $assignClassText = get_string('assignclass', 'videoassessment');
             $mform->addElement('html', "<a class='managelink' href='$assignClassLink'>$assignClassText</a>");
             /* End */
+
+            /* Le Xuan Anh VERSION 2 */
+            $duplicateRubricLink = new moodle_url('/mod/videoassessment/rubric/duplicate.php', array('id' => $cm->id));
+            $duplicateRubricText = get_string('duplicaterubric', 'videoassessment');
+            $mform->addElement('html', "<a class='managelink' href='$duplicateRubricLink'>$duplicateRubricText</a>");
+            /* End */
         }
     }
 

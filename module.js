@@ -241,9 +241,19 @@ if (!M.mod_videoassessment) {
                     node.one("#heading-"+timing+"teacher").setStyle("display", "none");
 
                     /* MinhTB VERSION 2 */
+                    var classTextRubric = 0; // Le Xuan Anh Ver2
+                    var totalClassRubric = 0; // Le Xuan Anh Ver2
+                    var totalRubric = 0; // Le Xuan Anh Ver2
+                    var classInsert = ''; // Le Xuan Anh Ver2
+
+                    totalRubric = node.one("#rubrics-beforeself").all(".criterion").size() +
+                                  node.one("#rubrics-beforepeer").all(".criterion").size() +
+                                  node.one("#rubrics-beforeclass").all(".criterion").size(); // Le Xuan Anh Ver2
+
                     Y.Array.each(["self", "peer", "class"], function(gradertype) {
                     /* END */
                         node.one("#rubrics-"+timing+gradertype).all(".criterion").each(function(crit) {
+                            classTextRubric++; // Le Xuan Anh Ver2
                             var critname = crit.one(".description").getHTML();
                             var levelname = crit.one(".checked .definition").getHTML();
                             var remark = crit.one(".remark").getHTML();
@@ -262,8 +272,22 @@ if (!M.mod_videoassessment) {
                                         }
                                         if (level.one(".definition").getHTML() == levelname) {
                                             levelfound = true;
-                                            level.one(".level-wrapper").insert('<span class="inferiorlevelmarker rubrictext-'+gradertype+'">'
+
+                                            // Le Xuan Anh Ver2
+                                            if (gradertype == 'class') {
+                                                totalClassRubric++;
+                                                classInsert = '<span class="inferiorlevelmarker rubrictext-' + gradertype + '">'
+                                                    + M.str.videoassessment[gradertype] + '[' + totalClassRubric + ']</span>';
+                                            } else {
+                                                level.one(".level-wrapper").insert('<span class="inferiorlevelmarker rubrictext-'+gradertype+'">'
                                                     +M.str.videoassessment[gradertype]+'</span>');
+                                            }
+
+                                            if (classTextRubric == totalRubric) {
+                                                level.one(".level-wrapper").insert(classInsert);
+                                            }
+                                            // End
+
                                         }
                                     });
                                     tcrit.one(".remark").insert('<div class="rubrictext-'+gradertype+'">'+remark+'</span>');
