@@ -1009,7 +1009,7 @@ class va {
      */
     private function view_assess() {
         global $DB, $PAGE, $USER, $OUTPUT;
-
+        
         $PAGE->requires->js_init_call('M.mod_videoassessment.assess_init', null, true, $this->jsmodule);
         /* MinhTB VERSION 2 */
         $PAGE->requires->js('/mod/videoassessment/assess.js');
@@ -1104,7 +1104,7 @@ class va {
             $o .= \html_writer::start_tag('div', array('class' => 'assess-form-videos'));
             if ($gradertype == 'training') {
                 $data = $DB->get_record('videoassessment_videos', array('id' => $this->va->trainingvideoid));
-                if ($data) {
+                if (!empty($data)) {
                     if ($video = new video($this->context, $data)) {
                         $o .= \html_writer::start_tag('div', array('class' => 'video-wrap'));
                         $o .= $this->output->render($video);

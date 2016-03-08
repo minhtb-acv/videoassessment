@@ -3,7 +3,6 @@
 defined('MOODLE_INTERNAL') || die();
 
 require_once $CFG->dirroot . '/course/moodleform_mod.php';
-require_once $CFG->dirroot . '/mod/videoassessment/bulkupload/lib.php';
 
 use videoassess\va;
 
@@ -111,51 +110,6 @@ class mod_videoassessment_mod_form extends moodleform_mod {
         return $errors;
     }
     
-    public function get_data() {
-        global $USER;
-    
-        $mform =& $this->_form;
-    
-        if (!$this->is_cancelled() and $this->is_submitted() and $this->is_validated()) {
-            $data = $mform->exportValues();
-            unset($data['sesskey']); // we do not need to return sesskey
-            unset($data['_qf__'.$this->_formname]);   // we do not need the submission marker too
-            if (empty($data)) {
-                return NULL;
-            } else {
-                if ($data['training'] && !empty($data['trainingvideo'])) {
-                    $fs = get_file_storage();
-                    $upload = new \videoassessment_bulkupload($data['coursemodule']);
-    
-                    $files = $fs->get_area_files(\context_user::instance($USER->id)->id, 'user', 'draft', $data['trainingvideo']);
-    
-                    if (!empty($files)) {
-                        foreach ($files as $file) {
-                            if ($file->get_filename() == '.') {
-                                continue;
-                            }
-    
-                            $upload->create_temp_dirs();
-                            $tmpname = $upload->get_temp_name($file->get_filename());
-                            $tmppath = $upload->get_tempdir().'/upload/'.$tmpname;
-                            $file->copy_content_to($tmppath);
-    
-                            $data['trainingvideoid'] = $upload->video_data_add($tmpname, $file->get_filename());
-    
-                            $upload->convert($tmpname);
-                        }
-                    }
-                }
-                
-                $data['trainingvideo'] = 0;
-    
-                return (object)$data;
-            }
-        } else {
-            return NULL;
-        }
-    }
-
     /**
      * @author Le Xuan Anh Version2
      */
