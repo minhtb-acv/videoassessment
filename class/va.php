@@ -74,7 +74,7 @@ class va {
      *
      * @var array
      */
-    public $gradertypes = array('self', 'peer', 'teacher', 'class');
+    public $gradertypes = array('self', 'peer', 'teacher', 'class', 'training');
     /**
      *
      * @var array
@@ -211,7 +211,6 @@ class va {
                 break;
         }
         $o .= $this->output->footer();
-        echo $o; die;
         return $o;
     }
 
