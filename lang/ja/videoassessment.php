@@ -17,6 +17,8 @@ $string['open'] = 'Open Class Grading';
 $string['close'] = 'Close Class Grading';
 $string['classassessments'] = 'Class Assessments';
 $string['duplicaterubric'] = 'Duplicate Rubric';
+$string['duplicatesuccess'] = 'Duplicate Success';
+$string['duplicateerrors'] = 'Duplicate Errors';
 
 /* MinhTB VERSION 2 */
 $string['allparticipants'] = 'すべての参加者';

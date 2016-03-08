@@ -277,7 +277,7 @@ if (!M.mod_videoassessment) {
                                             if (gradertype == 'class') {
                                                 totalClassRubric++;
                                                 classInsert = '<span class="inferiorlevelmarker rubrictext-' + gradertype + '">'
-                                                    + M.str.videoassessment[gradertype] + '[' + totalClassRubric + ']</span>';
+                                                    + M.str.videoassessment[gradertype] + '(' + totalClassRubric + ')</span>';
                                             } else {
                                                 level.one(".level-wrapper").insert('<span class="inferiorlevelmarker rubrictext-'+gradertype+'">'
                                                     +M.str.videoassessment[gradertype]+'</span>');
