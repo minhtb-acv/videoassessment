@@ -223,6 +223,22 @@ function xmldb_videoassessment_upgrade($oldversion = 0) {
         // videoassessment savepoint reached
         upgrade_mod_savepoint(true, 2016030703, 'videoassessment');
     }
+    
+    if ($oldversion < 2016030803) {
+        // Define field trainingvideoid to be added to videoassessment
+        $table = new xmldb_table('videoassessment');
+        $field = new xmldb_field('trainingvideoid', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'trainingvideo');
+    
+        // Conditionally launch add field trainingvideoid
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+    
+        // videoassessment savepoint reached
+        upgrade_mod_savepoint(true, 2016030803, 'videoassessment');
+    }
+    
+    
 
     return true;
 }

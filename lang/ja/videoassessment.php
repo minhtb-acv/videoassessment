@@ -42,3 +42,8 @@ $string['pleasechoosevideos'] = 'Please choose videos';
 $string['trainingpretest'] = 'Training Pre-test';
 $string['no'] = 'No';
 $string['yes'] = 'Yes';
+
+/* TienNV VERSION 2 */
+$string['trainingvideo'] = 'Training video';
+$string['accepteddifference'] = 'Accepted difference in scores';
+$string['accepteddifference_help'] = 'Accepted difference in scores. Default 20%.';
