@@ -213,7 +213,7 @@ function xmldb_videoassessment_upgrade($oldversion = 0) {
     if ($oldversion < 2016030703) {
         // Define field gradebeforetraining to be added to videoassessment_aggregation
         $table = new xmldb_table('videoassessment_aggregation');
-        $field = new xmldb_field('gradebeforetraining', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '-1', 'gradebeforeclass');
+        $field = new xmldb_field('gradebeforetraining', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'gradebeforeclass');
 
         // Conditionally launch add field gradebeforetraining
         if (!$dbman->field_exists($table, $field)) {

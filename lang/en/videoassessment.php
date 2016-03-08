@@ -204,6 +204,9 @@ $string['pleasechoosevideos'] = 'Please choose videos';
 $string['trainingpretest'] = 'Training Pre-test';
 $string['no'] = 'No';
 $string['yes'] = 'Yes';
+$string['passed'] = 'Passed';
+$string['failed'] = 'Failed';
+$string['training'] = 'Training';
 
 /* TienNV VERSION 2 */
 $string['trainingvideo'] = 'Training video';
