@@ -19,9 +19,15 @@
                 <FIELD NAME="timedue" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"
                        PREVIOUS="maxbytes" NEXT="timeavailable"/>
                 <FIELD NAME="timeavailable" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"
-                       PREVIOUS="timedue" NEXT="grade"/>
+                       PREVIOUS="timedue" NEXT="training"/>
+                <FIELD NAME="training" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"
+                       PREVIOUS="timeavailable" NEXT="trainingvideo"/>
+                <FIELD NAME="trainingvideo" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"
+                       PREVIOUS="training" NEXT="accepteddifference"/>
+                <FIELD NAME="accepteddifference" TYPE="int" LENGTH="3" NOTNULL="false" SEQUENCE="false"
+                       PREVIOUS="trainingvideo" NEXT="grade"/>
                 <FIELD NAME="grade" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"
-                       PREVIOUS="timeavailable" NEXT="timemodified"/>
+                       PREVIOUS="accepteddifference" NEXT="timemodified"/>
                 <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"
                        PREVIOUS="grade" NEXT="ratingteacher"/>
                 <FIELD NAME="ratingteacher" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"
@@ -45,9 +51,7 @@
                 <FIELD NAME="allowstudentupload" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"
                        PREVIOUS="delayedteachergrade" NEXT="allowstudentpeerselection"/>
                 <FIELD NAME="allowstudentpeerselection" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"
-                       SEQUENCE="false" PREVIOUS="allowstudentupload" NEXT="allowduplicate"/>
-                <FIELD NAME="allowduplicate" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1"
-                       SEQUENCE="false" PREVIOUS="allowstudentpeerselection" NEXT="sort"/>
+                       SEQUENCE="false" PREVIOUS="allowstudentupload" NEXT="sort"/>
                 <FIELD NAME="sort" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"
                        PREVIOUS="allowstudentpeerselection" NEXT="order"/>
                 <FIELD NAME="order" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="sort"/>
@@ -84,9 +88,11 @@
                 <FIELD NAME="gradebeforepeer" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false"
                        PREVIOUS="gradebeforeself" NEXT="gradebeforeclass"/>
                 <FIELD NAME="gradebeforeclass" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false"
-                       PREVIOUS="gradebeforepeer" NEXT="gradeafterteacher"/>
+                       PREVIOUS="gradebeforepeer" NEXT="gradebeforetraining"/>
+                <FIELD NAME="gradebeforetraining" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false"
+                       PREVIOUS="gradebeforeclass" NEXT="gradeafterteacher"/>
                 <FIELD NAME="gradeafterteacher" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false"
-                       PREVIOUS="gradebeforepeer" NEXT="gradeafterself"/>
+                       PREVIOUS="gradebeforetraining" NEXT="gradeafterself"/>
                 <FIELD NAME="gradeafterself" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false"
                        PREVIOUS="gradeafterteacher" NEXT="gradeafterpeer"/>
                 <FIELD NAME="gradeafterpeer" TYPE="int" LENGTH="11" NOTNULL="true" DEFAULT="0" SEQUENCE="false"

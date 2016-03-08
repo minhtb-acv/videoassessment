@@ -49,13 +49,13 @@ class mod_videoassessment_mod_form extends moodleform_mod {
         $mform->setType('class', PARAM_INT);
         $mform->setDefault('class', 1);
 
-        if (empty($this->_instance)) {
-            foreach (array('before', 'after') as $timing) {
-                foreach (array('teacher', 'self', 'peer', 'class') as $gradingtype) {
-                    $this->current->{'advancedgradingmethod_' . $timing . $gradingtype} = 'rubric';
-                }
+        /* MinhTB VERSION 2 07-03-2016 */
+        foreach (array('teacher', 'self', 'peer', 'class', 'training') as $gradingtype) {
+            if (empty($this->current->{'advancedgradingmethod_before' . $gradingtype})) {
+                $this->current->{'advancedgradingmethod_before' . $gradingtype} = 'rubric';
             }
         }
+        /* END MinhTB VERSION 2 07-03-2016 */
 
 //         $mform->addElement('text', 'beforelabel', get_string('yourwordforx', '', get_string('before', 'videoassessment')), array('maxlength' => 40));
 //         $mform->setType('beforelabel', PARAM_TEXT);
@@ -122,6 +122,14 @@ class mod_videoassessment_mod_form extends moodleform_mod {
             if (!$this->_features->rating || $this->_features->gradecat) {
                 $mform->addElement('header', 'modstandardgrade', get_string('grade', 'videoassessment'));
             }
+
+            /* MinhTB VERSION 2 07-03-2016 */
+            $mform->addElement('select', 'training', get_string('trainingpretest', 'videoassessment'), array(
+                '0' => get_string('no', 'videoassessment'),
+                '1' => get_string('yes', 'videoassessment')
+            ));
+            $mform->setDefault('training', 0);
+            /* END MinhTB VERSION 2 07-03-2016 */
 
             //if supports grades and grades arent being handled via ratings
             if (!$this->_features->rating) {

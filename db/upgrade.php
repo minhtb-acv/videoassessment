@@ -164,23 +164,64 @@ function xmldb_videoassessment_upgrade($oldversion = 0) {
     }
 
     /**
-     * @author Le Xuan Anh Ver2
+     * @author MinhTB VERSION 2
      *
-     * Add field duplicate to videoassessment table
+     * Add training field to videoassessment table
      */
-    if ($oldversion < 2016022902) {
-
-        // Define field allowstudentpeerselection to be added to videoassessment
+    if ($oldversion < 2016030701) {
+        // Define field traning to be added to videoassessment
         $table = new xmldb_table('videoassessment');
-        $field = new xmldb_field('allowduplicate', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'allowstudentpeerselection');
+        $field = new xmldb_field('training', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'timeavailable');
 
-        // Conditionally launch add field allowstudentpeerselection
+        // Conditionally launch add field traning
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
 
         // videoassessment savepoint reached
-        upgrade_mod_savepoint(true, 2016022902, 'videoassessment');
+        upgrade_mod_savepoint(true, 2016030701, 'videoassessment');
+    }
+
+    /**
+     * @author MinhTB VERSION 2
+     *
+     * Add trainingvideo, accepteddifference fields to videoassessment table
+     */
+    if ($oldversion < 2016030702) {
+        // Define field traningvideo to be added to videoassessment
+        $table = new xmldb_table('videoassessment');
+        $field = new xmldb_field('trainingvideo', XMLDB_TYPE_CHAR, '255', null, null, null, null, 'training');
+
+        // Conditionally launch add field traningvideo
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field accepteddifference to be added to videoassessment
+        $table = new xmldb_table('videoassessment');
+        $field = new xmldb_field('accepteddifference', XMLDB_TYPE_INTEGER, '3', null, null, null, null, 'trainingvideo');
+
+        // Conditionally launch add field accepteddifference
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // videoassessment savepoint reached
+        upgrade_mod_savepoint(true, 2016030702, 'videoassessment');
+    }
+
+    if ($oldversion < 2016030703) {
+        // Define field gradebeforetraining to be added to videoassessment_aggregation
+        $table = new xmldb_table('videoassessment_aggregation');
+        $field = new xmldb_field('gradebeforetraining', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '-1', 'gradebeforeclass');
+
+        // Conditionally launch add field gradebeforetraining
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // videoassessment savepoint reached
+        upgrade_mod_savepoint(true, 2016030703, 'videoassessment');
     }
 
     return true;
