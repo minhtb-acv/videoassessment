@@ -138,8 +138,6 @@ class va {
 
         $this->action = $action;
         
-        $this->videoassessment_convert_video($this->va);
-
         $o = '';
         switch ($action) {
             case 'peeradd':
@@ -2256,38 +2254,4 @@ class va {
         return $peerids;
     }
     /* End */
-    
-    public function videoassessment_convert_video($va) {
-        global $CFG, $DB, $USER;
-    
-        require_once $CFG->dirroot . '/mod/videoassessment/bulkupload/lib.php';
-    
-        if ($va->training && !empty($va->trainingvideo)) {
-            $fs = get_file_storage();
-            $cm = get_coursemodule_from_instance('videoassessment', $va->id, 0, false, MUST_EXIST);
-            $upload = new \videoassessment_bulkupload($cm->id);
-    
-            $files = $fs->get_area_files(\context_user::instance($USER->id)->id, 'user', 'draft', $va->trainingvideo);
-    
-            if (!empty($files)) {
-                foreach ($files as $file) {
-                    if ($file->get_filename() == '.') {
-                        continue;
-                    }
-    
-                    $upload->create_temp_dirs();
-                    $tmpname = $upload->get_temp_name($file->get_filename());
-                    $tmppath = $upload->get_tempdir().'/upload/'.$tmpname;
-                    $file->copy_content_to($tmppath);
-    
-                    $va->trainingvideoid = $upload->video_data_add($tmpname, $file->get_filename());
-                    $va->trainingvideo = 0;
-    
-                    $upload->convert($tmpname);
-                    $DB->execute("UPDATE {videoassessment} SET trainingvideoid = ?, trainingvideo = 0 WHERE id = ?", 
-                            array($va->trainingvideoid, $va->id));
-                }
-            }
-        }
-    }
 }
