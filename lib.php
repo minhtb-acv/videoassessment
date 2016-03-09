@@ -13,7 +13,7 @@ function videoassessment_add_instance($va, $form) {
     global $DB;
 
     $va->id = $DB->insert_record('videoassessment', $va);
-
+    
     return $va->id;
 }
 

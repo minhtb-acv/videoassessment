@@ -103,7 +103,7 @@ class va {
 
         $this->output = $PAGE->get_renderer('mod_videoassessment');
         $this->output->va = $this;
-
+        
         $this->viewurl = new \moodle_url('/mod/videoassessment/view.php', array('id' => $this->cm->id));
 
         $this->jsmodule = array(
@@ -137,9 +137,10 @@ class va {
         global $PAGE;
 
         $this->action = $action;
+        
+        $this->videoassessment_convert_video($this->va);
 
         $o = '';
-
         switch ($action) {
             case 'peeradd':
                 $this->view_peer_add();
@@ -182,12 +183,13 @@ class va {
             $PAGE->requires->css('/mod/videoassessment/view.css');
         }
 
-        if ($action == 'assess' || $action == 'assesstraining') {
+        if ($action == 'assess') {
             $PAGE->blocks->show_only_fake_blocks();
             $PAGE->requires->css('/mod/videoassessment/assess.css');
             $PAGE->add_body_class('assess-page'); //Le Xuan Anh Ver2
         }
 
+        /* MinhTB VERSION2 08-03-2016 */
         $o .= $this->output->header($this);
         switch ($action) {
             case 'upload':
@@ -208,10 +210,14 @@ class va {
             case 'publish':
                 $o .= $this->view_publish();
                 break;
+            case 'trainingresult':
+                $o .= $this->view_result();
+                break;
             default:
                 $o .= $this->view_main();
                 break;
         }
+        /* END MinhTB VERSION2 08-03-2016 */
         $o .= $this->output->footer();
         return $o;
     }
@@ -1009,7 +1015,7 @@ class va {
      */
     private function view_assess() {
         global $DB, $PAGE, $USER, $OUTPUT;
-
+        
         $PAGE->requires->js_init_call('M.mod_videoassessment.assess_init', null, true, $this->jsmodule);
         /* MinhTB VERSION 2 */
         $PAGE->requires->js('/mod/videoassessment/assess.js');
@@ -1096,7 +1102,13 @@ class va {
 
             $this->aggregate_grades($user->id);
 
-            $this->view_redirect();
+            /* MinhTB VERSION 2 08-03-2016 */
+            if ($gradertype == 'training' && !$this->is_teacher()) {
+                $this->view_redirect('trainingresult', array('userid' => $user->id));
+            } else {
+                $this->view_redirect();
+            }
+            /* END MinhTB VERSION 2 08-03-2016 */
         }
 
         $o .= \html_writer::start_tag('div', array('class' => 'clearfix'));
@@ -1104,7 +1116,7 @@ class va {
             $o .= \html_writer::start_tag('div', array('class' => 'assess-form-videos'));
             if ($gradertype == 'training') {
                 $data = $DB->get_record('videoassessment_videos', array('id' => $this->va->trainingvideoid));
-                if ($data) {
+                if (!empty($data)) {
                     if ($video = new video($this->context, $data)) {
                         $o .= \html_writer::start_tag('div', array('class' => 'video-wrap'));
                         $o .= $this->output->render($video);
@@ -2244,4 +2256,38 @@ class va {
         return $peerids;
     }
     /* End */
+    
+    public function videoassessment_convert_video($va) {
+        global $CFG, $DB, $USER;
+    
+        require_once $CFG->dirroot . '/mod/videoassessment/bulkupload/lib.php';
+    
+        if ($va->training && !empty($va->trainingvideo)) {
+            $fs = get_file_storage();
+            $cm = get_coursemodule_from_instance('videoassessment', $va->id, 0, false, MUST_EXIST);
+            $upload = new \videoassessment_bulkupload($cm->id);
+    
+            $files = $fs->get_area_files(\context_user::instance($USER->id)->id, 'user', 'draft', $va->trainingvideo);
+    
+            if (!empty($files)) {
+                foreach ($files as $file) {
+                    if ($file->get_filename() == '.') {
+                        continue;
+                    }
+    
+                    $upload->create_temp_dirs();
+                    $tmpname = $upload->get_temp_name($file->get_filename());
+                    $tmppath = $upload->get_tempdir().'/upload/'.$tmpname;
+                    $file->copy_content_to($tmppath);
+    
+                    $va->trainingvideoid = $upload->video_data_add($tmpname, $file->get_filename());
+                    $va->trainingvideo = 0;
+    
+                    $upload->convert($tmpname);
+                    $DB->execute("UPDATE {videoassessment} SET trainingvideoid = ?, trainingvideo = 0 WHERE id = ?", 
+                            array($va->trainingvideoid, $va->id));
+                }
+            }
+        }
+    }
 }

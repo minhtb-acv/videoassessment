@@ -396,6 +396,16 @@ class grade_table {
 
         $row = array();
         $row[0] = $OUTPUT->user_picture($user).' '.fullname($user);
+        $row[1] = '';
+
+        $data = $DB->get_record('videoassessment_videos', array('id' => $this->va->va->trainingvideoid));
+        if ($data) {
+            if ($video = new video($this->va->context, $data)) {
+                $row[1] .= \html_writer::start_tag('div', array('class' => 'video-wrap'));
+                $row[1] .= $this->va->output->render($video);
+                $row[1] .= \html_writer::end_tag('div');
+            }
+        }
 
         if ($user->passtraining === 1) {
             $row[2] = va::str('passed');
