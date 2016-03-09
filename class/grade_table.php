@@ -441,7 +441,7 @@ class grade_table {
         $timing = 'before';
         $s = $this->startcolumns[$timing];
 
-        if ($this->domid == 'gradetableteacher') {
+        if ($this->domid == 'gradetableteacher' && $this->va->va->training) {
             $n = 1;
             $row1[$s + $n + 1] = get_string('training', 'videoassessment');
         } else {
@@ -550,16 +550,20 @@ class grade_table {
         $s = $this->startcolumns[$timing];
 
         if ($this->domid == 'gradetableteacher') {
-            $n = 1;
-            $passed = $DB->get_field('videoassessment_aggregation', 'passtraining', array(
-                'videoassessment' => $this->va->va->id,
-                'userid' => $user->id
-            ));
-
-            if ($passed === 1) {
-                $row[$s + $n + 1] = va::str('passed');
+            if ($this->va->va->training) {
+                $n = 1;
+                $passed = $DB->get_field('videoassessment_aggregation', 'passtraining', array(
+                        'videoassessment' => $this->va->va->id,
+                        'userid' => $user->id
+                ));
+                
+                if ($passed === 1) {
+                    $row[$s + $n + 1] = va::str('passed');
+                } else {
+                    $row[$s + $n + 1] = va::str('failed');
+                }
             } else {
-                $row[$s + $n + 1] = va::str('failed');
+                $n = 0;
             }
 
             $class[$s + $n + 1] = 'mark';

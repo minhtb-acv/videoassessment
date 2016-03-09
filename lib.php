@@ -129,3 +129,36 @@ function mod_videoassessment_pluginfile($course, $cm, $context, $filearea, $args
     session_get_instance()->write_close(); // unlock session during fileserving
     send_stored_file($file, HOURSECS, 0, $forcedownload);
 }
+
+function videoassessment_convert_video($event, $va) {
+    global $CFG, $DB, $USER;
+
+    require_once $CFG->dirroot . '/mod/videoassessment/bulkupload/lib.php';
+
+    if ($va->training && !empty($va->trainingvideo)) {
+        $fs = get_file_storage();
+        $upload = new \videoassessment_bulkupload($event->instanceid);
+
+        $files = $fs->get_area_files(\context_user::instance($USER->id)->id, 'user', 'draft', $va->trainingvideo);
+
+        if (!empty($files)) {
+            foreach ($files as $file) {
+                if ($file->get_filename() == '.') {
+                    continue;
+                }
+
+                $upload->create_temp_dirs();
+                $tmpname = $upload->get_temp_name($file->get_filename());
+                $tmppath = $upload->get_tempdir().'/upload/'.$tmpname;
+                $file->copy_content_to($tmppath);
+
+                $videoid = $upload->video_data_add($tmpname, $file->get_filename());
+
+                $upload->convert($tmpname);
+                
+                $DB->execute("UPDATE {videoassessment} SET trainingvideoid = ?, trainingvideo = 0 WHERE id = ?",
+                        array($videoid, $va->id));
+            }
+        }
+    }
+}
