@@ -252,6 +252,14 @@
     color: #333;
 }
 
+.duplicate-page #rubric-rubric.gradingform_rubric .options {
+    display: none !important;
+}
+
+.duplicate-page .box.generalbox.rubricmappingexplained {
+    display: none !important;
+}
+
 /* MinhTB VERSION 2 */
 .id_order_students, #manually-list {
     padding: 0;
