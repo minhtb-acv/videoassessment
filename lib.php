@@ -14,8 +14,6 @@ function videoassessment_add_instance($va, $form) {
 
     $va->id = $DB->insert_record('videoassessment', $va);
     
-    $DB->update_record('videoassessment', $va);
-
     return $va->id;
 }
 
