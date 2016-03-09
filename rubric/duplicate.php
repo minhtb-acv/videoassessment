@@ -24,19 +24,28 @@ $areaIds = array(); // Array Id of Class, Peer, Self in Grading_Areas's Table
 $definitionIds = array(); // Array Id Definition in grading_definitions's table
 $criteriaIds = array(); // Array Id Criteria in gradingform_rubric_criteria's table
 
+// Get data from videoassessment table
+$currentVideoAssessment = $DB->get_record('videoassessment', array('id' => $cm->instance), 'training');
+// Get data from grading_areas table
 $areasGrading = $DB->get_records('grading_areas', array('contextid' => $context->id));
-
 if (is_array($areasGrading)) {
     foreach ($areasGrading as $area) {
         if ($area->areaname == 'beforeteacher') {
             $areaTeacherId = $area->id;
         } else {
-            $areaIds[] = $area->id;
+            if ($currentVideoAssessment->training == 0) {
+                if ($area->areaname != 'beforetraining') {
+                    $areaIds[] = $area->id;
+                }
+            } else {
+                $areaIds[] = $area->id;
+            }
         }
     }
 }
 
 $gradingDefinitionTeacher = $DB->get_record('grading_definitions', array('areaid' => $areaTeacherId));
+
 // Get information of Rubric
 $manager = get_grading_manager($areaTeacherId);
 // Get the currently active method
@@ -54,15 +63,32 @@ $data->contextid = $context->id;
 $dForm = new \mod_videoassessment_rubric_form_duplicate();
 $dForm->set_data($data);
 
-//Post form
+// Post form
 if ($data = $dForm->get_data()) {
+    // Check exist teacher's rubric
+    if (!$gradingDefinitionTeacher) {
+        redirect('/mod/videoassessment/view.php?id='.$PAGE->cm->id, get_string('duplicateerrors', 'videoassessment'));
+    }
+
+    $inAreaIds = implode(',', array_values($areaIds));
+    $areaDefinitions = $DB->get_records_sql('SELECT areaid FROM {grading_definitions} WHERE areaid IN (' . $areaTeacherId . ',' . $inAreaIds . ')');
+    if (is_array($areaDefinitions)) {
+        foreach ($areaDefinitions as $areaDefinition) {
+            if(($key = array_search($areaDefinition->areaid, $areaIds)) !== false) {
+                unset($areaIds[$key]);
+            }
+        }
+    }
+
+    if (is_null($areaIds) || empty($areaIds)) {
+        redirect('/mod/videoassessment/view.php?id='.$PAGE->cm->id, get_string('duplicateerrors', 'videoassessment'));
+    }
     /**
      * Insert to grading_definitions table
      * Get id definitions of new record after insert
      */
     // $gradingDefinitionOther : Object use insert data to grading_definitions table (data: peer, self, class)
     $gradingDefinitionOther = clone $gradingDefinitionTeacher;
-
     foreach ($areaIds as $areaId) {
         $gradingDefinitionOther->areaid = $areaId;
         $definitionIds[] = $DB->insert_record('grading_definitions', $gradingDefinitionOther);
