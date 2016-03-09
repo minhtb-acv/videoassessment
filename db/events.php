@@ -29,4 +29,8 @@ $observers = array(
         'eventname' => '\core\event\course_module_created',
         'callback'  => 'mod_videoassessment_observer::course_module_created',
     ),
+    array(
+        'eventname' => '\core\event\course_module_updated',
+        'callback'  => 'mod_videoassessment_observer::course_module_updated',
+    ),
 );
