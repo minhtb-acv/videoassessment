@@ -61,6 +61,13 @@ if ($ADMIN->fulltree) {
 			get_string('mp4boxcommanddesc', 'videoassessment'),
 			'/usr/local/bin/MP4Box', PARAM_RAW, 60)
 		);
+	
+	$settings->add(
+        new admin_setting_configtextarea('videoassessment_trainingdesc',
+            get_string('trainingdesc', 'videoassessment'),
+            get_string('trainingdeschelp', 'videoassessment'),
+            get_string('trainingdesctext', 'videoassessment'))
+	);
 
     $settings->add(new admin_setting_heading('backupdefaults', new lang_string('backupdefaults', 'videoassessment'), ''));
     $settings->add(

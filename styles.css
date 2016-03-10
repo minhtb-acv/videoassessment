@@ -94,7 +94,8 @@
 .path-mod-videoassessment .button-firstassess,
 .path-mod-videoassessment .button-assessagain,
 .path-mod-videoassessment .button-upload,
-.path-mod-videoassessment .button-download {
+.path-mod-videoassessment .button-download,
+.path-mod-videoassessment .button-viewresult {
     padding: 2px 8px;
     -webkit-border-radius: 10px;
     -moz-border-radius: 10px;
@@ -250,6 +251,14 @@
 .managelink:hover {
     text-decoration: underline;
     color: #333;
+}
+
+.duplicate-page #rubric-rubric.gradingform_rubric .options {
+    display: none !important;
+}
+
+.duplicate-page .box.generalbox.rubricmappingexplained {
+    display: none !important;
 }
 
 /* MinhTB VERSION 2 */

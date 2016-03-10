@@ -46,4 +46,16 @@ class mod_videoassessment_observer {
             videoassessment_convert_video($event->get_context(), $va);
         }
     }
+    
+    public static function course_module_updated(\core\event\course_module_updated $event) {
+        global $CFG;
+    
+        if ($event->other['modulename'] === 'videoassessment') {
+            // Include the videoassessment library to make use of the forum_instance_created function.
+            require_once($CFG->dirroot . '/mod/videoassessment/lib.php');
+
+            $va = $event->get_record_snapshot('videoassessment', $event->other['instanceid']);
+            videoassessment_convert_video($event->get_context(), $va);
+        }
+    }
 }
