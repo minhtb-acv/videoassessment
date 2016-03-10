@@ -61,12 +61,12 @@ class video_publish extends \moodleform {
                 'style' => 'min-width: 270px',
                 'id' => 'publish-section'
             ));
-            $mform->addElement('text', 'fullname', get_string('fullnamecourse'), array(
+            $mform->addElement('text', 'fullname', get_string('fullnamecourse', 'videoassessment'), array(
                 'size' => 32,
                 'id' => 'publish-fullname'
             ));
             $mform->setType('fullname', PARAM_TEXT);
-            $mform->addElement('text', 'shortname', get_string('shortnamecourse'), array(
+            $mform->addElement('text', 'shortname', get_string('shortnamecourse', 'videoassessment'), array(
                 'size' => 32,
                 'id' => 'publish-shortname'
             ));
