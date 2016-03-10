@@ -130,3 +130,49 @@
 .remark textarea[cols] {
     width: 90%;
 }
+
+/* MinhTB VERSION 2 09-03-2016 */
+#training-result-wrap {
+    float: left;
+    width: 73.2144%;
+}
+
+#training-result-wrap table {
+    width: 100%;
+}
+
+#training-result-wrap table td {
+    border: 1px solid #efefef;
+    vertical-align: top;
+    padding: 5px;
+}
+
+#training-result-wrap .status {
+    text-align: center;
+    vertical-align: middle!important;
+}
+
+#training-result-wrap .score {
+    color: #575;
+    font-style: italic;
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+#training-result-wrap .score-selected-wrap {
+    margin-top: 5px;
+}
+
+#training-result-wrap .teacher-selected {
+    color: #40aa55;
+}
+
+#training-result-wrap .student-selected {
+    color: #ff0000;
+}
+
+#training-result-wrap .score-selected {
+    font-weight: bold;
+    margin-right: 5px;
+}
+/* END MinhTB VERSION 2 09-03-2016 */

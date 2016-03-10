@@ -45,6 +45,7 @@ $string['yes'] = 'Yes';
 $string['passed'] = 'Passed';
 $string['failed'] = 'Failed';
 $string['training'] = 'Training';
+$string['results'] = 'Results';
 
 /* TienNV VERSION 2 */
 $string['trainingvideo'] = 'Training video';
