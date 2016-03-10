@@ -201,14 +201,14 @@ class video_publish extends \moodleform {
         $errors = parent::validation($data, $files);
 
         if (!$data['course']) {
-            if (!$data['fullname']) {
+            if (!trim($data['fullname'])) {
                 $errors['fullname'] = va::str('inputnewcoursename');
             }
 
-            if (!$data['shortname']) {
+            if (!trim($data['shortname'])) {
                 $errors['shortname'] = va::str('inputnewcourseshortname');
             } else {
-                if ($DB->get_record('course', array('shortname' => $data['shortname']))) {
+                if ($DB->get_record('course', array('shortname' => trim($data['shortname'])))) {
                     $errors['shortname'] = va::str('courseshortnameexist');
                 }
             }

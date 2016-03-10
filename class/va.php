@@ -1509,8 +1509,8 @@ class va {
 
                 $course = (object)array(
                         'category' => $data->category,
-                        'fullname' => $data->fullname,
-                        'shortname' => $data->shortname
+                        'fullname' => trim($data->fullname),
+                        'shortname' => trim($data->shortname)
                 );
                 $course = create_course($course);
 
@@ -1530,6 +1530,12 @@ class va {
 
             foreach ($videos as $videoid => $value) {
                 $video = $DB->get_record('videoassessment_videos', array('id' => $videoid));
+                $file = $fs->get_file($this->context->id, 'mod_videoassessment', 'video', 0, $video->filepath, $video->filename);
+
+                if (empty($file)) {
+                    continue;
+                }
+
                 $assocs = $this->get_video_associations($videoid);
                 $assocnames = array();
                 foreach ($assocs as $assoc) {
@@ -1549,7 +1555,7 @@ class va {
                 // モジュールオプション追加
                 $resource = new \stdClass();
                 $resource->course = $course->id;
-                $resource->name = $data->prefix . $modulename . $data->suffix;
+                $resource->name = trim($data->prefix) . $modulename . trim($data->suffix);
                 $resource->display = 1;
                 $resource->timemodified = time();
                 $resource->coursemodule = $cm->id;
@@ -1576,7 +1582,6 @@ class va {
                 $DB->set_field('course_modules', 'section', $sectionid, array('id' => $cm->id));
 
                 // ファイル追加
-                $file = $fs->get_file($this->context->id, 'mod_videoassessment', 'video', 0, $video->filepath, $video->filename);
                 $newfile = array(
                         'contextid' => \context_module::instance($cm->id)->id,
                         'component' => 'mod_resource',

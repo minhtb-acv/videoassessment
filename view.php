@@ -8,6 +8,7 @@ if (optional_param('ajax', null, PARAM_ALPHANUM)) {
 
     if ($action == 'getcoursesbycategory') {
         $catid = optional_param('catid', null, PARAM_INT);
+        $currentcourseid = optional_param('currentcourseid', 0, PARAM_INT);
         $courseopts = array();
         $html = "";
 
@@ -19,8 +20,14 @@ if (optional_param('ajax', null, PARAM_ALPHANUM)) {
 
             $html = "<option value='0'>" . '('.get_string('new').')' . "</option>";
 
-            foreach ($courseopts as $catid => $catname) {
-                $html .= "<option value='$catid'>$catname</option>";
+            foreach ($courseopts as $courseid => $coursename) {
+                $selected = '';
+
+                if ($currentcourseid == $courseid) {
+                    $selected = ' selected';
+                }
+
+                $html .= "<option value='$courseid'" . $selected . ">$coursename</option>";
             }
         }
 
@@ -30,6 +37,7 @@ if (optional_param('ajax', null, PARAM_ALPHANUM)) {
         die;
     } elseif ($action == 'getsectionsbycourse') {
         $courseid = optional_param('courseid', null, PARAM_INT);
+        $currentsectionid = optional_param('currentsectionid', null, PARAM_INT);
         $sectionopts = array();
         $html = "";
 
@@ -42,8 +50,14 @@ if (optional_param('ajax', null, PARAM_ALPHANUM)) {
                     $sectionopts[$section->__get('id')] = get_section_name($courseid, $section->__get('section'));
                 }
 
-                foreach ($sectionopts as $sectionnum => $sectionname) {
-                    $html .= "<option value='$sectionnum'>$sectionname</option>";
+                foreach ($sectionopts as $sectionid => $sectionname) {
+                    $selected = '';
+
+                    if ($currentsectionid == $sectionid) {
+                        $selected = ' selected';
+                    }
+
+                    $html .= "<option value='$sectionid'" . $selected . ">$sectionname</option>";
                 }
             }
         }
