@@ -36,7 +36,7 @@ class video_publish extends \moodleform {
         $sectionopts[0] = '';
         if (!empty($categories)) {
             //$mform->addElement('static', 'courseor', get_string('or', 'videoassessment'));
-            $mform->addElement('select', 'category', get_string('category'), $categories, array('id' => 'publish-category'));
+            $mform->addElement('select', 'category', get_string('category'), $categories, array('id' => 'publish-category', 'style' => 'min-width: 270px'));
             if (!empty($categories)) {
                 $courseopts[0] = '('.get_string('new').')';
             }
@@ -52,22 +52,22 @@ class video_publish extends \moodleform {
                 }
             });
             $mform->addElement('select', 'course', get_string('existingcourseornewcourse', 'videoassessment'), $courseopts, array(
-                'style' => 'min-width: 100px',
+                'style' => 'min-width: 270px',
                 'id' => 'publish-course'
             ));
             $mform->addHelpButton('course', 'existingcourse', 'videoassessment');
             $mform->addElement('select', 'section', get_string('insertintosection', 'videoassessment'), $sectionopts, array(
                 'disabled' => 'disabled',
-                'style' => 'min-width: 100px',
+                'style' => 'min-width: 270px',
                 'id' => 'publish-section'
             ));
             $mform->addElement('text', 'fullname', get_string('fullnamecourse'), array(
-                'size' => 64,
+                'size' => 32,
                 'id' => 'publish-fullname'
             ));
             $mform->setType('fullname', PARAM_TEXT);
             $mform->addElement('text', 'shortname', get_string('shortnamecourse'), array(
-                'size' => 64,
+                'size' => 32,
                 'id' => 'publish-shortname'
             ));
             $mform->setType('shortname', PARAM_TEXT);
