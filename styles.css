@@ -94,7 +94,8 @@
 .path-mod-videoassessment .button-firstassess,
 .path-mod-videoassessment .button-assessagain,
 .path-mod-videoassessment .button-upload,
-.path-mod-videoassessment .button-download {
+.path-mod-videoassessment .button-download,
+.path-mod-videoassessment .button-viewresult {
     padding: 2px 8px;
     -webkit-border-radius: 10px;
     -moz-border-radius: 10px;
