@@ -972,7 +972,7 @@ class va {
                 'userid' => $USER->id
             ));
 
-            if ($trainingPassed === 1) {
+            if (!$this->va->training || $trainingPassed == 1) {
                 if ($this->va->class) {
                     $o .= $this->output->heading(self::str('classassessments'));
                     $o .= $gradetable->print_class_grade_table();
@@ -1212,8 +1212,17 @@ class va {
             $o .= \html_writer::start_tag('table', array('id' => 'training-result-table'));
 
             $passed = true;
+            $even = 1;
             foreach ($definition->rubric_criteria as $rid => $rubric) {
-                $o .= \html_writer::start_tag('tr');
+                if ($even == 1) {
+                    $even = 0;
+                    $trclass = 'even';
+                } else {
+                    $even = 1;
+                    $trclass = 'odd';
+                }
+
+                $o .= \html_writer::start_tag('tr', array('class' => $trclass));
 
                 $o .= \html_writer::start_tag('td');
                 $o .= $rubric['description'];
@@ -1282,19 +1291,35 @@ class va {
             }
 
             $o .= \html_writer::end_tag('table');
-            $o .= \html_writer::end_tag('div');
-            $o .= \html_writer::end_tag('div');
 
             $agg = $DB->get_record('videoassessment_aggregation', array(
                 'videoassessment' => $this->va->id,
                 'userid' => $user->id
             ));
 
+            $o .= \html_writer::start_tag('div', array('class' => 'result-notice'));
+
             if (!$agg->passtraining && $passed) {
                 $agg->passtraining = 1;
 
                 $DB->update_record('videoassessment_aggregation', $agg);
             }
+
+            if (!$this->is_teacher()) {
+                if ($agg->passtraining) {
+                    $o .= get_string('passednotice', 'videoassessment', '<a class="button-notice" href="' . new \moodle_url('/mod/videoassessment/view.php', array('id' => $this->cm->id)) . '">' . self::str('selfpeer') . '</a>');
+                } else {
+                    $a = new \stdClass();
+                    $a->accepteddifference = $this->va->accepteddifference;
+                    $a->button = '<a class="button-notice" href="' . new \moodle_url('/mod/videoassessment/view.php', array('id' => $this->cm->id, 'action' => 'assess', 'userid' => $user->id, 'gradertype' => 'training')) . '">' . self::str('tryagain') . '</a>';
+
+                    $o .= get_string('failednotice', 'videoassessment', $a);
+                }
+            }
+
+            $o .= \html_writer::end_tag('div');
+            $o .= \html_writer::end_tag('div');
+            $o .= \html_writer::end_tag('div');
 
             return $o;
         } else {
