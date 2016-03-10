@@ -401,9 +401,14 @@ class grade_table {
         $data = $DB->get_record('videoassessment_videos', array('id' => $this->va->va->trainingvideoid));
         if ($data) {
             if ($video = new video($this->va->context, $data)) {
-                $row[1] .= \html_writer::start_tag('div', array('class' => 'video-wrap'));
-                $row[1] .= $this->va->output->render($video);
-                $row[1] .= \html_writer::end_tag('div');
+                $content = $video->render_thumbnail(va::str('previewvideo'));
+                $row[1] = \html_writer::tag(
+                    'a', $content, array(
+                        'onclick' => 'M.mod_videoassessment.videos_show_video_preview_by_user('.$user->id.',\'before\')',
+                        'href' => 'javascript:void(0)'
+                    )
+                );
+
             }
         }
 
@@ -430,7 +435,7 @@ class grade_table {
         
         $row[2] = $OUTPUT->action_link($url,
                 get_string($button, 'videoassessment'), null,
-                array('class' => 'button-'.$button)) . '<br />' . $row[0];
+                array('class' => 'button-'.$button)) . '<br />' . $row[2];
         
         $this->add_data($row);
 
