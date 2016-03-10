@@ -1034,7 +1034,7 @@ class va {
             'userid' => $user->id
         ));
 
-        if ($gradertype == 'training' && $passtraining) {
+        if ($gradertype == 'training' && ($passtraining || !$this->va->training)) {
             $this->view_redirect();
         }
 
@@ -1347,7 +1347,7 @@ class va {
 
             $o .= \html_writer::start_tag('div', array('class' => 'result-notice'));
 
-            if (!$agg->passtraining && $passed) {
+            if (!$agg->passtraining && $passed && $teacherfilling) {
                 $agg->passtraining = 1;
 
                 $DB->update_record('videoassessment_aggregation', $agg);
@@ -2075,8 +2075,8 @@ class va {
         $table = new table_export();
         $table->filename = $this->cm->name.'.xls';
         $fullnamestr = util::get_fullname_label();
-        $table->set(0, 0, va::str('title') . ': ' . $this->cm->name);
-        $table->set(0, 1, va::str('groupname') . ': ' . $groupname);
+        $table->set(0, 0, va::str('title') . ' ' . $this->cm->name);
+        $table->set(0, 1, va::str('groupname') . ' ' . $groupname);
         $table->set(1, 0, get_string('idnumber'));
         $table->set(1, 1, $fullnamestr);
 //         $table->set(0, 2, va::str('beforeafter'));
