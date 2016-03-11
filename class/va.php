@@ -1239,7 +1239,7 @@ class va {
                     
                     $o .= \html_writer::start_tag('div', array('id' => 'training-desc'));
                     $o .= \html_writer::start_tag('h5');
-                    $o .= str_replace('xx', $this->va->accepteddifference, $CFG->videoassessment_trainingdesc);
+                    $o .= str_replace('xx', $this->va->accepteddifference, $this->va->trainingdesc);
                     $o .= \html_writer::end_tag('h5');
                     $o .= \html_writer::end_tag('div');
                     

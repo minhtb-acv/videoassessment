@@ -25,7 +25,9 @@
                 <FIELD NAME="trainingvideo" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"
                        PREVIOUS="training" NEXT="accepteddifference"/>
                 <FIELD NAME="trainingvideoid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"
-                       PREVIOUS="trainingvideo" NEXT="accepteddifference"/>
+                       PREVIOUS="trainingvideo" NEXT="trainingdesc"/>
+                <FIELD NAME="trainingdesc" TYPE="text" NOTNULL="false" SEQUENCE="false"
+                       PREVIOUS="trainingvideoid" NEXT="accepteddifference"/>
                 <FIELD NAME="accepteddifference" TYPE="int" LENGTH="3" NOTNULL="false" SEQUENCE="false"
                        PREVIOUS="trainingvideoid" NEXT="grade"/>
                 <FIELD NAME="grade" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"
