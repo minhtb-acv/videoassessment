@@ -1236,8 +1236,12 @@ class va {
                     $teacherfilling = array();
                     if ($teacherid) {
                         $itemid = $this->get_grade_item($gradingarea, $user->id, $teacherid);
-                        $teacherinstance = $controller->get_or_create_instance($instanceid, $teacherid, $itemid)->get_current_instance();
-                        $teacherfilling = $teacherinstance->get_rubric_filling();
+                        $teacherinstance = $controller->get_or_create_instance($instanceid, $teacherid, $itemid);
+                        $teachercurrentinstance = $teacherinstance->get_current_instance();
+
+                        if (!empty($teachercurrentinstance)) {
+                            $teacherfilling = $teacherinstance->get_rubric_filling();
+                        }
                     }
                     
                     $definition = $controller->get_definition();
