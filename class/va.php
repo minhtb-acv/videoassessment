@@ -1025,6 +1025,11 @@ class va {
         $user = $DB->get_record('user', array('id' => optional_param('userid', 0, PARAM_INT)));
 
         $gradertype = optional_param('gradertype', '', PARAM_ALPHA);
+
+        if ($gradertype == 'training' && $USER->id != $user->id && !$this->is_teacher()) {
+            $this->view_redirect();
+        }
+
         if ($gradertype != 'class' && $gradertype != 'training') {
             $gradertype = $this->get_grader_type($user->id);
         }
