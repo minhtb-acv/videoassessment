@@ -218,7 +218,7 @@ $string['selfpeer'] = 'Self / Peer';
 $string['tryagain'] = 'Try again';
 $string['pleasedefinerubricforteacher'] = 'Please define rubric for teacher';
 $string['pleasechoosegradingareas'] = 'Please choose grading areas';
-$string['gradingareadefined'] = 'Grading area defined';
+$string['gradingareadefined'] = 'Can not duplicated because rubric is already exist';
 $string['duplicatefor'] = 'Duplicate for';
 
 /* TienNV VERSION 2 */
