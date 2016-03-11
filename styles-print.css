@@ -10,14 +10,16 @@
 
 /* AnhLX Add */
 .pagebreak {
-    /*page-break-before: always;*/
+    page-break-before: always;
     border-bottom: 1px solid rgba(17, 17, 17, 0.85);
     padding-top: 15px;
 }
 
-.report-rubrics {
+.rubrics-page-down {
     page-break-after: always;
 }
+
+/* end */
 
 #page-content h2 {
     font-size: 150%;

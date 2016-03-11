@@ -301,9 +301,30 @@ if (!M.mod_videoassessment) {
                                     });
                                     tcrit.one(".remark").insert('<div class="rubrictext-'+gradertype+'">'+remark+'</span>');
                                     crit.setStyle("display", "none");
+                                    crit.addClass("hidden-information"); /* Xuan Anh : Use when print report */
                                 }
                             });
                         });
+                        /* Xuan Anh : Use when print report */
+                        var criterion = node.one("#rubrics-"+timing+gradertype).all(".criterion").size();
+                        var hiddenCriterion = node.one("#rubrics-"+timing+gradertype).all(".hidden-information").size();
+                        if ("rubrics-beforeclass" != "rubrics-"+timing+gradertype) {
+                            if (!node.one("#rubrics-"+timing+gradertype).one(".comment") && criterion <= hiddenCriterion) {
+                                node.one("#rubrics-"+timing+gradertype).setStyle("display", "none");
+                            }
+
+                            if (node.one("#rubrics-"+timing+gradertype).one(".comment") && criterion <= hiddenCriterion) {
+                                node.one("#rubrics-"+timing+gradertype+" .pagebreak").remove();
+                            }
+                        } else {
+                            if (criterion <= hiddenCriterion) {
+                                node.one("#rubrics-beforeclass").all('.pagebreak').each(function(pagebreak){
+                                    pagebreak.remove();
+                                });
+                                node.one("#rubrics-beforeclass").previous().previous().one('.pagebreak').remove();
+                            }
+                        }
+                        /* /Xuan Anh : Use when print report */
 
                         node.one("#heading-"+timing+gradertype).setStyle("display", "none");
                     });
