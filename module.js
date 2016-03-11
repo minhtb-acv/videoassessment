@@ -126,6 +126,15 @@ if (!M.mod_videoassessment) {
             this.videopreviewpanel.set("bodyContent", html);
             this.videopreviewpanel.show();
         },
+        
+        videos_show_video_training_preview: function(videoid) {
+            var src = "videopreview.php?id="+this.cmid+"&amp;videoid="+videoid+"&amp;width=400&amp;height=300";
+            var html = '<iframe class="videopreview" width="420" height="370" src="'+src+'"></iframe>';
+
+            this.videopreviewpanel.set("bodyContent", html);
+            this.videopreviewpanel.set("visible", true);
+            this.videopreviewpanel.focus();
+        },
 
         videos_show_video_preview_by_user: function(userid, timing) {
             var src = "videopreview.php?id="+this.cmid+"&amp;userid="+userid+"&amp;timing="+timing+"&amp;width=400&amp;height=300";
@@ -241,9 +250,19 @@ if (!M.mod_videoassessment) {
                     node.one("#heading-"+timing+"teacher").setStyle("display", "none");
 
                     /* MinhTB VERSION 2 */
+                    var classTextRubric = 0; // Le Xuan Anh Ver2
+                    var totalClassRubric = 0; // Le Xuan Anh Ver2
+                    var totalRubric = 0; // Le Xuan Anh Ver2
+                    var classInsert = ''; // Le Xuan Anh Ver2
+
+                    totalRubric = node.one("#rubrics-beforeself").all(".criterion").size() +
+                                  node.one("#rubrics-beforepeer").all(".criterion").size() +
+                                  node.one("#rubrics-beforeclass").all(".criterion").size(); // Le Xuan Anh Ver2
+
                     Y.Array.each(["self", "peer", "class"], function(gradertype) {
                     /* END */
                         node.one("#rubrics-"+timing+gradertype).all(".criterion").each(function(crit) {
+                            classTextRubric++; // Le Xuan Anh Ver2
                             var critname = crit.one(".description").getHTML();
                             var levelname = crit.one(".checked .definition").getHTML();
                             var remark = crit.one(".remark").getHTML();
@@ -262,15 +281,55 @@ if (!M.mod_videoassessment) {
                                         }
                                         if (level.one(".definition").getHTML() == levelname) {
                                             levelfound = true;
-                                            level.one(".level-wrapper").insert('<span class="inferiorlevelmarker rubrictext-'+gradertype+'">'
+
+                                            // Le Xuan Anh Ver2
+                                            if (gradertype == 'class') {
+                                                totalClassRubric++;
+                                                classInsert = '<span class="inferiorlevelmarker rubrictext-' + gradertype + '">'
+                                                    + M.str.videoassessment[gradertype] + '(' + totalClassRubric + ')</span>';
+                                            } else {
+                                                level.one(".level-wrapper").insert('<span class="inferiorlevelmarker rubrictext-'+gradertype+'">'
                                                     +M.str.videoassessment[gradertype]+'</span>');
+                                            }
+
+                                            if (classTextRubric == totalRubric) {
+                                                level.one(".level-wrapper").insert(classInsert);
+                                            }
+                                            // End
+
                                         }
                                     });
                                     tcrit.one(".remark").insert('<div class="rubrictext-'+gradertype+'">'+remark+'</span>');
                                     crit.setStyle("display", "none");
+                                    crit.addClass("hidden-information"); /* Xuan Anh : Use when print report */
                                 }
                             });
                         });
+                        /* Xuan Anh : Use when print report */
+                        var criterion = node.one("#rubrics-"+timing+gradertype).all(".criterion").size();
+                        var hiddenCriterion = node.one("#rubrics-"+timing+gradertype).all(".hidden-information").size();
+                        if ("rubrics-beforeclass" != "rubrics-"+timing+gradertype) {
+                            if (!node.one("#rubrics-"+timing+gradertype).one(".comment") && criterion <= hiddenCriterion) {
+                                node.one("#rubrics-"+timing+gradertype).setStyle("display", "none");
+                            }
+
+                            if (node.one("#rubrics-"+timing+gradertype).one(".comment") && criterion <= hiddenCriterion) {
+                                node.one("#rubrics-"+timing+gradertype+" .pagebreak").remove();
+                            }
+                        } else {
+                            if (criterion <= hiddenCriterion) {
+                                node.one("#rubrics-beforeclass").all('.pagebreak').each(function(pagebreak){
+                                    pagebreak.remove();
+                                });
+                                node.one("#rubrics-beforeclass").previous().previous().all('.pagebreak').each(function (pagebreak) {
+                                    pagebreak.remove();
+                                });
+                            }
+                        }
+                        node.one("#rubrics-beforetraining").all('.pagebreak').each(function (pagebreak) {
+                            pagebreak.remove();
+                        });
+                        /* /Xuan Anh : Use when print report */
 
                         node.one("#heading-"+timing+gradertype).setStyle("display", "none");
                     });

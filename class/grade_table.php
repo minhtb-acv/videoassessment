@@ -364,6 +364,84 @@ class grade_table {
         return $this->print_html();
     }
 
+    /* MinhTB VERSION 2 08-03-2016 */
+    /**
+     * @author MinhTB VERSION 2
+     *
+     * get grade table for training pre-test
+     */
+    public function print_training_grade_table()
+    {
+        global $DB, $USER, $OUTPUT;
+
+        $this->domid = 'gradetabletraining';
+
+        $user = $this->va->get_aggregated_grades($USER->id);
+
+        $this->add_data(array('', '', ''));
+
+        $header = array();
+        $header[0] = va::str('namesort');
+        $header[1] = va::str('weighting');
+        $header[2] = '';
+
+        $this->add_data($header);
+
+        if (!isset($user->picture)) {
+            $tmp = $DB->get_record('user', array('id' => $user->userid), \user_picture::fields());
+            foreach (explode(',', \user_picture::fields()) as $field) {
+                $user->$field = $tmp->$field;
+            }
+        }
+
+        $row = array();
+        $row[0] = $OUTPUT->user_picture($user).' '.fullname($user);
+        $row[1] = '';
+
+        $data = $DB->get_record('videoassessment_videos', array('id' => $this->va->va->trainingvideoid));
+        if ($data) {
+            if ($video = new video($this->va->context, $data)) {
+                $content = $video->render_thumbnail(va::str('previewvideo'));
+                $row[1] = \html_writer::tag(
+                    'a', $content, array(
+                        'onclick' => 'M.mod_videoassessment.videos_show_video_training_preview('.$this->va->va->trainingvideoid.')',
+                        'href' => 'javascript:void(0)'
+                    )
+                );
+
+            }
+        }
+
+        if ($user->passtraining == 1) {
+            $row[2] = va::str('passed');
+        } else {
+            $row[2] = va::str('failed');
+        }
+
+        if ($this->va->is_graded_by_current_user($user->id, 'beforetraining')) {
+            $button = 'assessagain';
+        } else {
+            $button = 'firstassess';
+        }
+
+        if ($user->passtraining == 1) {
+            $url = new \moodle_url($this->va->viewurl,
+                    array('action' => 'trainingresult', 'userid' => $user->id));
+            $button = 'viewresult';
+        } else {
+            $url = new \moodle_url($this->va->viewurl,
+                    array('action' => 'assess', 'userid' => $user->id, 'gradertype' => 'training'));
+        }
+        
+        $row[2] = $OUTPUT->action_link($url,
+                get_string($button, 'videoassessment'), null,
+                array('class' => 'button-'.$button)) . '<br />' . $row[2];
+        
+        $this->add_data($row);
+
+        return $this->print_html();
+    }
+
     private function setup_header() {
         $this->data = array();
         $this->classes = array();
@@ -373,11 +451,19 @@ class grade_table {
 
         $timing = 'before';
         $s = $this->startcolumns[$timing];
-        $row1[$s + 2] = get_string('class', 'videoassessment');
-        $row1[$s + 3] = get_string('self', 'videoassessment');
-        $row1[$s + 4] = get_string('peer', 'videoassessment');
-        $row1[$s + 5] = get_string('teacher', 'videoassessment');
-        $row1[$s + 6] = get_string('total', 'videoassessment');
+
+        if ($this->domid == 'gradetableteacher' && $this->va->va->training) {
+            $n = 1;
+            $row1[$s + $n + 1] = get_string('training', 'videoassessment');
+        } else {
+            $n = 0;
+        }
+
+        $row1[$s + $n + 2] = get_string('class', 'videoassessment');
+        $row1[$s + $n + 3] = get_string('self', 'videoassessment');
+        $row1[$s + $n + 4] = get_string('peer', 'videoassessment');
+        $row1[$s + $n + 5] = get_string('teacher', 'videoassessment');
+        $row1[$s + $n + 6] = get_string('total', 'videoassessment');
 
         /* MinhTB VERSION 2 */
         $params = array('id' => $this->cm->id);
@@ -403,15 +489,16 @@ class grade_table {
 
         $row2[$s] = '<a href="' . $url . '" class="name-sort">' . get_string("namesort", "videoassessment") . $arrow . '</a>';
         $row2[$s + 1] = get_string('weighting', 'videoassessment');
-        $row2[$s + 2] = $this->va->va->ratingclass.'%';
-        $row2[$s + 3] = $this->va->va->ratingself.'%';
-        $row2[$s + 4] = $this->va->va->ratingpeer.'%';
-        $row2[$s + 5] = $this->va->va->ratingteacher.'%';
+        $row2[$s + $n + 2] = $this->va->va->ratingclass.'%';
+        $row2[$s + $n + 3] = $this->va->va->ratingself.'%';
+        $row2[$s + $n + 4] = $this->va->va->ratingpeer.'%';
+        $row2[$s + $n + 5] = $this->va->va->ratingteacher.'%';
         /* End */
 
         $this->add_data($row1);
         $this->add_data($row2);
     }
+    /* END MinhTB VERSION 2 08-03-2016 */
 
     /**
      *
@@ -430,6 +517,7 @@ class grade_table {
      * @global \stdClass $USER
      * @param \stdClass $user
      */
+    /* MinhTB VERSION 2 08-03-2016 */
     private function add_user_data($user) {
         global $DB, $OUTPUT, $USER;
 
@@ -471,18 +559,41 @@ class grade_table {
 
         $timing = 'before';
         $s = $this->startcolumns[$timing];
-        if ($this->va->va->class && !has_capability('mod/videoassessment:grade', $this->va->context)) {
-            $row[$s + 2] = $this->emptygradetext;
+
+        if ($this->domid == 'gradetableteacher') {
+            if ($this->va->va->training) {
+                $n = 1;
+                $passed = $DB->get_field('videoassessment_aggregation', 'passtraining', array(
+                        'videoassessment' => $this->va->va->id,
+                        'userid' => $user->id
+                ));
+                
+                if ($passed == 1) {
+                    $row[$s + $n + 1] = va::str('passed');
+                } else {
+                    $row[$s + $n + 1] = va::str('failed');
+                }
+            } else {
+                $n = 0;
+            }
+
+            $class[$s + $n + 1] = 'mark';
         } else {
-            $row[$s + 2] = $this->format_grade($user->{'grade'.$timing.'class'});
+            $n = 0;
         }
-        $row[$s + 3] = $this->format_grade($user->{'grade'.$timing.'self'});
-        $row[$s + 4] = $this->format_grade($user->{'grade'.$timing.'peer'});
-        $row[$s + 5] = $this->format_grade($user->{'grade'.$timing.'teacher'});
-        $row[$s + 6] = $this->format_grade($user->{'grade'.$timing});
+
+        if ($this->va->va->class && !has_capability('mod/videoassessment:grade', $this->va->context)) {
+            $row[$s + $n + 2] = $this->emptygradetext;
+        } else {
+            $row[$s + $n + 2] = $this->format_grade($user->{'grade'.$timing.'class'});
+        }
+        $row[$s + $n + 3] = $this->format_grade($user->{'grade'.$timing.'self'});
+        $row[$s + $n + 4] = $this->format_grade($user->{'grade'.$timing.'peer'});
+        $row[$s + $n + 5] = $this->format_grade($user->{'grade'.$timing.'teacher'});
+        $row[$s + $n + 6] = $this->format_grade($user->{'grade'.$timing});
         $class[0] = 'user';
-        $class[$s + 2] = $class[$s + 3] = $class[$s + 4] = $class[$s + 5] = 'mark';
-        $class[$s + 6] = 'totalmark';
+        $class[$s + $n + 2] = $class[$s + $n + 3] = $class[$s + $n + 4] = $class[$s + $n + 5] = 'mark';
+        $class[$s + $n + 6] = 'totalmark';
 
         if ($video = $this->va->get_associated_video($user->id, $timing)) {
             $url = $video->get_url(true);
@@ -534,16 +645,16 @@ class grade_table {
         if ($type) {
             switch ($type) {
                 case 'self':
-                    $linkcell = $s + 3;
+                    $linkcell = $s + $n + 3;
                     break;
                 case 'peer':
-                    $linkcell = $s + 4;
+                    $linkcell = $s + $n + 4;
                     break;
                 case 'teacher':
-                    $linkcell = $s + 5;
+                    $linkcell = $s + $n + 5;
                     break;
                 case 'class':
-                    $linkcell = $s + 2;
+                    $linkcell = $s + $n + 2;
                     break;
             }
 
@@ -569,9 +680,31 @@ class grade_table {
                         get_string($button, 'videoassessment'), null,
                         array('class' => 'button-'.$button)) . '<br />' . $row[$linkcell];
             }
+
+            if ($type == 'teacher') {
+                if ($this->va->is_graded_by_current_user($user->id, $timing.'training')) {
+                    $button = 'assessagain';
+                } else {
+                    $button = 'firstassess';
+                }
+
+                if (isset($passed) && $passed == 1) {
+                    $url = new \moodle_url($this->va->viewurl,
+                            array('action' => 'trainingresult', 'userid' => $user->id));
+                    $button = 'viewresult';
+                } else {
+                    $url = new \moodle_url($this->va->viewurl,
+                            array('action' => 'assess', 'userid' => $user->id, 'gradertype' => 'training'));
+                }
+                
+                $row[$s + $n + 1] = $OUTPUT->action_link($url,
+                        get_string($button, 'videoassessment'), null,
+                        array('class' => 'button-'.$button)) . '<br />' . $row[$s + $n + 1];
+            }
         }
         $this->add_data($row, $class);
     }
+    /* END MinhTB VERSION 2 08-03-2016 */
 
     /**
      *

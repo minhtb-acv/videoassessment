@@ -42,7 +42,7 @@ class mod_videoassessment_print_renderer extends plugin_renderer_base {
                         2, 'main', 'heading-'.$gradingarea);
                 $gradinginfo = grade_get_grades($this->course->id, 'mod', 'videoassessment',
                         $this->instance, $userid);
-                $o .= \html_writer::start_tag('div', array('id' => 'rubrics-'.$gradingarea));
+                $o .= \html_writer::start_tag('div', array('id' => 'rubrics-'.$gradingarea, 'class' => 'rubrics-page-down'));
                 if ($controller = $rubric->get_available_controller($gradingarea)) {
                     $gradeitems = $this->get_grade_items($gradingarea, $userid);
                     foreach ($gradeitems as $gradeitem) {

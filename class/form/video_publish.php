@@ -30,25 +30,64 @@ class video_publish extends \moodleform {
 
         $courseopts = array();
         $categories = \coursecat::make_categories_list('moodle/course:create');
-        if (!empty($categories)) {
-            $courseopts[0] = '('.get_string('new').')';
-        }
-        $courses = \videoassess\va::get_courses_managed_by($USER->id);
-        array_walk($courses, function (\stdClass $a) use (&$courseopts) {
-            $courseopts[$a->id] = $a->fullname;
-        });
-        $mform->addElement('select', 'course', get_string('existingcourse', 'videoassessment'), $courseopts);
-        $mform->addHelpButton('course', 'existingcourse', 'videoassessment');
+        /* MinhTB VERSION 2 03-03-2016 */
 
+        $sectionopts = array();
+        $sectionopts[0] = '';
         if (!empty($categories)) {
-            $mform->addElement('static', 'courseor', get_string('or', 'videoassessment'));
-            $mform->addElement('select', 'category', get_string('category'), $categories);
-            $mform->addElement('text', 'fullname', get_string('fullnamecourse'), array('size' => 64));
+            //$mform->addElement('static', 'courseor', get_string('or', 'videoassessment'));
+            $mform->addElement('select', 'category', get_string('category'), $categories, array('id' => 'publish-category', 'style' => 'min-width: 270px'));
+            if (!empty($categories)) {
+                $courseopts[0] = '('.get_string('new').')';
+            }
+            $courses = \videoassess\va::get_courses_managed_by($USER->id);
+            array_walk($courses, function (\stdClass $a) use (&$courseopts, &$sectionopts) {
+                $courseopts[$a->id] = $a->fullname;
+
+                $modinfo = get_fast_modinfo($a->id);
+                $sections = $modinfo->get_section_info_all();
+
+                foreach ($sections as $key => $section) {
+                    $sectionopts[$section->__get('id')] = get_section_name($a->id, $section->__get('section'));
+                }
+            });
+            $mform->addElement('select', 'course', get_string('existingcourseornewcourse', 'videoassessment'), $courseopts, array(
+                'class' => 'input-select',
+                'id' => 'publish-course'
+            ));
+            $mform->addHelpButton('course', 'existingcourse', 'videoassessment');
+            $mform->addElement('select', 'section', get_string('insertintosection', 'videoassessment'), $sectionopts, array(
+                'disabled' => 'disabled',
+                'class' => 'input-select',
+                'id' => 'publish-section'
+            ));
+            $mform->addElement('text', 'fullname', get_string('fullnamecourse', 'videoassessment'), array(
+                'class' => 'input-select',
+                'id' => 'publish-fullname'
+            ));
             $mform->setType('fullname', PARAM_TEXT);
-            $mform->addElement('text', 'shortname', get_string('shortnamecourse'), array('size' => 64));
+            $mform->addElement('text', 'shortname', get_string('shortnamecourse', 'videoassessment'), array(
+                'class' => 'input-select',
+                'id' => 'publish-shortname'
+            ));
             $mform->setType('shortname', PARAM_TEXT);
-        }
+            $mform->addElement('text', 'prefix', get_string('addprefixtolabel', 'videoassessment'), array(
+                'class' => 'input-select',
+                'id' => 'publish-prefix'
+            ));
+            $mform->setType('prefix', PARAM_TEXT);
+            $mform->addElement('text', 'suffix', get_string('addsuffixtolabel', 'videoassessment'), array(
+                'class' => 'input-select',
+                'id' => 'publish-suffix'
+            ));
+            $mform->setType('suffix', PARAM_TEXT);
+            /* MinhTB VERSION 2 07-03-2016 */
+            $mform->addElement('hidden', 'video_count', 0, array('id' => 'video-count'));
+            $mform->setType('video_count', PARAM_INT);
+            /* END MinhTB VERSION 2 07-03-2016 */
 
+        }
+        /* END MinhTB VERSION 2 03-03-2016 */
         ob_start();
         $table = new \flexible_table('video-publish');
         $table->set_attribute('class', 'generaltable');
@@ -119,9 +158,18 @@ class video_publish extends \moodleform {
         	return $b->grade - $a->grade;
         });
 
+        /* MinhTB VERSION 2 07-03-2016 */
+        $videos = array_keys($this->_customdata->videos);
+
         foreach ($videorecs as $videorec) {
+            if (in_array($videorec->id, $videos)) {
+                $checked = true;
+            } else {
+                $checked = false;
+            }
+
             $table->add_data(array(
-                    \html_writer::checkbox('videos['.$videorec->id.']', 1, false, '',
+                    \html_writer::checkbox('videos['.$videorec->id.']', 1, $checked, '',
                     		array('class' => 'video-check')),
                     $videorec->link,
             		$videorec->originalname,
@@ -129,6 +177,7 @@ class video_publish extends \moodleform {
                     $videorec->gradecell
             ));
         }
+        /* END MinhTB VERSION 2 07-03-2016 */
 
         $table->finish_output();
         $o .= ob_get_contents();
@@ -147,10 +196,26 @@ class video_publish extends \moodleform {
      * @return array
      */
     public function validation($data, $files) {
+        global $DB;
+
         $errors = parent::validation($data, $files);
 
-        if (!$data['course'] && !$data['fullname']) {
-            $errors['fullname'] = va::str('inputnewcoursename');
+        if (!$data['course']) {
+            if (!trim($data['fullname'])) {
+                $errors['fullname'] = va::str('inputnewcoursename');
+            }
+
+            if (!trim($data['shortname'])) {
+                $errors['shortname'] = va::str('inputnewcourseshortname');
+            } else {
+                if ($DB->get_record('course', array('shortname' => trim($data['shortname'])))) {
+                    $errors['shortname'] = va::str('courseshortnameexist');
+                }
+            }
+        }
+
+        if (!$data['video_count']) {
+            $errors['videos'] = va::str('pleasechoosevideos');
         }
 
         return $errors;
