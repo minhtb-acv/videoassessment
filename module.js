@@ -321,7 +321,9 @@ if (!M.mod_videoassessment) {
                                 node.one("#rubrics-beforeclass").all('.pagebreak').each(function(pagebreak){
                                     pagebreak.remove();
                                 });
-                                node.one("#rubrics-beforeclass").previous().previous().one('.pagebreak').remove();
+                                node.one("#rubrics-beforeclass").previous().previous().all('.pagebreak').each(function (pagebreak) {
+                                    pagebreak.remove();
+                                });
                             }
                         }
                         /* /Xuan Anh : Use when print report */
