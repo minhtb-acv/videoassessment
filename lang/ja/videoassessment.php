@@ -55,6 +55,8 @@ $string['failednotice'] = 'Sorry. Some of your scores were {$a->accepteddifferen
 $string['selfpeer'] = 'Self / Peer';
 $string['tryagain'] = 'Try again';
 $string['pleasedefinerubricforteacher'] = 'Please define rubric for teacher';
+$string['pleasechoosegradingareas'] = 'Please choose grading areas';
+$string['duplicatefor'] = 'Duplicate for';
 
 /* TienNV VERSION 2 */
 $string['trainingvideo'] = 'Training video';
