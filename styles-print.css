@@ -13,6 +13,10 @@
     page-break-before: always;
 }
 
+.rubrics-beforetraining {
+    display: none;
+}
+
 .border-bottom {
     border-bottom: 1px solid rgba(17, 17, 17, 0.85);
     padding-top: 15px;
@@ -105,4 +109,9 @@
     .border-bottom {
         border-bottom: 0;
     }
+    
+    .rubrics-beforetraining {
+        display: none;
+    }
+    
 }
