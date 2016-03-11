@@ -1331,7 +1331,7 @@ class va {
                                 $maxscore = max($scores);
                                 $differencescore = abs($scores[$studentfilling['criteria'][$rid]['levelid']] - $scores[$teacherfilling['criteria'][$rid]['levelid']]);
                                 $accepteddifference = $this->va->accepteddifference;
-                                $difference = ($differencescore / ($maxscore - $minscore + 1)) * 100;
+                                $difference = ($differencescore / ($maxscore - $minscore)) * 100;
                     
                                 $o .= \html_writer::start_tag('td', array('class' => 'status'));
                     

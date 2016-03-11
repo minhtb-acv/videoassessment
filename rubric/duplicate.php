@@ -78,7 +78,7 @@ if ($data = $dForm->get_data()) {
     $areas = $data->areas;
     $inAreaIds = implode(',', array_keys($areas));
     $areaDefinitions = $DB->get_records_sql('SELECT areaid FROM {grading_definitions} WHERE areaid IN (' . $areaTeacherId . ',' . $inAreaIds . ')');
-    
+
     /**
      * Insert to grading_definitions table
      * Get id definitions of new record after insert
