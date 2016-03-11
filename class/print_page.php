@@ -71,7 +71,7 @@ class print_page
             if ($firstpage) {
                 $firstpage = false;
             } else {
-                $o .= \html_writer::tag('div', '', array('class' => 'pagebreak'));
+                $o .= \html_writer::tag('div', '', array('class' => 'pagebreak border-bottom'));
             }
 
             $o .= $OUTPUT->heading(fullname($user));

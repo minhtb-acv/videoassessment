@@ -11,6 +11,9 @@
 /* AnhLX Add */
 .pagebreak {
     page-break-before: always;
+}
+
+.border-bottom {
     border-bottom: 1px solid rgba(17, 17, 17, 0.85);
     padding-top: 15px;
 }
@@ -99,7 +102,7 @@
 }
 
 @media print {
-    .pagebreak {
+    .border-bottom {
         border-bottom: 0;
     }
 }
