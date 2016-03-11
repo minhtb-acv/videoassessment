@@ -54,6 +54,7 @@ $string['passednotice'] = 'Congratulations! All of your scores were near standar
 $string['failednotice'] = 'Sorry. Some of your scores were {$a->accepteddifference}% different from standard scores. You must have all “O”, no “X”.<br />{$a->button}';
 $string['selfpeer'] = 'Self / Peer';
 $string['tryagain'] = 'Try again';
+$string['pleasedefinerubricforteacher'] = 'Please define rubric for teacher';
 
 /* TienNV VERSION 2 */
 $string['trainingvideo'] = 'Training video';

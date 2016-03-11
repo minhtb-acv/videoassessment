@@ -48,7 +48,7 @@ if (is_array($areasGrading)) {
 $gradingDefinitionTeacher = $DB->get_record('grading_definitions', array('areaid' => $areaTeacherId));
 // Check exist teacher's rubric
 if (!$gradingDefinitionTeacher) {
-    redirect('/mod/videoassessment/view.php?id='.$PAGE->cm->id, get_string('duplicateerrors', 'videoassessment'));
+    redirect(new \moodle_url('/grade/grading/manage.php?areaid=' . $areaTeacherId), get_string('pleasedefinerubricforteacher', 'videoassessment'));
 }
 // Get information of Rubric
 $manager = get_grading_manager($areaTeacherId);
