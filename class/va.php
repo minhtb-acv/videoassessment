@@ -1332,7 +1332,7 @@ class va {
                         $icon = 'passed';
                     }
 
-                    $o .= \html_writer::img('images/' . $icon . '.png', $icon);
+                    $o .= \html_writer::img('images/' . $icon . '.gif', $icon);
 
                     $o .= \html_writer::end_tag('td');
                 }
