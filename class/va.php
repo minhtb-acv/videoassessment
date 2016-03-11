@@ -176,7 +176,7 @@ class va {
             $PAGE->requires->css('/mod/videoassessment/font/font-awesome/css/font-awesome.min.css');
         }
 
-        if ($action == 'report')
+        if ($action == 'report' || $action == 'publish')
         {
             $PAGE->requires->css('/mod/videoassessment/view.css');
         }

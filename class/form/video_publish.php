@@ -52,32 +52,32 @@ class video_publish extends \moodleform {
                 }
             });
             $mform->addElement('select', 'course', get_string('existingcourseornewcourse', 'videoassessment'), $courseopts, array(
-                'style' => 'min-width: 270px',
+                'class' => 'input-select',
                 'id' => 'publish-course'
             ));
             $mform->addHelpButton('course', 'existingcourse', 'videoassessment');
             $mform->addElement('select', 'section', get_string('insertintosection', 'videoassessment'), $sectionopts, array(
                 'disabled' => 'disabled',
-                'style' => 'min-width: 270px',
+                'class' => 'input-select',
                 'id' => 'publish-section'
             ));
             $mform->addElement('text', 'fullname', get_string('fullnamecourse', 'videoassessment'), array(
-                'size' => 32,
+                'class' => 'input-select',
                 'id' => 'publish-fullname'
             ));
             $mform->setType('fullname', PARAM_TEXT);
             $mform->addElement('text', 'shortname', get_string('shortnamecourse', 'videoassessment'), array(
-                'size' => 32,
+                'class' => 'input-select',
                 'id' => 'publish-shortname'
             ));
             $mform->setType('shortname', PARAM_TEXT);
             $mform->addElement('text', 'prefix', get_string('addprefixtolabel', 'videoassessment'), array(
-                'size' => 32,
+                'class' => 'input-select',
                 'id' => 'publish-prefix'
             ));
             $mform->setType('prefix', PARAM_TEXT);
             $mform->addElement('text', 'suffix', get_string('addsuffixtolabel', 'videoassessment'), array(
-                'size' => 32,
+                'class' => 'input-select',
                 'id' => 'publish-suffix'
             ));
             $mform->setType('suffix', PARAM_TEXT);
