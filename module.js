@@ -126,6 +126,15 @@ if (!M.mod_videoassessment) {
             this.videopreviewpanel.set("bodyContent", html);
             this.videopreviewpanel.show();
         },
+        
+        videos_show_video_training_preview: function(videoid) {
+            var src = "videopreview.php?id="+this.cmid+"&amp;videoid="+videoid+"&amp;width=400&amp;height=300";
+            var html = '<iframe class="videopreview" width="420" height="370" src="'+src+'"></iframe>';
+
+            this.videopreviewpanel.set("bodyContent", html);
+            this.videopreviewpanel.set("visible", true);
+            this.videopreviewpanel.focus();
+        },
 
         videos_show_video_preview_by_user: function(userid, timing) {
             var src = "videopreview.php?id="+this.cmid+"&amp;userid="+userid+"&amp;timing="+timing+"&amp;width=400&amp;height=300";

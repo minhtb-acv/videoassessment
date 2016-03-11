@@ -36,7 +36,7 @@ class video_publish extends \moodleform {
         $sectionopts[0] = '';
         if (!empty($categories)) {
             //$mform->addElement('static', 'courseor', get_string('or', 'videoassessment'));
-            $mform->addElement('select', 'category', get_string('category'), $categories, array('id' => 'publish-category'));
+            $mform->addElement('select', 'category', get_string('category'), $categories, array('id' => 'publish-category', 'style' => 'min-width: 270px'));
             if (!empty($categories)) {
                 $courseopts[0] = '('.get_string('new').')';
             }
@@ -52,32 +52,32 @@ class video_publish extends \moodleform {
                 }
             });
             $mform->addElement('select', 'course', get_string('existingcourseornewcourse', 'videoassessment'), $courseopts, array(
-                'style' => 'min-width: 100px',
+                'class' => 'input-select',
                 'id' => 'publish-course'
             ));
             $mform->addHelpButton('course', 'existingcourse', 'videoassessment');
             $mform->addElement('select', 'section', get_string('insertintosection', 'videoassessment'), $sectionopts, array(
                 'disabled' => 'disabled',
-                'style' => 'min-width: 100px',
+                'class' => 'input-select',
                 'id' => 'publish-section'
             ));
-            $mform->addElement('text', 'fullname', get_string('fullnamecourse'), array(
-                'size' => 64,
+            $mform->addElement('text', 'fullname', get_string('fullnamecourse', 'videoassessment'), array(
+                'class' => 'input-select',
                 'id' => 'publish-fullname'
             ));
             $mform->setType('fullname', PARAM_TEXT);
-            $mform->addElement('text', 'shortname', get_string('shortnamecourse'), array(
-                'size' => 64,
+            $mform->addElement('text', 'shortname', get_string('shortnamecourse', 'videoassessment'), array(
+                'class' => 'input-select',
                 'id' => 'publish-shortname'
             ));
             $mform->setType('shortname', PARAM_TEXT);
             $mform->addElement('text', 'prefix', get_string('addprefixtolabel', 'videoassessment'), array(
-                'size' => 32,
+                'class' => 'input-select',
                 'id' => 'publish-prefix'
             ));
             $mform->setType('prefix', PARAM_TEXT);
             $mform->addElement('text', 'suffix', get_string('addsuffixtolabel', 'videoassessment'), array(
-                'size' => 32,
+                'class' => 'input-select',
                 'id' => 'publish-suffix'
             ));
             $mform->setType('suffix', PARAM_TEXT);
@@ -201,14 +201,14 @@ class video_publish extends \moodleform {
         $errors = parent::validation($data, $files);
 
         if (!$data['course']) {
-            if (!$data['fullname']) {
+            if (!trim($data['fullname'])) {
                 $errors['fullname'] = va::str('inputnewcoursename');
             }
 
-            if (!$data['shortname']) {
+            if (!trim($data['shortname'])) {
                 $errors['shortname'] = va::str('inputnewcourseshortname');
             } else {
-                if ($DB->get_record('course', array('shortname' => $data['shortname']))) {
+                if ($DB->get_record('course', array('shortname' => trim($data['shortname'])))) {
                     $errors['shortname'] = va::str('courseshortnameexist');
                 }
             }

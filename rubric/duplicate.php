@@ -20,7 +20,7 @@ require_login($cm->course, true, $cm);
 
 $course = $DB->get_record('course', array('id' => $cm->course));
 $context = \context_module::instance($cm->id);
-$areaIds = array(); // Array Id of Class, Peer, Self in Grading_Areas's Table
+$areas = array(); // Array Id of Class, Peer, Self in Grading_Areas's Table
 $definitionIds = array(); // Array Id Definition in grading_definitions's table
 $criteriaIds = array(); // Array Id Criteria in gradingform_rubric_criteria's table
 
@@ -36,10 +36,10 @@ if (is_array($areasGrading)) {
         } else {
             if ($currentVideoAssessment->training == 0) {
                 if ($area->areaname != 'beforetraining') {
-                    $areaIds[] = $area->id;
+                    $areas[$area->id] = get_string($area->areaname, 'videoassessment');
                 }
             } else {
-                $areaIds[] = $area->id;
+                $areas[$area->id] = get_string($area->areaname, 'videoassessment');
             }
         }
     }
@@ -48,12 +48,14 @@ if (is_array($areasGrading)) {
 $gradingDefinitionTeacher = $DB->get_record('grading_definitions', array('areaid' => $areaTeacherId));
 // Check exist teacher's rubric
 if (!$gradingDefinitionTeacher) {
-    redirect('/mod/videoassessment/view.php?id='.$PAGE->cm->id, get_string('duplicateerrors', 'videoassessment'));
+    redirect(new \moodle_url('/grade/grading/manage.php', array('areaid' => $areaTeacherId)), get_string('pleasedefinerubricforteacher', 'videoassessment'));
 }
 // Get information of Rubric
 $manager = get_grading_manager($areaTeacherId);
 // Get the currently active method
 $method = $manager->get_active_method();
+
+$PAGE->requires->css(new \moodle_url('/mod/videoassessment/duplicate.css'));
 
 $url = new moodle_url('/mod/videoassessment/rubric/duplicate.php', array('id' => $cmid));
 $PAGE->set_url($url);
@@ -65,7 +67,7 @@ $data->id = $cmid;
 $data->contextid = $context->id;
 
 // Create form duplicate
-$dForm = new \mod_videoassessment_rubric_form_duplicate();
+$dForm = new \mod_videoassessment_rubric_form_duplicate('', array('areas' => $areas));
 $dForm->set_data($data);
 
 // Post form
@@ -73,91 +75,57 @@ if ($data = $dForm->get_data()) {
     /**
      * Check rubric in grading_definitions
      */
-    $inAreaIds = implode(',', array_values($areaIds));
+    $areas = $data->areas;
+    $inAreaIds = implode(',', array_keys($areas));
     $areaDefinitions = $DB->get_records_sql('SELECT areaid FROM {grading_definitions} WHERE areaid IN (' . $areaTeacherId . ',' . $inAreaIds . ')');
 
-    if (is_array($areaDefinitions)) {
-        foreach ($areaDefinitions as $areaDefinition) {
-            if(($key = array_search($areaDefinition->areaid, $areaIds)) !== false) {
-                unset($areaIds[$key]);
-            }
-        }
-    }
-
-    if (is_null($areaIds) || empty($areaIds)) {
-        redirect('/mod/videoassessment/view.php?id='.$PAGE->cm->id, get_string('duplicateerrors', 'videoassessment'));
-    }
     /**
      * Insert to grading_definitions table
      * Get id definitions of new record after insert
      */
     // $gradingDefinitionOther : Object use insert data to grading_definitions table (data: peer, self, class)
-    $gradingDefinitionOther = clone $gradingDefinitionTeacher;
+    $transaction = $DB->start_delegated_transaction();
 
-    foreach ($areaIds as $areaId) {
-        $gradingDefinitionOther->areaid = $areaId;
-        $definitionIds[] = $DB->insert_record('grading_definitions', $gradingDefinitionOther);
-    }
+    try {
+        $gradingDefinitionOther = clone $gradingDefinitionTeacher;
 
-    if (is_null($definitionIds)) {
-        redirect('/mod/videoassessment/view.php?id='.$PAGE->cm->id, get_string('duplicateerrors', 'videoassessment'));
-    }
-    /**
-     * Insert to gradingForm_rubric_criteria table
-     * Get ids criteria of new record after insert
-     */
-    $gradingsFormCriteria = $DB->get_records('gradingform_rubric_criteria', array('definitionid' => $gradingDefinitionTeacher->id));
-    $criteriaTeacherIds = array(); // Array save criteria teacher data
+        foreach ($areas as $areaId => $val) {
+            $gradingDefinitionOther->areaid = $areaId;
+            $definitionIds[] = $DB->insert_record('grading_definitions', $gradingDefinitionOther);
+        }
 
-    if (is_array($gradingsFormCriteria)) {
-        foreach ($definitionIds as $definitionId) {
-            foreach ($gradingsFormCriteria as $gradingFormCriteria) {
-                $gradingFormCriteriaOther = clone $gradingFormCriteria;
-                $gradingFormCriteriaOther->definitionid = $definitionId;
-                $criteriaIds[] = $DB->insert_record('gradingform_rubric_criteria', $gradingFormCriteriaOther);
-                $criteriaTeacherIds[$gradingFormCriteria->id] = $gradingFormCriteria->id;
+        if (is_null($definitionIds)) {
+            redirect(new \moodle_url('/mod/videoassessment/view.php', array('id' => $PAGE->cm->id)), get_string('duplicateerrors', 'videoassessment'));
+        }
+        /**
+         * Insert to gradingForm_rubric_criteria table
+         * Get ids criteria of new record after insert
+         */
+        $gradingsFormCriteria = $DB->get_records('gradingform_rubric_criteria', array('definitionid' => $gradingDefinitionTeacher->id));
+
+        if (is_array($gradingsFormCriteria)) {
+            foreach ($definitionIds as $definitionId) {
+                foreach ($gradingsFormCriteria as $gradingFormCriteria) {
+                    $gradingFormCriteriaOther = clone $gradingFormCriteria;
+                    $gradingFormCriteriaOther->definitionid = $definitionId;
+
+                    $criteriaId = $DB->insert_record('gradingform_rubric_criteria', $gradingFormCriteriaOther);
+
+                    $gradingRubricLevels = $DB->get_records('gradingform_rubric_levels', array('criterionid' => $gradingFormCriteria->id));
+
+                    foreach ($gradingRubricLevels as $gradingRubricLevel) {
+                        $gradingRubricLevelTeacherOther = clone $gradingRubricLevel;
+                        $gradingRubricLevelTeacherOther->criterionid = $criteriaId;
+                        $result = $DB->insert_record('gradingform_rubric_levels', $gradingRubricLevelTeacherOther);
+                    }
+                }
             }
         }
-    }
 
-    if (is_null($criteriaIds)) {
-        //Delete grading_definitions
-        $definitionIds = implode(',', array_values($definitionIds));
-        $DB->delete_records_select('grading_definitions', 'id IN (' . $definitionIds . ')');
-        //Redirect
-        redirect('/mod/videoassessment/view.php?id='.$PAGE->cm->id, get_string('duplicateerrors', 'videoassessment'));
-    }
-    /**
-     * Insert to gradingForm_rubric_levels table
-     * Return true | false
-     */
-    $criteriaTeacherIdLevels = implode(',', array_values($criteriaTeacherIds));
-    $gradingRubricLevelsTeacher = $DB->get_records_sql('SELECT * FROM {gradingform_rubric_levels} WHERE criterionid IN (' . $criteriaTeacherIdLevels . ')');
-    $criteriaLevelDuplicate = array();
-
-    if (is_array($gradingRubricLevelsTeacher)) {
-        foreach ($criteriaIds as $criteriaId) {
-            foreach ($gradingRubricLevelsTeacher as $gradingRubricLevelTeacher) {
-                $gradingRubricLevelTeacherOther = clone $gradingRubricLevelTeacher;
-                $gradingRubricLevelTeacherOther->criterionid = $criteriaId;
-                $criteriaLevelDuplicate[] = $gradingRubricLevelTeacherOther;
-            }
-        }
-    }
-
-    $success = $DB->insert_records('gradingform_rubric_levels', $criteriaLevelDuplicate);
-
-    if (!$success) {
-        redirect('/mod/videoassessment/view.php?id='.$PAGE->cm->id, get_string('duplicatesuccess', 'videoassessment'));
-    } else {
-        //Delete grading_definitions
-        $definitionIds = implode(',', array_values($definitionIds));
-        $DB->delete_records_select('grading_definitions', 'id IN (' . $definitionIds . ')');
-        //Delete gradingform_rubric_criteria
-        $criteriaIds = implode(',', array_values($criteriaIds));
-        $DB->delete_records_select('gradingform_rubric_criteria', 'id IN (' . $criteriaIds . ')');
-        //Redirect
-        redirect('/mod/videoassessment/view.php?id='.$PAGE->cm->id, get_string('duplicateerrors', 'videoassessment'));
+        $transaction->allow_commit();
+        redirect(new \moodle_url('/mod/videoassessment/view.php', array('id' => $PAGE->cm->id)), get_string('duplicatesuccess', 'videoassessment'));
+    } catch (Exception $e) {
+        $transaction->rollback($e);
     }
 } else { //Default page
     echo $OUTPUT->header();

@@ -176,7 +176,7 @@ class va {
             $PAGE->requires->css('/mod/videoassessment/font/font-awesome/css/font-awesome.min.css');
         }
 
-        if ($action == 'report')
+        if ($action == 'report' || $action == 'publish')
         {
             $PAGE->requires->css('/mod/videoassessment/view.css');
         }
@@ -1025,8 +1025,22 @@ class va {
         $user = $DB->get_record('user', array('id' => optional_param('userid', 0, PARAM_INT)));
 
         $gradertype = optional_param('gradertype', '', PARAM_ALPHA);
+
+        if ($gradertype == 'training' && $USER->id != $user->id && !$this->is_teacher()) {
+            $this->view_redirect();
+        }
+
         if ($gradertype != 'class' && $gradertype != 'training') {
             $gradertype = $this->get_grader_type($user->id);
+        }
+
+        $passtraining = $DB->get_field('videoassessment_aggregation', 'passtraining', array(
+            'videoassessment' => $this->va->id,
+            'userid' => $user->id
+        ));
+
+        if ($gradertype == 'training' && ($passtraining || !$this->va->training)) {
+            $this->view_redirect();
         }
 
         $mformdata = (object)array(
@@ -1151,147 +1165,196 @@ class va {
      *
      */
     private function view_result() {
-        global $DB, $USER, $PAGE;
+        global $DB, $USER, $PAGE, $CFG;
 
         $gradingarea = 'beforetraining';
         $user = $DB->get_record('user', array('id' => optional_param('userid', 0, PARAM_INT)));
 
         if ($this->is_graded_by_current_user($user->id, $gradingarea, $user->id)) {
-            $rubric = new rubric($this, array($gradingarea));
-            $controller = $rubric->get_available_controller($gradingarea);
-
-            $itemid = null;
-            $itemid = $this->get_grade_item($gradingarea, $user->id);
-            $instanceid = optional_param('advancedgradinginstanceid', 0, PARAM_INT);
-
-            $studentinstance = $controller->get_or_create_instance($instanceid, $USER->id, $itemid)->get_current_instance();
-            $studentfilling = $studentinstance->get_rubric_filling();
-
-            $teacher = $DB->get_record_sql('
+            
+            if ($this->is_teacher()) {
+                $studentid = $user->id;
+                $teacherid = $USER->id;
+            } else {
+                $teacher = $DB->get_record_sql('
                 SELECT gi.grader
                 FROM {videoassessment_grade_items} gi
                 WHERE gi.type = :type AND videoassessment = :videoassessment AND gradeduser = :gradeduser AND grader <> :grader
                 ORDER BY gi.id DESC
                 LIMIT 0, 1
                 ',
-                array(
-                    'type' => $gradingarea,
-                    'videoassessment' => $this->va->id,
-                    'gradeduser' => $user->id,
-                    'grader' => $user->id
-                )
-            );
+                    array(
+                        'type' => $gradingarea,
+                        'videoassessment' => $this->va->id,
+                        'gradeduser' => $user->id,
+                        'grader' => $user->id
+                    )
+                );
 
-            $teacherfilling = array();
-            if ($teacher) {
-                $itemid = $this->get_grade_item($gradingarea, $user->id, $teacher->grader);
-                $teacherinstance = $controller->get_or_create_instance($instanceid, $teacher->grader, $itemid)->get_current_instance();
-                $teacherfilling = $teacherinstance->get_rubric_filling();
-            }
+                $studentid = $USER->id;
 
-            $definition = $controller->get_definition();
-            $o = '';
-
-            $o .= \html_writer::start_tag('div', array('class' => 'clearfix'));
-            $o .= \html_writer::start_tag('div', array('class' => 'assess-form-videos'));
-
-            $data = $DB->get_record('videoassessment_videos', array('id' => $this->va->trainingvideoid));
-            if (!empty($data)) {
-                if ($video = new video($this->context, $data)) {
-                    $o .= \html_writer::start_tag('div', array('class' => 'video-wrap'));
-                    $o .= $this->output->render($video);
-                    $o .= \html_writer::end_tag('div');
-                }
-            }
-
-            $o .= \html_writer::end_tag('div');
-            $o .= \html_writer::start_tag('div', array('id' => 'training-result-wrap'));
-            $o .= \html_writer::start_tag('h2');
-            $o .= self::str('results');
-            $o .= \html_writer::end_tag('h2');
-            $o .= \html_writer::start_tag('table', array('id' => 'training-result-table'));
-
-            $passed = true;
-            $even = 1;
-            foreach ($definition->rubric_criteria as $rid => $rubric) {
-                if ($even == 1) {
-                    $even = 0;
-                    $trclass = 'even';
+                if ($teacher) {
+                    $teacherid = $teacher->grader;
                 } else {
-                    $even = 1;
-                    $trclass = 'odd';
+                    $teacherid = null;
                 }
-
-                $o .= \html_writer::start_tag('tr', array('class' => $trclass));
-
-                $o .= \html_writer::start_tag('td');
-                $o .= $rubric['description'];
-                $o .= \html_writer::end_tag('td');
-
-                $o .= \html_writer::start_tag('td');
-                $o .= \html_writer::start_tag('table');
-                $o .= \html_writer::start_tag('tr');
-
-                $scores = array();
-
-                foreach ($rubric['levels'] as $lid => $level) {
-                    $o .= \html_writer::start_tag('td');
-                    $o .= \html_writer::start_tag('div');
-                    $o .= $level['definition'];
-                    $o .= \html_writer::end_tag('div');
-                    $o .= \html_writer::start_tag('div', array('class' => 'score'));
-                    $o .= $level['score'] . ' ' . get_string('points', 'grades');
-                    $o .= \html_writer::end_tag('div');
-                    $o .= \html_writer::start_tag('div', array('class' => 'score-selected-wrap'));
-
-                    if ($studentfilling['criteria'][$rid]['levelid'] == $lid) {
-                        $o .= \html_writer::start_tag('span', array('class' => 'student-selected score-selected'));
-                        $o .= self::str('self');
-                        $o .= \html_writer::end_tag('span');
-                    }
-
-                    if (!empty($teacherfilling) && $teacherfilling['criteria'][$rid]['levelid'] == $lid) {
-                        $o .= \html_writer::start_tag('span', array('class' => 'teacher-selected score-selected'));
-                        $o .= self::str('teacher');
-                        $o .= \html_writer::end_tag('span');
-                    }
-
-                    $o .= \html_writer::end_tag('td');
-                    $o .= \html_writer::end_tag('td');
-
-                    $scores[$lid] = $level['score'];
-                }
-
-                $o .= \html_writer::end_tag('tr');
-                $o .= \html_writer::end_tag('table');
-                $o .= \html_writer::end_tag('td');
-
-                if (!empty($teacherfilling)) {
-                    $minscore = min($scores);
-                    $maxscore = max($scores);
-                    $differencescore = abs($scores[$studentfilling['criteria'][$rid]['levelid']] - $scores[$teacherfilling['criteria'][$rid]['levelid']]);
-                    $accepteddifference = $this->va->accepteddifference;
-                    $difference = ($differencescore / ($maxscore - $minscore + 1)) * 100;
-
-                    $o .= \html_writer::start_tag('td', array('class' => 'status'));
-
-                    if ($difference > $accepteddifference) {
-                        $passed = false;
-                        $icon = 'failed';
-                    } else {
-                        $icon = 'passed';
-                    }
-
-                    $o .= \html_writer::img('images/' . $icon . '.png', $icon);
-
-                    $o .= \html_writer::end_tag('td');
-                }
-
-                $o .= \html_writer::end_tag('tr');
             }
 
-            $o .= \html_writer::end_tag('table');
+            $rubric = new rubric($this, array($gradingarea));
+            $o = '';
+            
+            if (!empty($rubric)) {
+                $controller = $rubric->get_available_controller($gradingarea);
 
+                $o .= \html_writer::start_tag('div', array('class' => 'clearfix'));
+                $o .= \html_writer::start_tag('div', array('class' => 'assess-form-videos'));
+                
+                $data = $DB->get_record('videoassessment_videos', array('id' => $this->va->trainingvideoid));
+                if (!empty($data)) {
+                    if ($video = new video($this->context, $data)) {
+                        $o .= \html_writer::start_tag('div', array('class' => 'video-wrap'));
+                        $o .= $this->output->render($video);
+                        $o .= \html_writer::end_tag('div');
+                    }
+                }
+                
+                $o .= \html_writer::end_tag('div');
+                $o .= \html_writer::start_tag('div', array('id' => 'training-result-wrap'));
+                
+                $o .= \html_writer::start_tag('h2');
+                $o .= self::str('results');
+                $o .= \html_writer::end_tag('h2');
+                
+                if (!empty($controller)) {
+                    $itemid = null;
+                    $itemid = $this->get_grade_item($gradingarea, $user->id, $studentid);
+                    $instanceid = optional_param('advancedgradinginstanceid', 0, PARAM_INT);
+                    
+                    $studentinstance = $controller->get_or_create_instance($instanceid, $studentid, $itemid)->get_current_instance();
+                    $studentfilling = $studentinstance->get_rubric_filling();
+                    
+                    $teacherfilling = array();
+                    if ($teacherid) {
+                        $itemid = $this->get_grade_item($gradingarea, $user->id, $teacherid);
+                        $teacherinstance = $controller->get_or_create_instance($instanceid, $teacherid, $itemid)->get_current_instance();
+                        $teacherfilling = $teacherinstance->get_rubric_filling();
+                    }
+                    
+                    $definition = $controller->get_definition();
+                    
+                    $o .= \html_writer::start_tag('div', array('id' => 'training-desc'));
+                    $o .= \html_writer::start_tag('h5');
+                    $o .= str_replace('xx', $this->va->accepteddifference, $this->va->trainingdesc);
+                    $o .= \html_writer::end_tag('h5');
+                    $o .= \html_writer::end_tag('div');
+                    
+                    $o .= \html_writer::start_tag('table', array('id' => 'training-result-table'));
+                    
+                    $passed = true;
+                    $even = 1;
+                    
+                    if (!empty($definition)) {
+                        foreach ($definition->rubric_criteria as $rid => $rubric) {
+                            if ($even == 1) {
+                                $even = 0;
+                                $trclass = 'even';
+                            } else {
+                                $even = 1;
+                                $trclass = 'odd';
+                            }
+                    
+                            $o .= \html_writer::start_tag('tr', array('class' => $trclass));
+                    
+                            $o .= \html_writer::start_tag('td', array('class' => 'bold'));
+                            $o .= $rubric['description'];
+                            $o .= \html_writer::end_tag('td');
+                    
+                            $o .= \html_writer::start_tag('td');
+                            $o .= \html_writer::start_tag('table');
+                            $o .= \html_writer::start_tag('tr');
+                    
+                            $scores = array();
+                    
+                            foreach ($rubric['levels'] as $lid => $level) {
+                    
+                                $selecteds = '';
+                                $tdclass = '';
+                                $selected = false;
+                    
+                                if ($studentfilling['criteria'][$rid]['levelid'] == $lid) {
+                                    $selecteds .= \html_writer::start_tag('span', array('class' => 'student-selected score-selected'));
+                                    $selecteds .= self::str('self');
+                                    $selecteds .= \html_writer::end_tag('span');
+                                    $selecteds .= '<br>';
+                    
+                                    $tdclass .= ' student-td';
+                                    $selected = true;
+                                }
+                    
+                                if (!empty($teacherfilling) && $teacherfilling['criteria'][$rid]['levelid'] == $lid) {
+                                    $selecteds .= \html_writer::start_tag('span', array('class' => 'teacher-selected score-selected'));
+                                    $selecteds .= self::str('teacher');
+                                    $selecteds .= \html_writer::end_tag('span');
+                                    $selecteds .= '<br>';
+                    
+                                    $tdclass .= ' teacher-td';
+                                    $selected = true;
+                                }
+                    
+                                if ($selected) {
+                                    $tdclass .= ' selected';
+                                }
+                    
+                                $o .= \html_writer::start_tag('td', array('class' => $tdclass));
+                                $o .= \html_writer::start_tag('div');
+                                $o .= $level['definition'];
+                                $o .= \html_writer::end_tag('div');
+                                $o .= \html_writer::start_tag('div', array('class' => 'score'));
+                                $o .= $level['score'] . ' ' . get_string('points', 'grades');
+                                $o .= \html_writer::end_tag('div');
+                                $o .= \html_writer::start_tag('div', array('class' => 'score-selected-wrap'));
+                    
+                                $o .= $selecteds;
+                    
+                                $o .= \html_writer::end_tag('td');
+                                $o .= \html_writer::end_tag('td');
+                    
+                                $scores[$lid] = $level['score'];
+                            }
+                    
+                            $o .= \html_writer::end_tag('tr');
+                            $o .= \html_writer::end_tag('table');
+                            $o .= \html_writer::end_tag('td');
+                    
+                            if (!empty($teacherfilling)) {
+                                $minscore = min($scores);
+                                $maxscore = max($scores);
+                                $differencescore = abs($scores[$studentfilling['criteria'][$rid]['levelid']] - $scores[$teacherfilling['criteria'][$rid]['levelid']]);
+                                $accepteddifference = $this->va->accepteddifference;
+                                $difference = ($differencescore / ($maxscore - $minscore)) * 100;
+                    
+                                $o .= \html_writer::start_tag('td', array('class' => 'status'));
+                    
+                                if ($difference > $accepteddifference) {
+                                    $passed = false;
+                                    $icon = 'failed';
+                                } else {
+                                    $icon = 'passed';
+                                }
+                    
+                                $o .= \html_writer::img('images/' . $icon . '.gif', $icon);
+                    
+                                $o .= \html_writer::end_tag('td');
+                            }
+                    
+                            $o .= \html_writer::end_tag('tr');
+                        }
+                    }
+                    
+                    $o .= \html_writer::end_tag('table');
+                }
+            }
+            
             $agg = $DB->get_record('videoassessment_aggregation', array(
                 'videoassessment' => $this->va->id,
                 'userid' => $user->id
@@ -1299,7 +1362,7 @@ class va {
 
             $o .= \html_writer::start_tag('div', array('class' => 'result-notice'));
 
-            if (!$agg->passtraining && $passed) {
+            if (!$agg->passtraining && $passed && $teacherfilling) {
                 $agg->passtraining = 1;
 
                 $DB->update_record('videoassessment_aggregation', $agg);
@@ -1461,8 +1524,8 @@ class va {
 
                 $course = (object)array(
                         'category' => $data->category,
-                        'fullname' => $data->fullname,
-                        'shortname' => $data->shortname
+                        'fullname' => trim($data->fullname),
+                        'shortname' => trim($data->shortname)
                 );
                 $course = create_course($course);
 
@@ -1482,6 +1545,12 @@ class va {
 
             foreach ($videos as $videoid => $value) {
                 $video = $DB->get_record('videoassessment_videos', array('id' => $videoid));
+                $file = $fs->get_file($this->context->id, 'mod_videoassessment', 'video', 0, $video->filepath, $video->filename);
+
+                if (empty($file)) {
+                    continue;
+                }
+
                 $assocs = $this->get_video_associations($videoid);
                 $assocnames = array();
                 foreach ($assocs as $assoc) {
@@ -1501,7 +1570,7 @@ class va {
                 // モジュールオプション追加
                 $resource = new \stdClass();
                 $resource->course = $course->id;
-                $resource->name = $data->prefix . $modulename . $data->suffix;
+                $resource->name = trim($data->prefix) . $modulename . trim($data->suffix);
                 $resource->display = 1;
                 $resource->timemodified = time();
                 $resource->coursemodule = $cm->id;
@@ -1528,7 +1597,6 @@ class va {
                 $DB->set_field('course_modules', 'section', $sectionid, array('id' => $cm->id));
 
                 // ファイル追加
-                $file = $fs->get_file($this->context->id, 'mod_videoassessment', 'video', 0, $video->filepath, $video->filename);
                 $newfile = array(
                         'contextid' => \context_module::instance($cm->id)->id,
                         'component' => 'mod_resource',
@@ -2027,8 +2095,8 @@ class va {
         $table = new table_export();
         $table->filename = $this->cm->name.'.xls';
         $fullnamestr = util::get_fullname_label();
-        $table->set(0, 0, va::str('title') . ': ' . $this->cm->name);
-        $table->set(0, 1, va::str('groupname') . ': ' . $groupname);
+        $table->set(0, 0, va::str('title') . ' ' . $this->cm->name);
+        $table->set(0, 1, va::str('groupname') . ' ' . $groupname);
         $table->set(1, 0, get_string('idnumber'));
         $table->set(1, 1, $fullnamestr);
 //         $table->set(0, 2, va::str('beforeafter'));

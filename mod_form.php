@@ -144,6 +144,12 @@ class mod_videoassessment_mod_form extends moodleform_mod {
             $mform->addElement('hidden', 'trainingvideoid');
             $mform->setType('trainingvideoid', PARAM_INT);
             
+            $mform->addElement('textarea', 'trainingdesc',
+                get_string('trainingdesc', 'videoassessment'),
+                array('cols' => 50, 'rows' => 8)
+            );
+            $mform->setDefault('trainingdesc', get_string('trainingdesctext', 'videoassessment'));
+            
             for ($i = 100; $i >= 0; $i--) {
                 $ratingopts[$i] = $i . '%';
             }

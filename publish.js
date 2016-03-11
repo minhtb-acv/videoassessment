@@ -4,6 +4,7 @@ jQuery(function($) {
     $('#publish-category').change(function() {
         var catid = $(this).val();
         var url = $(this).closest('form').attr('action');
+        var currentcourseid = $('#publish-course').val();
 
         $.ajax({
             method: 'post',
@@ -11,6 +12,7 @@ jQuery(function($) {
             data: {
                 ajax: 1,
                 catid: catid,
+                currentcourseid: currentcourseid,
                 action: 'getcoursesbycategory',
             },
             success: function(data) {
@@ -18,14 +20,16 @@ jQuery(function($) {
 
                 if (data.html) {
                     $('#publish-course').html(data.html);
+                    $('#publish-course').trigger('change');
                 }
             }
         });
     }).change();
 
-    $(document).on('change', '#publish-course', function() {
+    $('#publish-course').change(function() {
         var courseid = $(this).val();
         var url = $(this).closest('form').attr('action');
+        var currentsectionid = $('#publish-section').val();
 
         if (courseid != 0) {
             $('#publish-fullname').attr('disabled', 'disabled');
@@ -37,6 +41,7 @@ jQuery(function($) {
                 data: {
                     ajax: 1,
                     courseid: courseid,
+                    currentsectionid: currentsectionid,
                     action: 'getsectionsbycourse',
                 },
                 success: function (data) {
@@ -50,12 +55,15 @@ jQuery(function($) {
                     }
                 }
             });
+
+            $('#publish-fullname').attr('disabled', 'disabled').val('');
+            $('#publish-shortname').attr('disabled', 'disabled').val('');
         } else {
-            $('#publish-section').attr('disabled', 'disabled');
+            $('#publish-section').attr('disabled', 'disabled').html('');
             $('#publish-fullname').removeAttr('disabled');
             $('#publish-shortname').removeAttr('disabled');
         }
-    });
+    }).change();
 
     $(document).on('change', '.video-check', function() {
         var check = $(this).prop('checked');

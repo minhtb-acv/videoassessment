@@ -94,10 +94,10 @@ function videoassessment_supports($feature) {
 function videoassessment_grading_areas_list() {
     return array(
         'beforeteacher' => get_string('teacher', 'videoassessment'),
+        'beforetraining' => get_string('trainingpretest', 'videoassessment'),
         'beforeself' => get_string('self', 'videoassessment'),
         'beforepeer' => get_string('peer', 'videoassessment'),
         'beforeclass' => get_string('class', 'videoassessment'),
-        'beforetraining' => get_string('trainingpretest', 'videoassessment')
     );
 }
 /* END MinhTB VERSION 2 07-03-2016 */
