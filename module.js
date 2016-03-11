@@ -124,7 +124,8 @@ if (!M.mod_videoassessment) {
             var html = '<iframe class="videopreview" width="420" height="370" src="'+src+'"></iframe>';
 
             this.videopreviewpanel.set("bodyContent", html);
-            this.videopreviewpanel.show();
+            this.videopreviewpanel.set("visible", true);
+            this.videopreviewpanel.focus();
         },
 
         videos_show_video_preview_by_user: function(userid, timing) {

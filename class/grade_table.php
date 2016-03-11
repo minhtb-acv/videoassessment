@@ -404,7 +404,7 @@ class grade_table {
                 $content = $video->render_thumbnail(va::str('previewvideo'));
                 $row[1] = \html_writer::tag(
                     'a', $content, array(
-                        'onclick' => 'M.mod_videoassessment.videos_show_video_preview_by_user('.$user->id.',\'before\')',
+                        'onclick' => 'M.mod_videoassessment.videos_show_video_preview('.$this->va->va->trainingvideoid.')',
                         'href' => 'javascript:void(0)'
                     )
                 );
