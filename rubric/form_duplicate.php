@@ -24,6 +24,7 @@ class mod_videoassessment_rubric_form_duplicate extends moodleform {
         $dform->setType('contextid', PARAM_INT);
 
         $firstArea = true;
+        
         foreach ($areas as $areaId => $areaName) {
             if ($firstArea) {
                 $label = get_string('duplicatefor', 'videoassessment');
