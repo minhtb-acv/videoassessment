@@ -13,7 +13,7 @@
     page-break-before: always;
 }
 
-.rubrics-beforetraining {
+#rubrics-beforetraining {
     display: none;
 }
 
@@ -110,7 +110,7 @@
         border-bottom: 0;
     }
     
-    .rubrics-beforetraining {
+    #rubrics-beforetraining {
         display: none;
     }
     

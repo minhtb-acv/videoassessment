@@ -326,6 +326,9 @@ if (!M.mod_videoassessment) {
                                 });
                             }
                         }
+                        node.one("#rubrics-beforetraining").all('.pagebreak').each(function (pagebreak) {
+                            pagebreak.remove();
+                        });
                         /* /Xuan Anh : Use when print report */
 
                         node.one("#heading-"+timing+gradertype).setStyle("display", "none");
