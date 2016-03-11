@@ -63,3 +63,4 @@ $string['trainingdesc'] = 'Training explanation';
 $string['trainingdeschelp'] = 'Training explanation text';
 $string['trainingdesctext'] = 'To pass this training, you (red score) must evaluate each scale within xx% of the teacher’s score (green score). If you are xx% or under, you receive a “maru” “O”. If you are over xx%, you receive a “batsu” “X”. All scales must be “O” before you can pass.';
 $string['viewresult'] = 'View result';
+$string['beforetraining'] = 'Training';
