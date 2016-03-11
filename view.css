@@ -43,3 +43,9 @@
     -moz-box-sizing: border-box;
     box-sizing: border-box;
 }
+
+/* MinhTB VERSION 2 11-03-2016 */
+#rubrics-beforetraining {
+    display: none;
+}
+/* END MinhTB VERSION 2 11-03-2016 */
