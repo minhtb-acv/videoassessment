@@ -1275,6 +1275,7 @@ class va {
                         $selecteds .= \html_writer::start_tag('span', array('class' => 'student-selected score-selected'));
                         $selecteds .= self::str('self');
                         $selecteds .= \html_writer::end_tag('span');
+                        $selecteds .= '<br>';
 
                         $tdclass .= ' student-td';
                         $selected = true;
@@ -1284,6 +1285,7 @@ class va {
                         $selecteds .= \html_writer::start_tag('span', array('class' => 'teacher-selected score-selected'));
                         $selecteds .= self::str('teacher');
                         $selecteds .= \html_writer::end_tag('span');
+                        $selecteds .= '<br>';
 
                         $tdclass .= ' teacher-td';
                         $selected = true;
