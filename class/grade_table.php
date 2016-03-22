@@ -443,6 +443,8 @@ class grade_table {
     }
 
     private function setup_header() {
+        global $USER, $OUTPUT;
+
         $this->data = array();
         $this->classes = array();
 
@@ -455,6 +457,20 @@ class grade_table {
         if ($this->domid == 'gradetableteacher' && $this->va->va->training) {
             $n = 1;
             $row1[$s + $n + 1] = get_string('training', 'videoassessment');
+
+            if ($this->va->is_graded_by_current_user($USER->id, $timing.'training', $USER->id)) {
+                $button = 'assessagain';
+            } else {
+                $button = 'firstassess';
+            }
+
+            $url = new \moodle_url($this->va->viewurl,
+                array('action' => 'assess', 'userid' => $USER->id, 'gradertype' => 'training'));
+
+            $row2[$s + $n + 1] = $OUTPUT->action_link($url,
+                    get_string($button, 'videoassessment'), null,
+                    array('class' => 'button-'.$button));
+
         } else {
             $n = 0;
         }
@@ -688,14 +704,9 @@ class grade_table {
                     $button = 'firstassess';
                 }
 
-                if (isset($passed) && $passed == 1) {
-                    $url = new \moodle_url($this->va->viewurl,
-                            array('action' => 'trainingresult', 'userid' => $user->id));
-                    $button = 'viewresult';
-                } else {
-                    $url = new \moodle_url($this->va->viewurl,
-                            array('action' => 'assess', 'userid' => $user->id, 'gradertype' => 'training'));
-                }
+                $url = new \moodle_url($this->va->viewurl,
+                        array('action' => 'trainingresult', 'userid' => $user->id));
+                $button = 'viewresult';
                 
                 $row[$s + $n + 1] = $OUTPUT->action_link($url,
                         get_string($button, 'videoassessment'), null,
