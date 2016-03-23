@@ -2089,27 +2089,21 @@ class va {
 
         /* MinhTB VERSION 2 02-03-2016 */
         $groupid = groups_get_activity_group($this->cm, true);
-        $group = groups_get_group($groupid, 'name');
-
-        if (!empty($group)) {
-            $groupname = $group->name;
-        } else {
-            $groupname = get_string('allparticipants');
-        }
+        $currentgroup = groups_get_group($groupid, 'name');
 
         $table = new table_export();
         $table->filename = $this->cm->name.'.xls';
         $fullnamestr = util::get_fullname_label();
         $table->set(0, 0, va::str('title') . ' ' . $this->cm->name);
-        $table->set(0, 1, va::str('groupname') . ' ' . $groupname);
         $table->set(1, 0, get_string('idnumber'));
         $table->set(1, 1, $fullnamestr);
 //         $table->set(0, 2, va::str('beforeafter'));
-        $table->set(1, 2, va::str('teacherselfpeer'));
-        $table->set(1, 3, va::str('assessedby').' ('.get_string('idnumber').')');
-        $table->set(1, 4, va::str('assessedby').' ('.$fullnamestr.')');
-        $table->set(1, 5, va::str('total'));
-        $fixedcolumns = 6;
+        $table->set(1, 2, va::str('groupname'));
+        $table->set(1, 3, va::str('teacherselfpeer'));
+        $table->set(1, 4, va::str('assessedby').' ('.get_string('idnumber').')');
+        $table->set(1, 5, va::str('assessedby').' ('.$fullnamestr.')');
+        $table->set(1, 6, va::str('total'));
+        $fixedcolumns = 7;
 
         $rubric = new rubric($this);
         $headercriteria = array();
@@ -2145,15 +2139,32 @@ class va {
 		/* END MinhTB VERSION 2 02-03-2016 */
         foreach ($users as $user) {
             $fullname = fullname($user);
+
+            if (!empty($currentgroup)) {
+                $groupname = $currentgroup->name;
+            } else {
+                $groups = groups_get_all_groups($this->va->course, $user->id);
+                $groupname = array();
+
+                if (!empty($groups)) {
+                    foreach ($groups as $group) {
+                        $groupname[] = $group->name;
+                    }
+                }
+
+                $groupname = implode(', ', $groupname);
+            }
+
             foreach ($this->gradingareas as $gradingarea) {
                 $gradeitems = $this->get_grade_items($gradingarea, $user->id);
                 if ($controller = $rubric->get_controller($gradingarea) and $controller->is_form_available()) {
                     foreach ($gradeitems as $gradeitem) {
                         $table->set($row, 0, $user->idnumber);
                         $table->set($row, 1, $fullname);
+                        $table->set($row, 2, $groupname);
                         if (preg_match('/^(before|after)(self|peer|teacher|class)$/', $gradingarea, $m)) {
 //                             $table->set($row, 2, $timingstrs[$m[1]]);
-                            $table->set($row, 2, $gradertypestrs[$m[2]]);
+                            $table->set($row, 3, $gradertypestrs[$m[2]]);
 
                             if (empty($grader) || $grader->id != $gradeitem->grader) {
                                 $grader = $DB->get_record('user', array('id' => $gradeitem->grader),
@@ -2163,8 +2174,8 @@ class va {
                                 }
                             }
                             if ($grader) {
-                                $table->set($row, 3, $grader->idnumber);
-                                $table->set($row, 4, $gradername);
+                                $table->set($row, 4, $grader->idnumber);
+                                $table->set($row, 5, $gradername);
                             }
                         }
                         $instances = $controller->get_active_instances($gradeitem->id);
@@ -2173,7 +2184,7 @@ class va {
                             $instance = $instances[0];
                             $definition = $instance->get_controller()->get_definition();
                             $filling = $instance->get_rubric_filling();
-                            $table->set($row, 5, $gradeitem->grade);
+                            $table->set($row, 6, $gradeitem->grade);
 
                             foreach ($definition->rubric_criteria as $id => $criterion) {
                                 $critfilling = $filling['criteria'][$id];

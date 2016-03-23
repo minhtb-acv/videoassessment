@@ -587,7 +587,11 @@ class grade_table {
                 if ($passed == 1) {
                     $row[$s + $n + 1] = va::str('passed');
                 } else {
-                    $row[$s + $n + 1] = va::str('failed');
+                    if ($this->va->is_graded_by_current_user($user->id, 'beforetraining', $user->id)) {
+                        $row[$s + $n + 1] = va::str('failed');
+                    } else {
+                        $row[$s + $n + 1] = va::str('notattempted');
+                    }
                 }
             } else {
                 $n = 0;

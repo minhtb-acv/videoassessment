@@ -70,19 +70,20 @@ class mod_videoassessment_mod_form extends moodleform_mod {
             $ratingopts[$i] = $i . '%';
         }
         $mform->addElement('select', 'ratingteacher', get_string('teacher', 'videoassessment'), $ratingopts);
-        $mform->setDefault('ratingteacher', 40);
+        $mform->setDefault('ratingteacher', 80);
         $mform->addHelpButton('ratingteacher', 'ratingteacher', 'videoassessment');
         $mform->addElement('select', 'ratingself', get_string('self', 'videoassessment'), $ratingopts);
-        $mform->setDefault('ratingself', 20);
+        $mform->setDefault('ratingself', 10);
         $mform->addHelpButton('ratingself', 'ratingself', 'videoassessment');
         $mform->addElement('select', 'ratingpeer', get_string('peer', 'videoassessment'), $ratingopts);
-        $mform->setDefault('ratingpeer', 20);
+        $mform->setDefault('ratingpeer', 10);
         $mform->addHelpButton('ratingpeer', 'ratingpeer', 'videoassessment');
         $mform->addElement('select', 'ratingclass', get_string('class', 'videoassessment'), $ratingopts);
-        $mform->setDefault('ratingclass', 20);
+        $mform->setDefault('ratingclass', 0);
         $mform->addHelpButton('ratingclass', 'ratingclass', 'videoassessment');
 
         $mform->addElement('selectyesno', 'delayedteachergrade', get_string('delayedteachergrade', 'videoassessment'));
+        $mform->setDefault('delayedteachergrade', 1);
         $mform->addHelpButton('delayedteachergrade', 'delayedteachergrade', 'videoassessment');
 
 

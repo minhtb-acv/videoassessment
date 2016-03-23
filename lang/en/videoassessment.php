@@ -221,6 +221,7 @@ $string['pleasechoosegradingareas'] = 'Please choose grading areas';
 $string['gradingareadefined'] = 'Can not duplicated because rubric is already exist';
 $string['duplicatefor'] = 'Duplicate for';
 $string['teacherassesstraining'] = 'Assess training pre-test';
+$string['notattempted'] = 'Not attempted';
 
 /* TienNV VERSION 2 */
 $string['trainingvideo'] = 'Training video';
