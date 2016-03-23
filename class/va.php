@@ -1276,11 +1276,9 @@ class va {
                         $o .= $rubric['description'];
                         $o .= \html_writer::end_tag('td');
 
-                        $o .= \html_writer::start_tag('td');
-                        $o .= \html_writer::start_tag('table');
-                        $o .= \html_writer::start_tag('tr');
-
                         $scores = array();
+                        $row = '';
+                        $icon = '';
 
                         foreach ($rubric['levels'] as $lid => $level) {
 
@@ -1312,26 +1310,22 @@ class va {
                                 $tdclass .= ' selected';
                             }
 
-                            $o .= \html_writer::start_tag('td', array('class' => $tdclass));
-                            $o .= \html_writer::start_tag('div');
-                            $o .= $level['definition'];
-                            $o .= \html_writer::end_tag('div');
-                            $o .= \html_writer::start_tag('div', array('class' => 'score'));
-                            $o .= $level['score'] . ' ' . get_string('points', 'grades');
-                            $o .= \html_writer::end_tag('div');
-                            $o .= \html_writer::start_tag('div', array('class' => 'score-selected-wrap'));
+                            $row .= \html_writer::start_tag('td', array('class' => $tdclass));
+                            $row .= \html_writer::start_tag('div');
+                            $row .= $level['definition'];
+                            $row .= \html_writer::end_tag('div');
+                            $row .= \html_writer::start_tag('div', array('class' => 'score'));
+                            $row .= $level['score'] . ' ' . get_string('points', 'grades');
+                            $row .= \html_writer::end_tag('div');
+                            $row .= \html_writer::start_tag('div', array('class' => 'score-selected-wrap'));
 
-                            $o .= $selecteds;
+                            $row .= $selecteds;
 
-                            $o .= \html_writer::end_tag('td');
-                            $o .= \html_writer::end_tag('td');
+                            $row .= \html_writer::end_tag('td');
+                            $row .= \html_writer::end_tag('td');
 
                             $scores[$lid] = $level['score'];
                         }
-
-                        $o .= \html_writer::end_tag('tr');
-                        $o .= \html_writer::end_tag('table');
-                        $o .= \html_writer::end_tag('td');
 
                         if (!empty($teacherfilling) && !empty($studentfilling)) {
                             $minscore = min($scores);
@@ -1340,17 +1334,27 @@ class va {
                             $accepteddifference = $this->va->accepteddifference;
                             $difference = ($differencescore / ($maxscore - $minscore)) * 100;
 
-                            $o .= \html_writer::start_tag('td', array('class' => 'status'));
-
                             if ($difference > $accepteddifference) {
                                 $passed = false;
                                 $icon = 'failed';
                             } else {
                                 $icon = 'passed';
                             }
+                        }
 
+                        $o .= \html_writer::start_tag('td');
+                        $o .= \html_writer::start_tag('table');
+                        $o .= \html_writer::start_tag('tr', array('class' => 'criterion-' . $icon));
+
+                        $o .= $row;
+
+                        $o .= \html_writer::end_tag('tr');
+                        $o .= \html_writer::end_tag('table');
+                        $o .= \html_writer::end_tag('td');
+
+                        if (!empty($icon)) {
+                            $o .= \html_writer::start_tag('td', array('class' => 'status'));
                             $o .= \html_writer::img('images/' . $icon . '.gif', $icon);
-
                             $o .= \html_writer::end_tag('td');
                         }
 
