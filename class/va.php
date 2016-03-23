@@ -1039,7 +1039,7 @@ class va {
             'userid' => $user->id
         ));
 
-        if ($gradertype == 'training' && ($passtraining || !$this->va->training)) {
+        if ($gradertype == 'training' && !$this->is_teacher() && ($passtraining || !$this->va->training)) {
             $this->view_redirect();
         }
 
