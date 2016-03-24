@@ -195,7 +195,7 @@ $string['orderasc'] = 'Ascending';
 $string['orderdesc'] = 'Descending';
 $string['namesort'] = 'First name / Surname';
 $string['title'] = 'Title:';
-$string['groupname'] = 'Group name:';
+$string['groupname'] = 'Group name';
 $string['existingcourseornewcourse'] = 'Publish to an Existing Course<br /> or a New Course';
 $string['insertintosection'] = 'Insert into Section';
 $string['addprefixtolabel'] = 'Add Prefix to Label Name';
@@ -220,6 +220,8 @@ $string['pleasedefinerubricforteacher'] = 'Please define rubric for teacher';
 $string['pleasechoosegradingareas'] = 'Please choose grading areas';
 $string['gradingareadefined'] = 'Can not duplicated because rubric is already exist';
 $string['duplicatefor'] = 'Duplicate for';
+$string['teacherassesstraining'] = 'Assess training pre-test';
+$string['notattempted'] = 'Not attempted';
 
 /* TienNV VERSION 2 */
 $string['trainingvideo'] = 'Training video';

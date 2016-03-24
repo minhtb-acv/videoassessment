@@ -199,19 +199,21 @@
     background: #f0f0f0;
 }
 
-#training-result-table .selected {
-    border: 1px solid #000!important;
-}
-
 #training-result-table table {
     border-collapse: separate;
 }
 
-#training-result-table .teacher-td {
+#training-result-table .criterion-passed .teacher-td {
     background: rgba(163, 214, 173, 0.5);
+    border: 1px solid #000!important;
 }
 
 #training-result-table .student-td {
     background: rgba(238, 121, 121, 0.5)!important;
+    border: 1px solid #000!important;
+}
+
+#training-result-table .criterion-failed .teacher-selected {
+    display: none;
 }
 /* END MinhTB VERSION 2 09-03-2016 */

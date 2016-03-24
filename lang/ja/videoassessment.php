@@ -33,7 +33,7 @@ $string['orderasc'] = '昇順';
 $string['orderdesc'] = '降順';
 $string['namesort'] = 'First name / Surname';
 $string['title'] = 'タイトル：';
-$string['groupname'] = 'グループ名：';
+$string['groupname'] = 'グループ名';
 $string['existingcourseornewcourse'] = 'Publish to an Existing Course<br /> or a New Course';
 $string['insertintosection'] = 'Insert into Section';
 $string['addprefixtolabel'] = 'Add Prefix to Label Name';
@@ -58,6 +58,8 @@ $string['pleasedefinerubricforteacher'] = 'Please define rubric for teacher';
 $string['pleasechoosegradingareas'] = 'Please choose grading areas';
 $string['duplicatefor'] = 'Duplicate for';
 $string['gradingareadefined'] = 'Can not duplicated because rubric is already exist';
+$string['teacherassesstraining'] = 'Assess training pre-test';
+$string['notattempted'] = 'Not attempted';
 
 /* TienNV VERSION 2 */
 $string['trainingvideo'] = 'Training video';
