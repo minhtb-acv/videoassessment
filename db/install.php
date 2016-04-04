@@ -6,7 +6,7 @@ function xmldb_videoassessment_install() {
 	
     // Define field order to be added to user_enrolments
 	$table = new xmldb_table('user_enrolments');
-	$field = new xmldb_field('order', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'enrolid');
+	$field = new xmldb_field('sortorder', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'enrolid');
 
 	// Conditionally launch add field sort
 	if (!$dbman->field_exists($table, $field)) {
@@ -33,7 +33,7 @@ function xmldb_videoassessment_install() {
 
 	// Define field order to be added to groups_members
 	$table = new xmldb_table('groups_members');
-	$field = new xmldb_field('order', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '1');
+	$field = new xmldb_field('sortorder', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '1');
 
 	// Conditionally launch add field order
 	if (!$dbman->field_exists($table, $field)) {

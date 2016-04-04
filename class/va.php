@@ -2468,11 +2468,11 @@ class va {
             $join = ' JOIN {groups_members} gm ON gm.userid = u.id';
             $where = ' AND gm.groupid = :groupid';
             $params['groupid'] = $groupid;
-            $userfields .= ', gm.id as orderid, gm.order as sortorder';
+            $userfields .= ', gm.id as orderid, gm.sortorder as sortorder';
         } else {
             $join = '';
             $where = '';
-            $userfields .= ', ue.id as orderid, ue.order as sortorder';
+            $userfields .= ', ue.id as orderid, ue.sortorder as sortorder';
         }
 
         $sql = "
@@ -2506,11 +2506,11 @@ class va {
             $join = ' JOIN {groups_members} gm ON gm.userid = u.id';
             $where = ' AND gm.groupid = :groupid';
             $params['groupid'] = $groupid;
-            $fields = ', gm.order as sortorder';
+            $fields = ', gm.sortorder as sortorder';
         } else {
             $join = '';
             $where = '';
-            $fields = ', ue.order as sortorder';
+            $fields = ', ue.sortorder as sortorder';
         }
 
         $sql = "

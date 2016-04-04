@@ -38,7 +38,7 @@ if (isset($_POST['sort']) && isset($_POST['id']) && isset($_POST['groupid'])) {
         foreach ($students as $k => $student) {
             $sql = "
                 UPDATE $table t
-                SET t.order = :order
+                SET t.sortorder = :order
                 WHERE t.id = :id
             ";
 
@@ -149,7 +149,7 @@ if ($data = $form->get_data()) {
         foreach ($orderid_arr as $orderid) {
             $sql = "
                 UPDATE $table as t
-                SET t.order = :order
+                SET t.sortorder = :order
                 WHERE t.id = :id
             ";
 

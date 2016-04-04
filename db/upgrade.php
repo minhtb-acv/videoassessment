@@ -265,6 +265,54 @@ function xmldb_videoassessment_upgrade($oldversion = 0) {
         // videoassessment savepoint reached
         upgrade_mod_savepoint(true, 2016031100, 'videoassessment');
     }
+
+    if ($oldversion < 2016033003) {
+        // Define field sortorder to be added to user_enrolments
+        $table = new xmldb_table('user_enrolments');
+        $field = new xmldb_field('sortorder', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'enrolid');
+
+        // Conditionally launch add field sort
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $DB->execute(
+            'UPDATE {user_enrolments} ue SET ue.sortorder = ue.order'
+        );
+
+        // Define field order to be added to groups_members
+        $table = new xmldb_table('groups_members');
+        $field = new xmldb_field('sortorder', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '1');
+
+        // Conditionally launch add field order
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $DB->execute(
+            'UPDATE {groups_members} gm SET gm.sortorder = gm.order'
+        );
+
+        // Delete old field
+        $table = new xmldb_table('user_enrolments');
+        $field = new xmldb_field('order', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'enrolid');
+
+        // Remove field order
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        $table = new xmldb_table('groups_members');
+        $field = new xmldb_field('order', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '1');
+
+        // Remove field order
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // videoassessment savepoint reached
+        upgrade_mod_savepoint(true, 2016033003, 'videoassessment');
+    }
     
     return true;
 }
