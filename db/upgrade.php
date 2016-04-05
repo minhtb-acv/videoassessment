@@ -313,6 +313,40 @@ function xmldb_videoassessment_upgrade($oldversion = 0) {
         // videoassessment savepoint reached
         upgrade_mod_savepoint(true, 2016033003, 'videoassessment');
     }
+
+    if ($oldversion < 2016040400) {
+
+        // Create table videoassessment_sort_items
+        $table = new xmldb_table('videoassessment_sort_items');
+
+        $table->add_field('id', XMLDB_TYPE_INTEGER, 10, null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('itemid', XMLDB_TYPE_INTEGER, 10, null, XMLDB_NOTNULL, null, 0);
+        $table->add_field('type', XMLDB_TYPE_CHAR, 255, null, XMLDB_NOTNULL, null, '');
+        $table->add_field('sortby', XMLDB_TYPE_INTEGER, 10, null, XMLDB_NOTNULL, null, 0);
+
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Create table videoassessment_sort_order
+        $table = new xmldb_table('videoassessment_sort_order');
+
+        $table->add_field('id', XMLDB_TYPE_INTEGER, 10, null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('sortitemid', XMLDB_TYPE_INTEGER, 10, null, XMLDB_NOTNULL, null, 0);
+        $table->add_field('userid', XMLDB_TYPE_INTEGER, 10, null, XMLDB_NOTNULL, null, 0);
+        $table->add_field('sortorder', XMLDB_TYPE_INTEGER, 10, null, XMLDB_NOTNULL, null, 0);
+
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+        $table->add_key('sortitemid', XMLDB_KEY_FOREIGN, array('sortitemid'), 'videoassessment_sort_items', array('id'));
+
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        upgrade_mod_savepoint(true, 2016040400, 'videoassessment');
+    }
     
     return true;
 }
