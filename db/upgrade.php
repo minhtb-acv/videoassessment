@@ -314,7 +314,7 @@ function xmldb_videoassessment_upgrade($oldversion = 0) {
         upgrade_mod_savepoint(true, 2016033003, 'videoassessment');
     }
 
-    if ($oldversion < 2016040400) {
+    if ($oldversion < 2016040700) {
 
         // Create table videoassessment_sort_items
         $table = new xmldb_table('videoassessment_sort_items');
@@ -345,7 +345,111 @@ function xmldb_videoassessment_upgrade($oldversion = 0) {
             $dbman->create_table($table);
         }
 
-        upgrade_mod_savepoint(true, 2016040400, 'videoassessment');
+        try {
+            $transaction = $DB->start_delegated_transaction();
+
+            // Transfer data from table course
+            $courses = $DB->get_records('course');
+
+            if (!empty($courses)) {
+                foreach ($courses as $course) {
+                    $object = new stdClass();
+                    $object->type = 'course';
+                    $object->itemid = $course->id;
+                    $object->sortby = $course->sortby;
+                    $DB->insert_record('videoassessment_sort_items', $object);
+                }
+            }
+
+            // Transfer data from table user_enrolments
+            $ues = $DB->get_records_sql('
+                SELECT ue.id, ue.sortorder, ue.userid, e.courseid
+                FROM {user_enrolments} ue
+                INNER JOIN {enrol} e ON ue.enrolid = e.id
+            ');
+
+            if (!empty($ues)) {
+                foreach ($ues as $ue) {
+                    $sortitem = $DB->get_record('videoassessment_sort_items', array('type' => 'course', 'itemid' => $ue->courseid));
+
+                    if (!empty($sortitem)) {
+                        $object = new stdClass();
+                        $object->sortitemid = $sortitem->id;
+                        $object->userid = $ue->userid;
+                        $object->sortorder = $ue->sortorder;
+                        $DB->insert_record('videoassessment_sort_order', $object);
+                    }
+                }
+            }
+
+            // Transfer data from table groups
+            $groups = $DB->get_records('groups');
+
+            if (!empty($groups)) {
+                foreach ($groups as $group) {
+                    $object = new stdClass();
+                    $object->type = 'group';
+                    $object->itemid = $group->id;
+                    $object->sortby = $group->sortby;
+                    $DB->insert_record('videoassessment_sort_items', $object);
+                }
+            }
+
+            // Transfer data from table groups_members
+            $gms = $DB->get_records('groups_members');
+
+            if (!empty($gms)) {
+                foreach ($gms as $gm) {
+                    $sortitem = $DB->get_record('videoassessment_sort_items', array('type' => 'group', 'itemid' => $gm->groupid));
+
+                    if (!empty($sortitem)) {
+                        $object = new stdClass();
+                        $object->sortitemid = $sortitem->id;
+                        $object->userid = $gm->userid;
+                        $object->sortorder = $gm->sortorder;
+                        $DB->insert_record('videoassessment_sort_order', $object);
+                    }
+                }
+            }
+
+            $transaction->allow_commit();
+        } catch (Exception $e) {
+            $transaction->rollback($e);
+        }
+
+//        // Delete field sortby from course
+//        $table = new xmldb_table('course');
+//
+//        $field = new xmldb_field('sortby');
+//        if ($dbman->field_exists($table, $field)) {
+//            $dbman->drop_field($table, $field);
+//        }
+//
+//        // Delete field sortorder from user_enrolments
+//        $table = new xmldb_table('user_enrolments');
+//
+//        $field = new xmldb_field('sortorder');
+//        if ($dbman->field_exists($table, $field)) {
+//            $dbman->drop_field($table, $field);
+//        }
+//
+//        // Delete field sortby from groups
+//        $table = new xmldb_table('groups');
+//
+//        $field = new xmldb_field('sortby');
+//        if ($dbman->field_exists($table, $field)) {
+//            $dbman->drop_field($table, $field);
+//        }
+//
+//        // Delete field sortorder from groups_members
+//        $table = new xmldb_table('groups_members');
+//
+//        $field = new xmldb_field('sortorder');
+//        if ($dbman->field_exists($table, $field)) {
+//            $dbman->drop_field($table, $field);
+//        }
+
+        upgrade_mod_savepoint(true, 2016040700, 'videoassessment');
     }
     
     return true;

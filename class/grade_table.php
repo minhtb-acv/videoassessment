@@ -9,6 +9,7 @@
 
 namespace videoassess;
 
+use fxlmslink\assign;
 use videoassess\form\assign_class;
 
 require_once $CFG->dirroot . '/mod/videoassessment/class/form/assign_class.php';
@@ -106,12 +107,21 @@ class grade_table {
 
             $groupid = groups_get_activity_group($cm, true, $allowedgroups);
             $groupid = optional_param('group', $groupid, PARAM_INT);
+
             if (!empty($groupid)) {
-                $group = $DB->get_record('groups', array('id' => $groupid), 'sortby');
-                $sort = $group->sortby;
+                $type = 'group';
+                $itemid = $groupid;
             } else {
-                $course = $DB->get_record('course', array('id' => $cm->course), 'sortby');
-                $sort = $course->sortby;
+                $type = 'course';
+                $itemid = $cm->course;
+            }
+
+            $sortitem = $DB->get_record('videoassessment_sort_items', array('type' => $type, 'itemid' => $itemid));
+
+            if (!empty($sortitem)) {
+                $sort = $sortitem->sortby;
+            } else {
+                $sort = assign_class::SORT_ID;
             }
 
             $nsort = optional_param('nsort', null, PARAM_INT);
@@ -210,12 +220,21 @@ class grade_table {
 
         $groupid = groups_get_activity_group($cm, true, $allowedgroups);
         $groupid = optional_param('group', $groupid, PARAM_INT);
+
         if (!empty($groupid)) {
-            $group = $DB->get_record('groups', array('id' => $groupid), 'sortby');
-            $sort = $group->sortby;
+            $type = 'group';
+            $itemid = $groupid;
         } else {
-            $course = $DB->get_record('course', array('id' => $cm->course), 'sortby');
-            $sort = $course->sortby;
+            $type = 'course';
+            $itemid = $cm->course;
+        }
+
+        $sortitem = $DB->get_record('videoassessment_sort_items', array('type' => $type, 'itemid' => $itemid));
+
+        if (!empty($sortitem)) {
+            $sort = $sortitem->sortby;
+        } else {
+            $sort = assign_class::SORT_ID;
         }
 
         $nsort = optional_param('nsort', null, PARAM_INT);
@@ -305,12 +324,21 @@ class grade_table {
 
             $groupid = groups_get_activity_group($cm, true, $allowedgroups);
             $groupid = optional_param('group', $groupid, PARAM_INT);
+
             if (!empty($groupid)) {
-                $group = $DB->get_record('groups', array('id' => $groupid), 'sortby');
-                $sort = $group->sortby;
+                $type = 'group';
+                $itemid = $groupid;
             } else {
-                $course = $DB->get_record('course', array('id' => $cm->course), 'sortby');
-                $sort = $course->sortby;
+                $type = 'course';
+                $itemid = $cm->course;
+            }
+
+            $sortitem = $DB->get_record('videoassessment_sort_items', array('type' => $type, 'itemid' => $itemid));
+
+            if (!empty($sortitem)) {
+                $sort = $sortitem->sortby;
+            } else {
+                $sort = assign_class::SORT_ID;
             }
 
             $nsort = optional_param('nsort', null, PARAM_INT);

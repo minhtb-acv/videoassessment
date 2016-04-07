@@ -10,6 +10,7 @@ require_once $CFG->dirroot . '/mod/videoassessment/locallib.php';
 require_once $CFG->dirroot . '/mod/videoassessment/class/form/assign_class.php';
 
 $cmid = optional_param('id', null, PARAM_INT);
+$groupid = optional_param('groupid', 0, PARAM_INT);
 $cm = get_coursemodule_from_id('videoassessment', $cmid, 0, false, MUST_EXIST);
 require_login($cm->course, true, $cm);
 
@@ -25,34 +26,67 @@ if (isset($_POST['sort']) && isset($_POST['id']) && isset($_POST['groupid'])) {
     $va = new \videoassess\va($context, $cm, $course);
 
     if ($sort == assign_class::SORT_MANUALLY) {
-        $students = $va->get_students_sort($groupid, true);
 
-        if (!empty($groupid)) {
-            $table = '{groups_members}';
-        } else {
-            $table = '{user_enrolments}';
-        }
+        try {
+            $transaction = $DB->start_delegated_transaction();
 
-        $i = 1;
-        $html = '<ul id="manually-list">';
-        foreach ($students as $k => $student) {
-            $sql = "
-                UPDATE $table t
-                SET t.sortorder = :order
-                WHERE t.id = :id
-            ";
+            $students = $va->get_students_sort($groupid, true);
 
-            $params = array(
-                'order' => $i,
-                'id' => $student->orderid
-            );
+            if (!empty($groupid)) {
+                $type = 'group';
+                $itemid = $groupid;
+            } else {
+                $type = 'course';
+                $itemid = $cm->course;
+            }
 
-            $DB->execute($sql, $params);
+            $sortitem = $DB->get_record('videoassessment_sort_items', array('type' => $type, 'itemid' => $itemid));
 
-            $html .= '<li data-orderid="' . $student->orderid . '" class="clearfix">';
-            $html .= '<div class="name">' . fullname($student) . '</div>';
-            $html .= '</li>';
-            $i++;
+            if (!$sortitem) {
+                $object = new \stdClass();
+                $object->type = $type;
+                $object->itemid = $itemid;
+                $object->sortby = 0;
+                $sortitemid = $DB->insert_record('videoassessment_sort_items', $object);
+            } else {
+                $sortitemid = $sortitem->id;
+            }
+
+            $i = 1;
+            $html = '<ul id="manually-list">';
+            foreach ($students as $k => $student) {
+
+                if (!empty($student->orderid)) {
+                    $sql = "
+                        UPDATE {videoassessment_sort_order} vso
+                        SET vso.sortorder = :order
+                        WHERE vso.id = :id
+                    ";
+
+                    $params = array(
+                        'order' => $i,
+                        'id' => $student->orderid
+                    );
+
+                    $DB->execute($sql, $params);
+                } else {
+                    $object = new \stdClass();
+                    $object->sortitemid = $sortitemid;
+                    $object->userid = $student->id;
+                    $object->sortorder = $i;
+
+                    $student->orderid = $DB->insert_record('videoassessment_sort_order', $object);
+                }
+
+                $html .= '<li data-orderid="' . $student->orderid . '" class="clearfix">';
+                $html .= '<div class="name">' . fullname($student) . '</div>';
+                $html .= '</li>';
+                $i++;
+            }
+
+            $transaction->allow_commit();
+        } catch (Exception $e) {
+            $transaction->rollback($e);
         }
 
         $html .= '</ul><div id="manually-hidden"></div>';
@@ -114,15 +148,28 @@ $PAGE->requires->jquery();
 $PAGE->requires->js('/mod/videoassessment/jquery-sortable.js', true);
 $PAGE->requires->js('/mod/videoassessment/assignclass/assignclass.js');
 
-$url = new \moodle_url('/mod/videoassessment/assignclass/index.php', array('id' => $cm->id));
+$url = new \moodle_url('/mod/videoassessment/assignclass/index.php', array('id' => $cm->id, 'groupid' => $groupid));
 $PAGE->set_url($url);
 
 $students = $va->get_students_sort(true);
 
 $groups = $DB->get_records('groups', array('courseid' => $course->id), '', 'id, name');
-$groupid = optional_param('groupid', 0, PARAM_INT);
-$group = $DB->get_record('groups', array('id' => $groupid), 'sortby');
-$sortby = (empty($groupid)) ? $course->sortby : $group->sortby;
+
+if (empty($groupid)) {
+    $itemid = $course->id;
+    $type = 'course';
+} else {
+    $itemid = $groupid;
+    $type = 'group';
+}
+
+$sortitem = $DB->get_record('videoassessment_sort_items', array('type' => $type, 'itemid' => $itemid));
+
+if (!empty($sortitem)) {
+    $sortby = $sortitem->sortby;
+} else {
+    $sortby = 0;
+}
 
 $form = new assign_class(null, (object)array(
     'va' => $va,
@@ -133,58 +180,61 @@ $form = new assign_class(null, (object)array(
 ));
 
 if ($data = $form->get_data()) {
-    $sortby = optional_param('sortby', $form::SORT_ID, PARAM_INT);
-    $groupid = optional_param('groupid', 0, PARAM_INT);
-    $orderid_arr = optional_param_array('orderid', array(), PARAM_INT);
 
-    if (!empty($orderid_arr)) {
-        $i = 1;
+    try {
+        $transaction = $DB->start_delegated_transaction();
+
+        $sortby = $data->sortby;
+        $groupid = $data->groupid;
+        $orderid_arr = optional_param_array('orderid', array(), PARAM_INT);
 
         if (!empty($groupid)) {
-            $table = '{groups_members}';
+            $type = 'group';
+            $itemid = $groupid;
         } else {
-            $table = '{user_enrolments}';
+            $type = 'course';
+            $itemid = $cm->course;
         }
 
-        foreach ($orderid_arr as $orderid) {
-            $sql = "
-                UPDATE $table as t
-                SET t.sortorder = :order
-                WHERE t.id = :id
-            ";
+        $sortitem = $DB->get_record('videoassessment_sort_items', array('type' => $type, 'itemid' => $itemid));
 
-            $params = array(
-                'order' => $i,
-                'id' => $orderid
-            );
-
-            $DB->execute($sql, $params);
-            $i++;
+        if (!$sortitem) {
+            $object = new \stdClass();
+            $object->type = $type;
+            $object->itemid = $itemid;
+            $object->sortby = $sortby;
+            $DB->insert_record('videoassessment_sort_items', $object);
+        } else {
+            $sortitem->sortby = $sortby;
+            $DB->update_record('videoassessment_sort_items', $sortitem);
         }
+
+        if ($sortby = assign_class::SORT_MANUALLY && !empty($orderid_arr)) {
+            $i = 1;
+
+            foreach ($orderid_arr as $orderid) {
+                $sql = "
+                    UPDATE {videoassessment_sort_order} vso
+                    SET vso.sortorder = :order
+                    WHERE vso.id = :id
+                ";
+
+                $params = array(
+                    'order' => $i,
+                    'id' => $orderid
+                );
+
+                $DB->execute($sql, $params);
+                $i++;
+            }
+        }
+
+        $transaction->allow_commit();
+    } catch (Exception $e) {
+        $transaction->rollback($e);
     }
 
-    if (!empty($groupid)) {
-        $table = '{groups}';
-        $url .= '&groupid=' . $groupid;
-    } else {
-        $table = '{course}';
-    }
-
-    $sql = "
-        UPDATE $table
-        SET sortby = :sortby
-        WHERE id = :id
-    ";
-
-    $id = (!empty($groupid)) ? $groupid : $course->id;
-
-    $params = array(
-        'sortby' => $sortby,
-        'id' => $id
-    );
-
-    $DB->execute($sql, $params);
-    redirect($url);
+    //redirect($url);
 }
 
 echo $OUTPUT->header($va);
