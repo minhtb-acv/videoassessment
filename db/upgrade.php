@@ -321,7 +321,7 @@ function xmldb_videoassessment_upgrade($oldversion = 0) {
 
         $table->add_field('id', XMLDB_TYPE_INTEGER, 10, null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
         $table->add_field('itemid', XMLDB_TYPE_INTEGER, 10, null, XMLDB_NOTNULL, null, 0);
-        $table->add_field('type', XMLDB_TYPE_CHAR, 255, null, XMLDB_NOTNULL, null, '');
+        $table->add_field('type', XMLDB_TYPE_CHAR, 20, null, XMLDB_NOTNULL, null, '');
         $table->add_field('sortby', XMLDB_TYPE_INTEGER, 10, null, XMLDB_NOTNULL, null, 0);
 
         $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
