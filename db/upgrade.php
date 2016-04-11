@@ -417,39 +417,44 @@ function xmldb_videoassessment_upgrade($oldversion = 0) {
             $transaction->rollback($e);
         }
 
-//        // Delete field sortby from course
-//        $table = new xmldb_table('course');
-//
-//        $field = new xmldb_field('sortby');
-//        if ($dbman->field_exists($table, $field)) {
-//            $dbman->drop_field($table, $field);
-//        }
-//
-//        // Delete field sortorder from user_enrolments
-//        $table = new xmldb_table('user_enrolments');
-//
-//        $field = new xmldb_field('sortorder');
-//        if ($dbman->field_exists($table, $field)) {
-//            $dbman->drop_field($table, $field);
-//        }
-//
-//        // Delete field sortby from groups
-//        $table = new xmldb_table('groups');
-//
-//        $field = new xmldb_field('sortby');
-//        if ($dbman->field_exists($table, $field)) {
-//            $dbman->drop_field($table, $field);
-//        }
-//
-//        // Delete field sortorder from groups_members
-//        $table = new xmldb_table('groups_members');
-//
-//        $field = new xmldb_field('sortorder');
-//        if ($dbman->field_exists($table, $field)) {
-//            $dbman->drop_field($table, $field);
-//        }
-
         upgrade_mod_savepoint(true, 2016040700, 'videoassessment');
+    }
+
+    if ($oldversion < 2016041100) {
+
+        // Delete field sortby from course
+        $table = new xmldb_table('course');
+
+        $field = new xmldb_field('sortby');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // Delete field sortorder from user_enrolments
+        $table = new xmldb_table('user_enrolments');
+
+        $field = new xmldb_field('sortorder');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // Delete field sortby from groups
+        $table = new xmldb_table('groups');
+
+        $field = new xmldb_field('sortby');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // Delete field sortorder from groups_members
+        $table = new xmldb_table('groups_members');
+
+        $field = new xmldb_field('sortorder');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        upgrade_mod_savepoint(true, 2016041100, 'videoassessment');
     }
     
     return true;
