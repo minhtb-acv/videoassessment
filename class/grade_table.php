@@ -9,7 +9,6 @@
 
 namespace videoassess;
 
-use fxlmslink\assign;
 use videoassess\form\assign_class;
 
 require_once $CFG->dirroot . '/mod/videoassessment/class/form/assign_class.php';
