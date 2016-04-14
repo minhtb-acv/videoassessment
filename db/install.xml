@@ -230,7 +230,7 @@
             <FIELDS>
                 <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" NEXT="itemid"/>
                 <FIELD NAME="itemid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" NEXT="type" PREVIOUS="id"/>
-                <FIELD NAME="type" TYPE="char" LENGTH="20" NOTNULL="true" SEQUENCE="false" NEXT="sortby" PREVIOUS="itemid"/>
+                <FIELD NAME="type" TYPE="char" LENGTH="32" NOTNULL="true" SEQUENCE="false" NEXT="sortby" PREVIOUS="itemid"/>
                 <FIELD NAME="sortby" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" PREVIOUS="type"/>
             </FIELDS>
             <KEYS>

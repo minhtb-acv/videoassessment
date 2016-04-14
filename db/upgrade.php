@@ -321,7 +321,7 @@ function xmldb_videoassessment_upgrade($oldversion = 0) {
 
         $table->add_field('id', XMLDB_TYPE_INTEGER, 10, null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
         $table->add_field('itemid', XMLDB_TYPE_INTEGER, 10, null, XMLDB_NOTNULL, null, 0);
-        $table->add_field('type', XMLDB_TYPE_CHAR, 20, null, XMLDB_NOTNULL, null, '');
+        $table->add_field('type', XMLDB_TYPE_CHAR, 255, null, XMLDB_NOTNULL, null, '');
         $table->add_field('sortby', XMLDB_TYPE_INTEGER, 10, null, XMLDB_NOTNULL, null, 0);
 
         $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
@@ -455,6 +455,18 @@ function xmldb_videoassessment_upgrade($oldversion = 0) {
         }
 
         upgrade_mod_savepoint(true, 2016041100, 'videoassessment');
+    }
+
+    if ($oldversion < 2016041401) {
+
+        $table = new xmldb_table('videoassessment_sort_items');
+        $field = new xmldb_field('type', XMLDB_TYPE_CHAR, 32, null, XMLDB_NOTNULL, null, '');
+
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->change_field_precision($table, $field);
+        }
+
+        upgrade_mod_savepoint(true, 2016041401, 'videoassessment');
     }
     
     return true;
