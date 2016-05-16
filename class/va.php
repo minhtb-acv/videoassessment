@@ -2509,18 +2509,13 @@ class va {
 
         if (!empty($groupid)) {
             $join = ' JOIN {groups_members} gm ON gm.userid = u.id';
-	        $join .= ' LEFT JOIN {videoassessment_sort_items} vsi ON gm.groupid = vsi.itemid AND vsi.type = :type';
-	        $join .= ' LEFT JOIN {videoassessment_sort_order} vso ON vso.sortitemid = vsi.id AND vso.userid = u.id';
-	        $where = ' AND gm.groupid = :groupid';
-	        $params['groupid'] = $groupid;
-	        $params['type'] = 'group';
-            $fields = ', vso.sortorder as sortorder';
+            $where = ' AND gm.groupid = :groupid';
+            $params['groupid'] = $groupid;
+            $fields = ', gm.sortorder as sortorder';
         } else {
-	        $join = ' LEFT JOIN {videoassessment_sort_items} vsi ON e.courseid = vsi.itemid AND vsi.type = :type';
-	        $join .= ' LEFT JOIN {videoassessment_sort_order} vso ON vso.sortitemid = vsi.id AND vso.userid = u.id';
-	        $where = '';
-	        $params['type'] = 'course';
-            $fields = ', vso.sortorder as sortorder';
+            $join = '';
+            $where = '';
+            $fields = ', ue.sortorder as sortorder';
         }
 
         $sql = "
