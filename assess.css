@@ -225,7 +225,7 @@
 }
 
 #fitem_id_advancedgradingbefore > .felement.error > span.error {
-    margin: 0 5px 0 0;
+    display: none;
 }
 
 #fitem_id_advancedgradingbefore > .felement.error > br {
