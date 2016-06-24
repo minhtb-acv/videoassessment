@@ -43,6 +43,11 @@ class assess extends \moodleform {
         $mform->addElement('hidden', 'gradertype', $data->gradertype);
         $mform->setType('gradertype', PARAM_ALPHA);
 
+	    if (!empty($data->rubricspassed)) {
+		    $mform->addElement('hidden', 'rubrics_passed', json_encode($data->rubricspassed));
+		    $mform->setType('rubrics_passed', PARAM_TEXT);
+	    }
+
         $this->add_grades_section();
 
         $this->add_action_buttons();

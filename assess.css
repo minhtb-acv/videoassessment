@@ -138,41 +138,41 @@
     margin-bottom: 30px;
 }
 
-#training-result-wrap table {
+#training-result-wrap table, .rubric-result table {
     width: 100%;
 }
 
-#training-result-wrap table td {
+#training-result-wrap table td, .rubric-result td {
     border: 1px solid #ddd;
     vertical-align: top;
     padding: 5px;
 }
 
-#training-result-wrap .status {
+#training-result-wrap .status, .rubric-result .status {
     text-align: center;
     vertical-align: middle!important;
 }
 
-#training-result-wrap .score {
+#training-result-wrap .score, .rubric-result .score {
     color: #575;
     font-style: italic;
     font-weight: bold;
     margin-top: 5px;
 }
 
-#training-result-wrap .score-selected-wrap {
+#training-result-wrap .score-selected-wrap, .rubric-result .score-selected-wrap {
     margin-top: 5px;
 }
 
-#training-result-wrap .teacher-selected {
+#training-result-wrap .teacher-selected, .rubric-result .teacher-selected {
     color: #40aa55;
 }
 
-#training-result-wrap .student-selected {
+#training-result-wrap .student-selected, .rubric-result .student-selected {
     color: #ff0000;
 }
 
-#training-result-wrap .score-selected {
+#training-result-wrap .score-selected, .rubric-result .score-selected {
     font-weight: bold;
     margin-right: 5px;
 }
@@ -199,21 +199,21 @@
     background: #f0f0f0;
 }
 
-#training-result-table table {
+#training-result-table table, .rubric-result table {
     border-collapse: separate;
 }
 
-#training-result-table .criterion-passed .teacher-td {
+#training-result-table .criterion-passed .teacher-td, .rubric-result .criterion-passed .teacher-td {
     background: rgba(163, 214, 173, 0.5);
     border: 1px solid #000!important;
 }
 
-#training-result-table .student-td {
+#training-result-table .student-td, .rubric-result .student-td, .student-history-td {
     background: rgba(238, 121, 121, 0.5)!important;
     border: 1px solid #000!important;
 }
 
-#training-result-table .criterion-failed .teacher-selected {
+#training-result-table .criterion-failed .teacher-selected, .rubric-result .criterion-failed .teacher-selected {
     display: none;
 }
 /* END MinhTB VERSION 2 09-03-2016 */
@@ -236,3 +236,7 @@
     display: inline;
 }
 /* END MinhTB VERSION2 2016-05-18 */
+
+#training-result-table-render {
+    display: none;
+}
