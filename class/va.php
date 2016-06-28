@@ -1102,99 +1102,9 @@ class va {
 			        $result_table = '';
 			        $result_table .= \html_writer::start_tag('table', array('id' => 'training-result-table-render'));
 
-			        if (!empty($definition)) {
-				        foreach ($definition->rubric_criteria as $rid => $rubric) {
-					        $result_table .= \html_writer::start_tag('tr', array('class' => 'rubric-result', 'id' => 'advancedgradingbefore-criteria-' . $rid));
-
-					        $result_table .= \html_writer::start_tag('td', array('class' => 'bold'));
-					        $result_table .= $rubric['description'];
-					        $result_table .= \html_writer::end_tag('td');
-
-					        $scores = array();
-					        $row = '';
-					        $icon = '';
-
-					        foreach ($rubric['levels'] as $lid => $level) {
-
-						        $selecteds = '';
-						        $tdclass = '';
-						        $selected = false;
-
-						        if (!empty($studentfilling) && $studentfilling['criteria'][$rid]['levelid'] == $lid) {
-							        $selecteds .= \html_writer::start_tag('span', array('class' => 'student-selected score-selected'));
-							        $selecteds .= self::str('self');
-							        $selecteds .= \html_writer::end_tag('span');
-							        $selecteds .= '<br>';
-
-							        $tdclass .= ' student-td';
-							        $selected = true;
-						        }
-
-						        if (!empty($teacherfilling) && $teacherfilling['criteria'][$rid]['levelid'] == $lid) {
-							        $selecteds .= \html_writer::start_tag('span', array('class' => 'teacher-selected score-selected'));
-							        $selecteds .= self::str('teacher');
-							        $selecteds .= \html_writer::end_tag('span');
-							        $selecteds .= '<br>';
-
-							        $tdclass .= ' teacher-td';
-							        $selected = true;
-						        }
-
-						        if ($selected) {
-							        $tdclass .= ' selected';
-						        }
-
-						        $row .= \html_writer::start_tag('td', array('class' => $tdclass));
-						        $row .= \html_writer::start_tag('div');
-						        $row .= $level['definition'];
-						        $row .= \html_writer::end_tag('div');
-						        $row .= \html_writer::start_tag('div', array('class' => 'score'));
-						        $row .= $level['score'] . ' ' . get_string('points', 'grades');
-						        $row .= \html_writer::end_tag('div');
-						        $row .= \html_writer::start_tag('div', array('class' => 'score-selected-wrap'));
-
-						        $row .= $selecteds;
-
-						        $row .= \html_writer::end_tag('td');
-						        $row .= \html_writer::end_tag('td');
-
-						        $scores[$lid] = $level['score'];
-					        }
-
-					        if (!empty($teacherfilling) && !empty($studentfilling)) {
-						        $minscore = min($scores);
-						        $maxscore = max($scores);
-						        $differencescore = abs($scores[$studentfilling['criteria'][$rid]['levelid']] - $scores[$teacherfilling['criteria'][$rid]['levelid']]);
-						        $accepteddifference = $this->va->accepteddifference;
-						        $difference = ($differencescore / ($maxscore - $minscore)) * 100;
-
-						        if ($difference > $accepteddifference) {
-							        $icon = 'failed';
-						        } else {
-							        $icon = 'passed';
-							        $rubrics_passed[] = $rid;
-						        }
-					        }
-
-					        $result_table .= \html_writer::start_tag('td');
-					        $result_table .= \html_writer::start_tag('table');
-					        $result_table .= \html_writer::start_tag('tr', array('class' => 'criterion-' . $icon));
-
-					        $result_table .= $row;
-
-					        $result_table .= \html_writer::end_tag('tr');
-					        $result_table .= \html_writer::end_tag('table');
-					        $result_table .= \html_writer::end_tag('td');
-
-					        if (!empty($icon)) {
-						        $result_table .= \html_writer::start_tag('td', array('class' => 'status'));
-						        $result_table .= \html_writer::img('images/' . $icon . '.gif', $icon);
-						        $result_table .= \html_writer::end_tag('td');
-					        }
-
-					        $result_table .= \html_writer::end_tag('tr');
-				        }
-			        }
+			        $result = $this->get_training_result_table($definition, $studentfilling, $teacherfilling);
+			        $result_table .= $result[0];
+			        $rubrics_passed = $result[2];
 
 			        $result_table .= \html_writer::end_tag('table');
 			        $o .= $result_table;
@@ -1436,117 +1346,9 @@ class va {
 
                 $o .= \html_writer::start_tag('table', array('id' => 'training-result-table'));
 
-                $passed = true;
-                $even = 1;
-
-                if (!empty($definition)) {
-                    foreach ($definition->rubric_criteria as $rid => $rubric) {
-                        if ($even == 1) {
-                            $even = 0;
-                            $trclass = 'even';
-                        } else {
-                            $even = 1;
-                            $trclass = 'odd';
-                        }
-
-                        $o .= \html_writer::start_tag('tr', array('class' => $trclass));
-
-                        $o .= \html_writer::start_tag('td', array('class' => 'bold'));
-                        $o .= $rubric['description'];
-                        $o .= \html_writer::end_tag('td');
-
-                        $scores = array();
-                        $row = '';
-                        $icon = '';
-
-                        foreach ($rubric['levels'] as $lid => $level) {
-
-                            $selecteds = '';
-                            $tdclass = '';
-                            $selected = false;
-
-                            if (!empty($studentfilling) && $studentfilling['criteria'][$rid]['levelid'] == $lid) {
-                                $selecteds .= \html_writer::start_tag('span', array('class' => 'student-selected score-selected'));
-                                $selecteds .= self::str('self');
-                                $selecteds .= \html_writer::end_tag('span');
-                                $selecteds .= '<br>';
-
-                                $tdclass .= ' student-td';
-                                $selected = true;
-                            } elseif (isset($historyfillings[$rid]) && in_array($lid, $historyfillings[$rid])) {
-								$selecteds .= \html_writer::start_tag('span', array('class' => 'student-selected score-selected'));
-								$selecteds .= self::str('self');
-								$selecteds .= \html_writer::end_tag('span');
-								$selecteds .= '<br>';
-
-								$tdclass .= ' student-history-td';
-                            }
-
-                            if (!empty($teacherfilling) && $teacherfilling['criteria'][$rid]['levelid'] == $lid) {
-                                $selecteds .= \html_writer::start_tag('span', array('class' => 'teacher-selected score-selected'));
-                                $selecteds .= self::str('teacher');
-                                $selecteds .= \html_writer::end_tag('span');
-                                $selecteds .= '<br>';
-
-                                $tdclass .= ' teacher-td';
-                                $selected = true;
-                            }
-
-                            if ($selected) {
-                                $tdclass .= ' selected';
-                            }
-
-                            $row .= \html_writer::start_tag('td', array('class' => $tdclass));
-                            $row .= \html_writer::start_tag('div');
-                            $row .= $level['definition'];
-                            $row .= \html_writer::end_tag('div');
-                            $row .= \html_writer::start_tag('div', array('class' => 'score'));
-                            $row .= $level['score'] . ' ' . get_string('points', 'grades');
-                            $row .= \html_writer::end_tag('div');
-                            $row .= \html_writer::start_tag('div', array('class' => 'score-selected-wrap'));
-
-                            $row .= $selecteds;
-
-                            $row .= \html_writer::end_tag('td');
-                            $row .= \html_writer::end_tag('td');
-
-                            $scores[$lid] = $level['score'];
-                        }
-
-                        if (!empty($teacherfilling) && !empty($studentfilling)) {
-                            $minscore = min($scores);
-                            $maxscore = max($scores);
-                            $differencescore = abs($scores[$studentfilling['criteria'][$rid]['levelid']] - $scores[$teacherfilling['criteria'][$rid]['levelid']]);
-                            $accepteddifference = $this->va->accepteddifference;
-                            $difference = ($differencescore / ($maxscore - $minscore)) * 100;
-
-                            if ($difference > $accepteddifference) {
-                                $passed = false;
-                                $icon = 'failed';
-                            } else {
-                                $icon = 'passed';
-                            }
-                        }
-
-                        $o .= \html_writer::start_tag('td');
-                        $o .= \html_writer::start_tag('table');
-                        $o .= \html_writer::start_tag('tr', array('class' => 'criterion-' . $icon));
-
-                        $o .= $row;
-
-                        $o .= \html_writer::end_tag('tr');
-                        $o .= \html_writer::end_tag('table');
-                        $o .= \html_writer::end_tag('td');
-
-                        if (!empty($icon)) {
-                            $o .= \html_writer::start_tag('td', array('class' => 'status'));
-                            $o .= \html_writer::img('images/' . $icon . '.gif', $icon);
-                            $o .= \html_writer::end_tag('td');
-                        }
-
-                        $o .= \html_writer::end_tag('tr');
-                    }
-                }
+                $result = $this->get_training_result_table($definition, $studentfilling, $teacherfilling, $historyfillings);
+	            $o .= $result[0];
+	            $passed = $result[1];
 
                 $o .= \html_writer::end_tag('table');
             }
@@ -2741,5 +2543,124 @@ class va {
 			$rv[] = new \gradingform_rubric_instance($controller, $record);
 		}
 		return $rv;
+	}
+
+	public function get_training_result_table($definition, $studentfilling, $teacherfilling, $historyfillings = array()) {
+		$o = '';
+		$passed = true;
+		$rubrics_passed = array();
+		$even = 1;
+
+		if (!empty($definition)) {
+			foreach ($definition->rubric_criteria as $rid => $rubric) {
+				if ($even == 1) {
+					$even = 0;
+					$trclass = 'even';
+				} else {
+					$even = 1;
+					$trclass = 'odd';
+				}
+
+				$o .= \html_writer::start_tag('tr', array('class' => 'rubric-result ' . $trclass, 'id' => 'advancedgradingbefore-criteria-' . $rid));
+
+				$o .= \html_writer::start_tag('td', array('class' => 'bold'));
+				$o .= $rubric['description'];
+				$o .= \html_writer::end_tag('td');
+
+				$scores = array();
+				$row = '';
+				$icon = '';
+
+				foreach ($rubric['levels'] as $lid => $level) {
+
+					$selecteds = '';
+					$tdclass = '';
+					$selected = false;
+
+					if (!empty($studentfilling) && $studentfilling['criteria'][$rid]['levelid'] == $lid) {
+						$selecteds .= \html_writer::start_tag('span', array('class' => 'student-selected score-selected'));
+						$selecteds .= self::str('self');
+						$selecteds .= \html_writer::end_tag('span');
+						$selecteds .= '<br>';
+
+						$tdclass .= ' student-td';
+						$selected = true;
+					} elseif (!empty($historyfillings) && isset($historyfillings[$rid]) && in_array($lid, $historyfillings[$rid])) {
+						$selecteds .= \html_writer::start_tag('span', array('class' => 'student-selected score-selected'));
+						$selecteds .= self::str('self');
+						$selecteds .= \html_writer::end_tag('span');
+						$selecteds .= '<br>';
+
+						$tdclass .= ' student-history-td';
+					}
+
+					if (!empty($teacherfilling) && $teacherfilling['criteria'][$rid]['levelid'] == $lid) {
+						$selecteds .= \html_writer::start_tag('span', array('class' => 'teacher-selected score-selected'));
+						$selecteds .= self::str('teacher');
+						$selecteds .= \html_writer::end_tag('span');
+						$selecteds .= '<br>';
+
+						$tdclass .= ' teacher-td';
+						$selected = true;
+					}
+
+					if ($selected) {
+						$tdclass .= ' selected';
+					}
+
+					$row .= \html_writer::start_tag('td', array('class' => $tdclass));
+					$row .= \html_writer::start_tag('div');
+					$row .= $level['definition'];
+					$row .= \html_writer::end_tag('div');
+					$row .= \html_writer::start_tag('div', array('class' => 'score'));
+					$row .= $level['score'] . ' ' . get_string('points', 'grades');
+					$row .= \html_writer::end_tag('div');
+					$row .= \html_writer::start_tag('div', array('class' => 'score-selected-wrap'));
+
+					$row .= $selecteds;
+
+					$row .= \html_writer::end_tag('td');
+					$row .= \html_writer::end_tag('td');
+
+					$scores[$lid] = $level['score'];
+				}
+
+				if (!empty($teacherfilling) && !empty($studentfilling)) {
+					$minscore = min($scores);
+					$maxscore = max($scores);
+					$differencescore = abs($scores[$studentfilling['criteria'][$rid]['levelid']] - $scores[$teacherfilling['criteria'][$rid]['levelid']]);
+					$accepteddifference = $this->va->accepteddifference;
+					$difference = ($differencescore / ($maxscore - $minscore)) * 100;
+
+					if ($difference > $accepteddifference) {
+						$passed = false;
+						$icon = 'failed';
+					} else {
+						$icon = 'passed';
+						$rubrics_passed[] = $rid;
+					}
+				}
+
+				$o .= \html_writer::start_tag('td');
+				$o .= \html_writer::start_tag('table');
+				$o .= \html_writer::start_tag('tr', array('class' => 'criterion-' . $icon));
+
+				$o .= $row;
+
+				$o .= \html_writer::end_tag('tr');
+				$o .= \html_writer::end_tag('table');
+				$o .= \html_writer::end_tag('td');
+
+				if (!empty($icon)) {
+					$o .= \html_writer::start_tag('td', array('class' => 'status'));
+					$o .= \html_writer::img('images/' . $icon . '.gif', $icon);
+					$o .= \html_writer::end_tag('td');
+				}
+
+				$o .= \html_writer::end_tag('tr');
+			}
+		}
+
+		return array($o, $passed, $rubrics_passed);
 	}
 }
